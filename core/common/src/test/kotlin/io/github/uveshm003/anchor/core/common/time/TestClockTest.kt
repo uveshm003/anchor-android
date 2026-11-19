@@ -61,4 +61,16 @@ class TestClockTest {
         assertEquals(ZoneOffset.UTC, view.withZone(ZoneOffset.UTC).zone)
         assertEquals(clock.instant(), view.withZone(ZoneOffset.UTC).instant())
     }
+
+    @Test
+    fun advancingAcrossDst_skipsTheMissingLocalHour() {
+        val berlin = ZoneId.of("Europe/Berlin")
+        // 2026-03-29: clocks in Berlin jump from 02:00 to 03:00 local (01:00 UTC).
+        val clock = TestClock(Instant.parse("2026-03-29T00:59:00Z"), berlin)
+        assertEquals(java.time.LocalTime.of(1, 59), clock.instant().atZone(clock.zone).toLocalTime())
+
+        clock.advanceBy(Duration.ofMinutes(1))
+
+        assertEquals(java.time.LocalTime.of(3, 0), clock.instant().atZone(clock.zone).toLocalTime())
+    }
 }
