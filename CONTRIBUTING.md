@@ -39,7 +39,8 @@ Fix the cause. If you truly can't, explain why in the PR and open a `tech-debt` 
 - Each ViewModel exposes one `StateFlow<UiState>`; user actions are functions; one-off effects go
   through a `Channel`. No business logic in composables, services or receivers.
 - All user-facing strings live in resources, in **English and Hindi**.
-- New screens get Roborazzi screenshot tests (light/dark, phone/tablet); record with
+- New screens get Roborazzi screenshot tests (light/dark, phone/tablet) written with `ScreenshotRule` +
+  `ScreenshotVariant.parameters()` from `core:screenshot-testing` (see its KDoc for the pattern). Record with
   `./gradlew recordRoborazziDebug` and commit the PNGs.
 - Our own UI must be accessible: content descriptions, 48 dp touch targets, sensible TalkBack
   order, usable at 200 % font size.

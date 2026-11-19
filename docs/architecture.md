@@ -47,6 +47,7 @@ Rules:
 | `core:designsystem` | Compose lib | Theme, typography, core components |
 | `core:ui` | Compose lib | Shared UI built on the design system and the model |
 | `core:testing` | Android lib | Test rules (`MainDispatcherRule`), fakes; re-exports `TestClock` from `core:common` test fixtures |
+| `core:screenshot-testing` | Compose lib | `ScreenshotRule` + `ScreenshotVariant`: Roborazzi captures per device × light/dark, one fresh activity per variant |
 | `core:nfc` | Android lib | NFC reader mode, NDEF + AAR writing, UID hashing |
 | `core:qr` | Android lib | QR generation and scanning |
 | `core:triggers` | Android lib | Schedule, driving, Bluetooth, Space and place triggers |

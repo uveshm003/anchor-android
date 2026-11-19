@@ -75,6 +75,7 @@ dependencies {
     debugImplementation(libs.leakcanary.android)
 
     testImplementation(projects.core.testing)
+    testImplementation(projects.core.screenshotTesting)
     testImplementation(libs.hilt.android.testing)
     kspTest(libs.hilt.compiler)
 

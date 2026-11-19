@@ -1,211 +1,53 @@
 package io.github.uveshm003.anchor.core.designsystem.theme
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.os.Looper
-import android.view.ViewGroup
-import androidx.activity.ComponentActivity
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.Typography
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.test.junit4.AndroidComposeTestRule
-import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
-import androidx.compose.ui.unit.dp
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.takahirom.roborazzi.captureRoboImage
-import java.time.Duration
+import io.github.uveshm003.anchor.core.screenshottesting.ScreenshotDevice
+import io.github.uveshm003.anchor.core.screenshottesting.ScreenshotRule
+import io.github.uveshm003.anchor.core.screenshottesting.ScreenshotVariant
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.Shadows.shadowOf
-import org.robolectric.annotation.Config
+import org.robolectric.ParameterizedRobolectricTestRunner
 
 /**
  * Every colour role that Material components draw with, and every type style, so palette or typography
  * changes show up in review. The 12 `*Fixed*` roles are not set by the brand palette yet (#85) and are
- * not shown. The `dynamic_*` goldens pin the dynamic-colour wiring, rendered with Robolectric's built-in
- * system colours, not a real wallpaper palette.
+ * not shown.
  */
-@RunWith(AndroidJUnit4::class)
-class ThemeSpecimenScreenshotTest {
+@RunWith(ParameterizedRobolectricTestRunner::class)
+class ThemeSpecimenScreenshotTest(variant: ScreenshotVariant) {
     @get:Rule
-    val composeRule = createAndroidComposeRule<ComponentActivity>()
+    val screenshot = ScreenshotRule(variant)
 
     @Test
-    @Config(qualifiers = PHONE_LIGHT)
-    fun colors_phone_light() = capture("theme_colors_phone_light", darkTheme = false) { ColorSpecimen() }
+    fun colors() = screenshot.capture("theme_colors") { darkTheme -> Specimen(darkTheme) { ColorSpecimen() } }
 
     @Test
-    @Config(qualifiers = PHONE_DARK)
-    fun colors_phone_dark() = capture("theme_colors_phone_dark", darkTheme = true) { ColorSpecimen() }
+    fun type() = screenshot.capture("theme_type") { darkTheme -> Specimen(darkTheme) { TypeSpecimen() } }
 
-    @Test
-    @Config(qualifiers = TABLET_LIGHT)
-    fun colors_tablet_light() = capture("theme_colors_tablet_light", darkTheme = false) { ColorSpecimen() }
-
-    @Test
-    @Config(qualifiers = TABLET_DARK)
-    fun colors_tablet_dark() = capture("theme_colors_tablet_dark", darkTheme = true) { ColorSpecimen() }
-
-    @Test
-    @Config(qualifiers = PHONE_LIGHT)
-    fun type_phone_light() = capture("theme_type_phone_light", darkTheme = false) { TypeSpecimen() }
-
-    @Test
-    @Config(qualifiers = PHONE_DARK)
-    fun type_phone_dark() = capture("theme_type_phone_dark", darkTheme = true) { TypeSpecimen() }
-
-    @Test
-    @Config(qualifiers = TABLET_LIGHT)
-    fun type_tablet_light() = capture("theme_type_tablet_light", darkTheme = false) { TypeSpecimen() }
-
-    @Test
-    @Config(qualifiers = TABLET_DARK)
-    fun type_tablet_dark() = capture("theme_type_tablet_dark", darkTheme = true) { TypeSpecimen() }
-
-    @Test
-    @Config(qualifiers = PHONE_LIGHT)
-    fun dynamicColors_phone_light() =
-        capture("theme_dynamic_colors_phone_light", darkTheme = false, dynamicColor = true) { ColorSpecimen() }
-
-    @Test
-    @Config(qualifiers = PHONE_DARK)
-    fun dynamicColors_phone_dark() =
-        capture("theme_dynamic_colors_phone_dark", darkTheme = true, dynamicColor = true) { ColorSpecimen() }
-
-    private fun capture(
-        name: String,
-        darkTheme: Boolean,
-        dynamicColor: Boolean = false,
-        content: @Composable () -> Unit,
-    ) {
-        composeRule.setContent {
-            AnchorTheme(darkTheme = darkTheme, dynamicColor = dynamicColor) {
-                Surface(content = content)
-            }
-        }
-        // Compose being idle doesn't guarantee a frame reached the window surface Roborazzi reads. Advance the
-        // Robolectric main-looper clock a few frames so a traversal + draw has run (blank captures under load).
-        composeRule.waitForIdle()
-        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(FRAME_SETTLE_MILLIS))
-        composeRule.waitForIdle()
-        composeRule.captureContent("src/test/screenshots/$name.png")
-    }
-
-    private companion object {
-        const val FRAME_SETTLE_MILLIS = 100L
-        const val PHONE_LIGHT = "w411dp-h891dp-notnight-xxhdpi"
-        const val PHONE_DARK = "w411dp-h891dp-night-xxhdpi"
-        const val TABLET_LIGHT = "w1280dp-h800dp-notnight-xhdpi"
-        const val TABLET_DARK = "w1280dp-h800dp-night-xhdpi"
+    companion object {
+        @JvmStatic
+        @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+        fun variants() = ScreenshotVariant.parameters()
     }
 }
-
-private data class Role(val name: String, val background: Color, val content: Color, val border: Color? = null)
-
-@Composable
-private fun ColorSpecimen() {
-    FlowRow(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        colorRoles(MaterialTheme.colorScheme).forEach { role ->
-            Box(
-                modifier = Modifier
-                    .size(width = 120.dp, height = 40.dp)
-                    .background(role.background, MaterialTheme.shapes.small)
-                    .then(role.border?.let { Modifier.border(2.dp, it, MaterialTheme.shapes.small) } ?: Modifier),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(role.name, color = role.content, style = MaterialTheme.typography.labelSmall)
-            }
-        }
-    }
-}
-
-private fun colorRoles(c: ColorScheme) = listOf(
-    Role("primary", c.primary, c.onPrimary),
-    Role("primaryContainer", c.primaryContainer, c.onPrimaryContainer),
-    Role("inversePrimary", c.inverseSurface, c.inversePrimary),
-    Role("secondary", c.secondary, c.onSecondary),
-    Role("secondaryContainer", c.secondaryContainer, c.onSecondaryContainer),
-    Role("tertiary", c.tertiary, c.onTertiary),
-    Role("tertiaryContainer", c.tertiaryContainer, c.onTertiaryContainer),
-    Role("error", c.error, c.onError),
-    Role("errorContainer", c.errorContainer, c.onErrorContainer),
-    Role("background", c.background, c.onBackground),
-    Role("surface", c.surface, c.onSurface),
-    Role("surfaceVariant", c.surfaceVariant, c.onSurfaceVariant),
-    Role("surfaceDim", c.surfaceDim, c.onSurface),
-    Role("surfaceBright", c.surfaceBright, c.onSurface),
-    Role("containerLowest", c.surfaceContainerLowest, c.onSurface),
-    Role("containerLow", c.surfaceContainerLow, c.onSurface),
-    Role("container", c.surfaceContainer, c.onSurface),
-    Role("containerHigh", c.surfaceContainerHigh, c.onSurface),
-    Role("containerHighest", c.surfaceContainerHighest, c.onSurface),
-    Role("inverseSurface", c.inverseSurface, c.inverseOnSurface),
-    Role("outline", c.surface, c.onSurface, border = c.outline),
-    Role("outlineVariant", c.surface, c.onSurface, border = c.outlineVariant),
-    Role("scrim", c.scrim, Color.White),
-)
-
-@Composable
-private fun TypeSpecimen() {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        typeStyles(MaterialTheme.typography).forEach { (name, style) -> Text(name, style = style) }
-    }
-}
-
-private fun typeStyles(t: Typography) = listOf(
-    "Display large" to t.displayLarge,
-    "Display medium" to t.displayMedium,
-    "Display small" to t.displaySmall,
-    "Headline large" to t.headlineLarge,
-    "Headline medium" to t.headlineMedium,
-    "Headline small" to t.headlineSmall,
-    "Title large" to t.titleLarge,
-    "Title medium" to t.titleMedium,
-    "Title small" to t.titleSmall,
-    "Body large" to t.bodyLarge,
-    "Body medium" to t.bodyMedium,
-    "Body small" to t.bodySmall,
-    "Label large" to t.labelLarge,
-    "Label medium" to t.labelMedium,
-    "Label small" to t.labelSmall,
-)
 
 /**
- * Draws the content view synchronously. Capturing via PixelCopy (async callback) produced transparent images
- * under ciCheck load (#86). Temporary per-file copy until the shared screenshot helper lands (#88).
+ * Pins the dynamic-colour wiring, rendered with Robolectric's built-in system colours (not a real wallpaper
+ * palette). Phone only: the palette doesn't depend on the device size.
  */
-private fun AndroidComposeTestRule<*, out ComponentActivity>.captureContent(path: String) {
-    lateinit var bitmap: Bitmap
-    runOnUiThread {
-        val root = checkNotNull(activity.findViewById<ViewGroup>(android.R.id.content).getChildAt(0)) {
-            "Activity has no content view"
-        }
-        check(root.width > 0 && root.height > 0) { "Content view is not laid out (${root.width}x${root.height})" }
-        bitmap = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
-        root.draw(Canvas(bitmap))
+@RunWith(ParameterizedRobolectricTestRunner::class)
+class DynamicColorSpecimenScreenshotTest(variant: ScreenshotVariant) {
+    @get:Rule
+    val screenshot = ScreenshotRule(variant)
+
+    @Test
+    fun dynamicColors() = screenshot.capture("theme_dynamic_colors") { darkTheme ->
+        Specimen(darkTheme, dynamicColor = true) { ColorSpecimen() }
     }
-    bitmap.captureRoboImage(path)
+
+    companion object {
+        @JvmStatic
+        @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+        fun variants() = ScreenshotVariant.parameters(listOf(ScreenshotDevice.Phone))
+    }
 }
