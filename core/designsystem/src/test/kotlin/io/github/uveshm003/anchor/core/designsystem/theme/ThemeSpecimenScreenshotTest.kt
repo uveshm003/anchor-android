@@ -1,6 +1,6 @@
 package io.github.uveshm003.anchor.core.designsystem.theme
 
-import android.os.Looper
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -19,17 +19,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.takahirom.roborazzi.captureRoboImage
-import java.time.Duration
+import io.github.uveshm003.anchor.core.testing.screenshot.ScreenshotDevice
+import io.github.uveshm003.anchor.core.testing.screenshot.captureThemedScreenshots
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.Shadows.shadowOf
-import org.robolectric.annotation.Config
 
 /**
  * Every colour role that Material components draw with, and every type style, so palette or typography
@@ -40,75 +37,31 @@ import org.robolectric.annotation.Config
 @RunWith(AndroidJUnit4::class)
 class ThemeSpecimenScreenshotTest {
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    @Config(qualifiers = PHONE_LIGHT)
-    fun colors_phone_light() = capture("theme_colors_phone_light", darkTheme = false) { ColorSpecimen() }
-
-    @Test
-    @Config(qualifiers = PHONE_DARK)
-    fun colors_phone_dark() = capture("theme_colors_phone_dark", darkTheme = true) { ColorSpecimen() }
-
-    @Test
-    @Config(qualifiers = TABLET_LIGHT)
-    fun colors_tablet_light() = capture("theme_colors_tablet_light", darkTheme = false) { ColorSpecimen() }
-
-    @Test
-    @Config(qualifiers = TABLET_DARK)
-    fun colors_tablet_dark() = capture("theme_colors_tablet_dark", darkTheme = true) { ColorSpecimen() }
-
-    @Test
-    @Config(qualifiers = PHONE_LIGHT)
-    fun type_phone_light() = capture("theme_type_phone_light", darkTheme = false) { TypeSpecimen() }
-
-    @Test
-    @Config(qualifiers = PHONE_DARK)
-    fun type_phone_dark() = capture("theme_type_phone_dark", darkTheme = true) { TypeSpecimen() }
-
-    @Test
-    @Config(qualifiers = TABLET_LIGHT)
-    fun type_tablet_light() = capture("theme_type_tablet_light", darkTheme = false) { TypeSpecimen() }
-
-    @Test
-    @Config(qualifiers = TABLET_DARK)
-    fun type_tablet_dark() = capture("theme_type_tablet_dark", darkTheme = true) { TypeSpecimen() }
-
-    @Test
-    @Config(qualifiers = PHONE_LIGHT)
-    fun dynamicColors_phone_light() =
-        capture("theme_dynamic_colors_phone_light", darkTheme = false, dynamicColor = true) { ColorSpecimen() }
-
-    @Test
-    @Config(qualifiers = PHONE_DARK)
-    fun dynamicColors_phone_dark() =
-        capture("theme_dynamic_colors_phone_dark", darkTheme = true, dynamicColor = true) { ColorSpecimen() }
-
-    private fun capture(
-        name: String,
-        darkTheme: Boolean,
-        dynamicColor: Boolean = false,
-        content: @Composable () -> Unit,
-    ) {
-        composeRule.setContent {
-            AnchorTheme(darkTheme = darkTheme, dynamicColor = dynamicColor) {
-                Surface(content = content)
-            }
-        }
-        // Compose being idle doesn't guarantee a frame reached the window surface Roborazzi reads. Advance the
-        // Robolectric main-looper clock a few frames so a traversal + draw has run (blank captures under load).
-        composeRule.waitForIdle()
-        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(FRAME_SETTLE_MILLIS))
-        composeRule.waitForIdle()
-        composeRule.onRoot().captureRoboImage("src/test/screenshots/$name.png")
+    fun colors() = composeRule.captureThemedScreenshots("theme_colors") { darkTheme ->
+        Specimen(darkTheme) { ColorSpecimen() }
     }
 
-    private companion object {
-        const val FRAME_SETTLE_MILLIS = 100L
-        const val PHONE_LIGHT = "w411dp-h891dp-notnight-xxhdpi"
-        const val PHONE_DARK = "w411dp-h891dp-night-xxhdpi"
-        const val TABLET_LIGHT = "w1280dp-h800dp-notnight-xhdpi"
-        const val TABLET_DARK = "w1280dp-h800dp-night-xhdpi"
+    @Test
+    fun type() = composeRule.captureThemedScreenshots("theme_type") { darkTheme ->
+        Specimen(darkTheme) { TypeSpecimen() }
+    }
+
+    @Test
+    fun dynamicColors() = composeRule.captureThemedScreenshots(
+        name = "theme_dynamic_colors",
+        devices = listOf(ScreenshotDevice.Phone),
+    ) { darkTheme ->
+        Specimen(darkTheme, dynamicColor = true) { ColorSpecimen() }
+    }
+}
+
+@Composable
+private fun Specimen(darkTheme: Boolean, dynamicColor: Boolean = false, content: @Composable () -> Unit) {
+    AnchorTheme(darkTheme = darkTheme, dynamicColor = dynamicColor) {
+        Surface(content = content)
     }
 }
 
