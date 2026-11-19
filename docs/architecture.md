@@ -1,7 +1,7 @@
 # Architecture
 
 Anchor is a single-activity Jetpack Compose app split into Gradle modules by layer and feature.
-This page is the overview; decisions and their reasons live in [`adr/`](adr/), and the product brief
+This page is the overview; decisions and their reasons live in [`adr/`](adr/) (UDF: [0002](adr/0002-state-management-and-udf.md), engine: [0003](adr/0003-engine-command-pattern.md)), and the product brief
 is in [`PROJECT_BRIEF.md`](PROJECT_BRIEF.md).
 
 ## Layers
@@ -56,6 +56,110 @@ Rules:
 | `feature:*` | Compose lib | Screens + ViewModels: onboarding, home, modes, anchors, triggers, insights, settings |
 | `widget` | Compose lib | Glance widget, Quick Settings tile, app shortcuts |
 | `baselineprofile`, `benchmark` | Android test | Baseline Profile generation and Macrobenchmarks |
+
+### Module graph
+
+Main (non-test) dependencies, generated from the build files by `python3 scripts/module-graph.py`
+(run it after changing module dependencies; `--check` verifies). Adapters such as `core:nfc`,
+`core:qr` and `core:triggers` are wired into `app` as their milestones land.
+
+<!-- module-graph:start -->
+```mermaid
+graph TD
+    app[app]
+    baselineprofile[baselineprofile]
+    benchmark[benchmark]
+    widget[widget]
+    subgraph core
+        core_common[common]
+        core_data[data]
+        core_database[database]
+        core_datastore[datastore]
+        core_designsystem[designsystem]
+        core_engine[engine]
+        core_model[model]
+        core_nfc[nfc]
+        core_qr[qr]
+        core_screenshot_testing[screenshot-testing]
+        core_testing[testing]
+        core_triggers[triggers]
+        core_ui[ui]
+    end
+    subgraph feature
+        feature_anchors[anchors]
+        feature_home[home]
+        feature_insights[insights]
+        feature_modes[modes]
+        feature_onboarding[onboarding]
+        feature_settings[settings]
+        feature_triggers[triggers]
+    end
+    subgraph service
+        service_blocker[blocker]
+        service_notifications[notifications]
+    end
+    app --> core_data
+    app --> core_designsystem
+    app --> core_ui
+    app --> feature_anchors
+    app --> feature_home
+    app --> feature_insights
+    app --> feature_modes
+    app --> feature_onboarding
+    app --> feature_settings
+    app --> feature_triggers
+    app --> service_blocker
+    app --> service_notifications
+    app --> widget
+    core_data --> core_common
+    core_data --> core_database
+    core_data --> core_datastore
+    core_data --> core_engine
+    core_data --> core_model
+    core_database --> core_model
+    core_datastore --> core_common
+    core_datastore --> core_model
+    core_engine --> core_common
+    core_engine --> core_model
+    core_nfc --> core_common
+    core_nfc --> core_engine
+    core_qr --> core_common
+    core_qr --> core_engine
+    core_testing --> core_common
+    core_testing --> core_model
+    core_triggers --> core_common
+    core_triggers --> core_engine
+    core_ui --> core_designsystem
+    core_ui --> core_model
+    feature_anchors --> core_data
+    feature_anchors --> core_designsystem
+    feature_anchors --> core_ui
+    feature_home --> core_data
+    feature_home --> core_designsystem
+    feature_home --> core_ui
+    feature_insights --> core_data
+    feature_insights --> core_designsystem
+    feature_insights --> core_ui
+    feature_modes --> core_data
+    feature_modes --> core_designsystem
+    feature_modes --> core_ui
+    feature_onboarding --> core_data
+    feature_onboarding --> core_designsystem
+    feature_onboarding --> core_ui
+    feature_settings --> core_data
+    feature_settings --> core_designsystem
+    feature_settings --> core_ui
+    feature_triggers --> core_data
+    feature_triggers --> core_designsystem
+    feature_triggers --> core_ui
+    service_blocker --> core_common
+    service_blocker --> core_data
+    service_notifications --> core_common
+    service_notifications --> core_data
+    widget --> core_data
+    widget --> core_designsystem
+```
+<!-- module-graph:end -->
 
 Build configuration lives in `build-logic/` convention plugins (`anchor.android.library`,
 `anchor.android.feature`, `anchor.jvm.library`, …) so module build files only declare dependencies.
