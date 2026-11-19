@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 
 // Brand fallback palette: Material Theme Builder, seed #00668B (deep cyan-blue), standard contrast.
 // Used when dynamic colour is off (previews, screenshot tests, user preference).
+// The 12 *Fixed* roles are not generated yet and keep Material's baseline defaults: see #85 before using them.
 
 internal val BrandLightColorScheme = lightColorScheme(
     primary = Color(0xFF00506E),

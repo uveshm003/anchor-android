@@ -7,6 +7,7 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.core.app.ApplicationProvider
@@ -91,9 +92,7 @@ class AnchorThemeTest {
 
     private data class Captured(val colors: ColorScheme, val typography: Typography, val shapes: Shapes)
 
-    private fun capture(
-        theme: @androidx.compose.runtime.Composable (@androidx.compose.runtime.Composable () -> Unit) -> Unit,
-    ): Captured {
+    private fun capture(theme: @Composable (@Composable () -> Unit) -> Unit): Captured {
         lateinit var captured: Captured
         composeRule.setContent {
             theme {
