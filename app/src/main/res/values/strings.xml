@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name" translatable="false">Anchor</string>
+    <string name="app_tagline">Tap to focus. Tap again to come back.</string>
+    <string name="app_shell_placeholder">Anchor is being built. Modes, anchors and blocking arrive in the next milestones.</string>
+</resources>

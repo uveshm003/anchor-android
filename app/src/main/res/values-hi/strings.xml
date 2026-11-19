@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_tagline">ध्यान लगाने के लिए टैप करें। वापस आने के लिए फिर से टैप करें।</string>
+    <string name="app_shell_placeholder">Anchor अभी बन रहा है। मोड, एंकर और ब्लॉकिंग अगले चरणों में आएँगे।</string>
+</resources>
