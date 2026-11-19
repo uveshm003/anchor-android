@@ -7,6 +7,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 
 /**
@@ -21,8 +23,15 @@ fun AnchorTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
+    val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    // ColorScheme has no equals(): without remember every recomposition would invalidate the whole tree.
+    // Keyed on the configuration too, so a wallpaper/uiMode change handled in place recomputes it.
+    val colorScheme = remember(darkTheme, dynamicColor, context, configuration) {
+        anchorColorScheme(darkTheme, dynamicColor, context)
+    }
     MaterialTheme(
-        colorScheme = anchorColorScheme(darkTheme, dynamicColor, LocalContext.current),
+        colorScheme = colorScheme,
         typography = AnchorTypography,
         shapes = AnchorShapes,
         content = content,
