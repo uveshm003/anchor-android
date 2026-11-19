@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="core_designsystem_hold_hint">
+        <item quantity="one">%1$d सेकंड तक दबाए रखें</item>
+        <item quantity="other">%1$d सेकंड तक दबाए रखें</item>
+    </plurals>
+    <string name="core_designsystem_hold_progress">%1$d%% दबाया गया</string>
+</resources>

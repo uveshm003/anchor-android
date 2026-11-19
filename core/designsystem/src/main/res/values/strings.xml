@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Hold-to-confirm button: TalkBack state description while idle and while held. -->
+    <plurals name="core_designsystem_hold_hint">
+        <item quantity="one">Hold for %1$d second</item>
+        <item quantity="other">Hold for %1$d seconds</item>
+    </plurals>
+    <string name="core_designsystem_hold_progress">%1$d%% held</string>
+</resources>
