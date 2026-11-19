@@ -59,8 +59,10 @@ private fun Project.configureTests() {
     }
     tasks.withType<Test>().configureEach {
         failOnNoDiscoveredTests.set(hasTestSources)
-        // Roborazzi/Robolectric: native graphics with synchronous software rendering. Hardware pixel-copy
-        // mode renders asynchronously and captured stale or blank frames (see PR for #1).
+        // Roborazzi/Robolectric: native graphics with the default synchronous software renderer.
+        // `robolectric.pixelCopyRenderMode=hardware` renders asynchronously: with the v2 Compose test rules it
+        // captured blank or previous-test frames even after waitForIdle() (4 record runs, 4 different results).
+        // Trade-off: software rendering draws no elevation shadows. Follow-up: tech-debt issue on shadows.
         systemProperty("robolectric.graphicsMode", "NATIVE")
         maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
     }
