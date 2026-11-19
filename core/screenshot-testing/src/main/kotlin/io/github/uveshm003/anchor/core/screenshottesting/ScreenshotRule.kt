@@ -40,7 +40,8 @@ import org.robolectric.Shadows.shadowOf
  * ```
  *
  * Golden files are `src/test/screenshots/<name>[_<locale>]_<variant>.png`; the locale part is added for any
- * non-English class-level locale, so Hindi and English captures of the same screen don't collide.
+ * non-English class-level locale, so Hindi and English captures of the same screen don't collide. For any other
+ * per-class configuration (font scale, `ldrtl`, …) give `name` a distinct suffix, e.g. `home_fontscale2`.
  *
  * The host is `ComponentActivity` by default; pass another [activityClass] (e.g. a Hilt test activity, with
  * `HiltAndroidRule` ordered outside this rule) to capture composables that need it. Prefer capturing the
