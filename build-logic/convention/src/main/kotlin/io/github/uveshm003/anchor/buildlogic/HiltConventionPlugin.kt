@@ -15,13 +15,21 @@ class HiltConventionPlugin : Plugin<Project> {
             pluginManager.apply("com.google.devtools.ksp")
             dependencies { add("ksp", libs.lib("hilt-compiler")) }
 
+            var supported = false
             pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+                supported = true
                 dependencies { add("api", libs.lib("hilt-core")) }
             }
             listOf("com.android.application", "com.android.library").forEach { androidPlugin ->
                 pluginManager.withPlugin(androidPlugin) {
+                    supported = true
                     pluginManager.apply("com.google.dagger.hilt.android")
                     dependencies { add("implementation", libs.lib("hilt-android")) }
+                }
+            }
+            afterEvaluate {
+                check(supported) {
+                    "anchor.hilt supports Android application/library and Kotlin JVM modules only ($path)"
                 }
             }
         }
