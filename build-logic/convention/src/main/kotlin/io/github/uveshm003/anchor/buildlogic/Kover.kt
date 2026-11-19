@@ -22,6 +22,7 @@ internal fun Project.configureKover() {
                         // Hilt / Dagger generated
                         "*_Factory",
                         "*_Factory$*",
+                        "*Factory\$InstanceHolder",
                         "*_MembersInjector",
                         "*_HiltModules*",
                         "*_GeneratedInjector",
