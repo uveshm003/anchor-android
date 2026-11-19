@@ -5,8 +5,9 @@ Usage: python3 scripts/module-graph.py          # rewrite the graphs between the
        python3 scripts/module-graph.py --check  # exit 1 if either file is out of date (run by ciCheck)
 
 Nodes are the modules in settings.gradle.kts. Edges are main (non-test) `api`/`implementation` project
-dependencies in each module's build.gradle.kts, in `projects.x.y` or `project(":x:y")` form, plus the project
-dependencies the `anchor.android.feature` convention plugin adds to every feature module.
+dependencies in each module's build.gradle.kts (`projects.x.y`, `project(":x:y")`, `testFixtures(...)`, quoted
+or multi-line), plus those the `anchor.android.feature` convention plugin adds. Any project reference the
+parser doesn't recognise fails the run instead of being skipped.
 """
 import argparse
 import glob
@@ -18,9 +19,13 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 START, END = "<!-- module-graph:start -->", "<!-- module-graph:end -->"
 FEATURE_CONVENTION = "build-logic/convention/src/main/kotlin/io/github/uveshm003/anchor/buildlogic/AndroidFeatureConventionPlugin.kt"
 TARGETS = ["README.md", "docs/architecture.md"]
-DEPENDENCY = re.compile(
-    r'^\s*(?:api|implementation)\((?:projects\.([\w.]+)|project\("([^"]+)"\))\)', re.M
+# configuration( [testFixtures(] projects.x.y | project(":x:y") ...  — across lines, quoted or not.
+PROJECT_REFERENCE = re.compile(
+    r'"?(\w+)"?\s*\(\s*(?:testFixtures\(\s*)?(?:projects\.([\w.]+)|project\(\s*"([^"]+)"\s*\))', re.S
 )
+ANY_PROJECT_REFERENCE = re.compile(r'projects\.[\w.]+|\bproject\(')
+MAIN_CONFIGURATIONS = {"api", "implementation"}
+FEATURE_PLUGIN = re.compile(r"^\s*alias\(libs\.plugins\.anchor\.android\.feature\)", re.M)
 
 
 def read(rel):
@@ -62,12 +67,16 @@ def edges(modules):
         if module not in modules:
             sys.exit(f"{rel} is not included in settings.gradle.kts")
         text = read(rel)
-        for accessor, path in DEPENDENCY.findall(text):
+        references = PROJECT_REFERENCE.findall(text)
+        if len(references) != len(ANY_PROJECT_REFERENCE.findall(text)):
+            sys.exit(f"{rel}: unrecognised project dependency notation; extend scripts/module-graph.py")
+        for configuration, accessor, path in references:
             dep = accessor_to_path(accessor, modules) if accessor else path
             if dep not in modules:
                 sys.exit(f"{rel}: depends on unknown module {dep}")
-            result.add((module, dep))
-        if "anchor.android.feature" in text:
+            if configuration in MAIN_CONFIGURATIONS:
+                result.add((module, dep))
+        if FEATURE_PLUGIN.search(text):
             result.update((module, dep) for dep in convention)
     return sorted(result)
 
