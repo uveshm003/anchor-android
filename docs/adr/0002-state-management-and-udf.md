@@ -1,7 +1,7 @@
 # 2. State management and unidirectional data flow
 
 - **Status:** Accepted
-- **Date:** 2026-11-19
+- **Date:** 2026-11-20
 
 ## Context
 
@@ -24,13 +24,24 @@ one pattern every feature follows so reviews can check it mechanically.
 - User actions are plain functions on the ViewModel (`fun onModeSelected(id: ModeId)`), never a public
   `MutableStateFlow` and never a generic `onEvent(Event)` dispatcher.
 - **One-off effects** (navigate, show a snackbar, launch a system intent) go through a private
-  `Channel<XEffect>(Channel.BUFFERED)` exposed as `val effects: Flow<XEffect> = channel.receiveAsFlow()`.
-  The UI collects it with `LaunchedEffect` on the lifecycle (`repeatOnLifecycle(STARTED)`), so effects are
-  delivered once and not lost while the UI is stopped.
+  `Channel<XEffect>(Channel.BUFFERED)` exposed as `val effects: Flow<XEffect> = channel.receiveAsFlow()`
+  (brief §3). The ViewModel sends with `send` (never `trySend`) from `viewModelScope`. The UI collects in
+  `LaunchedEffect(lifecycleOwner) { lifecycleOwner.repeatOnLifecycle(STARTED) {
+  withContext(Dispatchers.Main.immediate) { effects.collect(::handle) } } }`. The `Main.immediate`
+  context matters because `repeatOnLifecycle` keeps the caller's context, and a frame-clock dispatcher
+  widens the window in which a received element can be lost to cancellation.
+- **Guarantee: at most once.** A `Channel` drops an element if the receiver is cancelled after taking it
+  (prompt cancellation). So any outcome whose loss matters is **modelled as state**, not an effect. For
+  example, "a session started" shows up as `uiState.activeSession != null`, and the screen navigates from
+  that. This follows Android's UI-events guidance, which prefers state over events.
 - Input that must survive process death (form fields, the selected item) lives in `SavedStateHandle`.
   Everything else is re-derived from repositories.
-- Dispatchers and `Clock` are injected (`@Dispatcher`, `java.time.Clock`); ViewModel tests use
-  `MainDispatcherRule` and `TestClock`.
+- Transient action state (e.g. `isSaving`) lives in a private `MutableStateFlow` combined into
+  `uiState`. Actions never branch on `uiState.value`: with `WhileSubscribed` it is stale while nobody
+  collects.
+- Dispatchers and `Clock` are injected (`@Dispatcher`, `java.time.Clock`). ViewModel tests use
+  `MainDispatcherRule` and `TestClock`, and **collect** `uiState` (Turbine or `backgroundScope`) before
+  asserting.
 
 **Composables**
 
@@ -41,7 +52,7 @@ one pattern every feature follows so reviews can check it mechanically.
   belongs in the ViewModel.
 
 **Services and receivers** follow the same rule from the other side: they translate platform signals into
-calls on a repository or the session controller and contain no decisions (ADR 0003).
+`SessionInputs.submit(...)` or repository calls and contain no decisions (ADR 0003).
 
 ## Consequences
 
@@ -55,6 +66,7 @@ calls on a repository or the session controller and contain no decisions (ADR 00
 - **MVI with a single `onEvent(Event)` reducer in the ViewModel:** more ceremony, and the reducer pattern
   is reserved for the domain where it pays off (the mode engine, ADR 0003).
 - **`SharedFlow` for effects:** drops events with no active collector unless replay is configured, and
-  replay re-delivers them after configuration changes. A buffered `Channel` delivers each once.
+  replay re-delivers them after configuration changes. A buffered `Channel` holds them until collected,
+  with the at-most-once caveat above.
 - **Compose state (`mutableStateOf`) in ViewModels:** couples ViewModels to the Compose runtime and is
   harder to test with Turbine.
