@@ -4,7 +4,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
-import io.github.uveshm003.anchor.ui.theme.AnchorTheme
+import io.github.uveshm003.anchor.core.designsystem.theme.AnchorTheme
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,8 +33,10 @@ class AnchorAppScreenshotTest {
 
     private fun capture(name: String, darkTheme: Boolean) {
         composeRule.setContent {
-            AnchorTheme(darkTheme = darkTheme) { AnchorApp() }
+            AnchorTheme(darkTheme = darkTheme, dynamicColor = false) { AnchorApp() }
         }
+        // v2 test rules queue work on a StandardTestDispatcher: settle before capturing.
+        composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage("src/test/screenshots/$name.png")
     }
 }

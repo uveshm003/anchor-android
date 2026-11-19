@@ -59,9 +59,9 @@ private fun Project.configureTests() {
     }
     tasks.withType<Test>().configureEach {
         failOnNoDiscoveredTests.set(hasTestSources)
-        // Roborazzi/Robolectric: render with the real (native) graphics stack.
+        // Roborazzi/Robolectric: native graphics with synchronous software rendering. Hardware pixel-copy
+        // mode renders asynchronously and captured stale or blank frames (see PR for #1).
         systemProperty("robolectric.graphicsMode", "NATIVE")
-        systemProperty("robolectric.pixelCopyRenderMode", "hardware")
         maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
     }
 }
