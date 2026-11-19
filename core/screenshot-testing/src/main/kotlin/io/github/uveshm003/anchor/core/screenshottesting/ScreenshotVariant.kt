@@ -1,19 +1,23 @@
 package io.github.uveshm003.anchor.core.screenshottesting
 
-/** Devices every screen is captured on (brief §3: phone and tablet). Orientation is explicit so nothing leaks. */
-enum class ScreenshotDevice(internal val size: String, internal val orientation: String, internal val density: String) {
-    Phone(size = "w411dp-h891dp", orientation = "port", density = "xxhdpi"),
-    Tablet(size = "w1280dp-h800dp", orientation = "land", density = "xhdpi"),
+/**
+ * Devices every screen is captured on (brief §3: phone and tablet). Every size-related qualifier is explicit
+ * (smallest width, width, height, screen size, aspect, orientation): Robolectric only derives `sw`/size/long
+ * when they are unset, so a relative qualifier would otherwise keep its defaults or a class-level `@Config`.
+ */
+enum class ScreenshotDevice(internal val qualifiers: String, internal val density: String) {
+    Phone(qualifiers = "sw411dp-w411dp-h891dp-normal-long-port", density = "xxhdpi"),
+    Tablet(qualifiers = "sw800dp-w1280dp-h800dp-xlarge-notlong-land", density = "xhdpi"),
 }
 
 /** One screenshot configuration. Its [toString] names the JUnit test and the golden file suffix. */
 data class ScreenshotVariant(val device: ScreenshotDevice, val darkTheme: Boolean) {
     /**
-     * Relative (`+`) qualifiers: they change only size, orientation, night mode and density, so a class-level
-     * `@Config(qualifiers = "hi")` locale is kept.
+     * Relative (`+`) qualifiers that set the whole screen configuration and night mode, leaving everything else
+     * (notably a class-level `@Config(qualifiers = "hi")` locale) untouched.
      */
     val qualifiers: String
-        get() = "+${device.size}-${device.orientation}-${if (darkTheme) "night" else "notnight"}-${device.density}"
+        get() = "+${device.qualifiers}-${if (darkTheme) "night" else "notnight"}-${device.density}"
 
     override fun toString(): String = "${device.name.lowercase()}_${if (darkTheme) "dark" else "light"}"
 

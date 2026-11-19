@@ -5,7 +5,6 @@ import android.graphics.Canvas
 import android.os.Looper
 import android.view.ViewGroup
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -40,12 +39,18 @@ import org.robolectric.Shadows.shadowOf
  * }
  * ```
  *
+ * Golden files are `src/test/screenshots/<name>[_<locale>]_<variant>.png`; the locale part is added for any
+ * non-English class-level locale, so Hindi and English captures of the same screen don't collide.
+ *
+ * The host is `ComponentActivity` by default; pass another [activityClass] (e.g. a Hilt test activity, with
+ * `HiltAndroidRule` ordered outside this rule) to capture composables that need it. Prefer capturing the
+ * stateless screen composable with fake state.
+ *
  * Limits: the content view is drawn with a software canvas, so other windows (dialogs, popups, bottom sheets)
  * and elevation shadows (#84) are not captured.
  */
-class ScreenshotRule(val variant: ScreenshotVariant) : TestRule {
-    val composeRule: AndroidComposeTestRule<ActivityScenarioRule<ComponentActivity>, ComponentActivity> =
-        createAndroidComposeRule<ComponentActivity>()
+class ScreenshotRule<A : ComponentActivity>(val variant: ScreenshotVariant, activityClass: Class<A>) : TestRule {
+    val composeRule: AndroidComposeTestRule<ActivityScenarioRule<A>, A> = createAndroidComposeRule(activityClass)
 
     private val qualifiers = object : ExternalResource() {
         override fun before() = RuntimeEnvironment.setQualifiers(variant.qualifiers)
@@ -54,15 +59,21 @@ class ScreenshotRule(val variant: ScreenshotVariant) : TestRule {
     override fun apply(base: Statement, description: Description): Statement =
         RuleChain.outerRule(qualifiers).around(composeRule).apply(base, description)
 
-    /** Renders [content] and records/verifies `src/test/screenshots/<name>_<variant>.png`. */
+    /** Renders [content] and records/verifies the golden for this variant (see the class KDoc for the path). */
     fun capture(name: String, content: @Composable (darkTheme: Boolean) -> Unit) {
         render(content)
-        drawContent().captureRoboImage("src/test/screenshots/${name}_$variant.png")
+        drawContent().captureRoboImage(goldenPath(name))
     }
 
-    /** Sets [content] and lets composition, layout and a frame finish. */
+    internal fun goldenPath(name: String): String {
+        val language = composeRule.activity.resources.configuration.locales[0].language
+        val localePart = if (language == "en") "" else "_$language"
+        return "src/test/screenshots/$name${localePart}_$variant.png"
+    }
+
+    /** Sets [content] once per test (a second call fails) and lets composition, layout and a frame finish. */
     fun render(content: @Composable (darkTheme: Boolean) -> Unit) {
-        composeRule.activity.setContent { content(variant.darkTheme) }
+        composeRule.setContent { content(variant.darkTheme) }
         composeRule.waitForIdle()
         shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(FRAME_SETTLE_MILLIS))
         composeRule.waitForIdle()
@@ -84,7 +95,11 @@ class ScreenshotRule(val variant: ScreenshotVariant) : TestRule {
         return bitmap
     }
 
-    private companion object {
-        const val FRAME_SETTLE_MILLIS = 100L
+    companion object {
+        private const val FRAME_SETTLE_MILLIS = 100L
+
+        /** A rule hosted in a plain `ComponentActivity`. */
+        operator fun invoke(variant: ScreenshotVariant): ScreenshotRule<ComponentActivity> =
+            ScreenshotRule(variant, ComponentActivity::class.java)
     }
 }
