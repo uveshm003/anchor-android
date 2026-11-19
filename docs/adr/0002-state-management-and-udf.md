@@ -31,9 +31,11 @@ one pattern every feature follows so reviews can check it mechanically.
   context matters because `repeatOnLifecycle` keeps the caller's context, and a frame-clock dispatcher
   widens the window in which a received element can be lost to cancellation.
 - **Guarantee: at most once.** A `Channel` drops an element if the receiver is cancelled after taking it
-  (prompt cancellation). So any outcome whose loss matters is **modelled as state**, not an effect. For
-  example, "a session started" shows up as `uiState.activeSession != null`, and the screen navigates from
-  that. This follows Android's UI-events guidance, which prefers state over events.
+  (prompt cancellation). So any outcome whose loss matters is **modelled as consumable state**, not an
+  effect. For example, `uiState.pendingNavigation = ToActiveSession(sessionId)`: the UI navigates and calls
+  `onNavigationHandled()`, which clears it. A persistent condition such as `activeSession != null` must not
+  drive navigation directly, or returning to the screen would navigate again. This follows Android's
+  UI-events guidance, which prefers state over events.
 - Input that must survive process death (form fields, the selected item) lives in `SavedStateHandle`.
   Everything else is re-derived from repositories.
 - Transient action state (e.g. `isSaving`) lives in a private `MutableStateFlow` combined into

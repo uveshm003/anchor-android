@@ -16,9 +16,13 @@ untestable; brief §2 asks for a pure Kotlin engine with ≥ 90 % coverage.
 ### 1. Pure reducer (`core:engine`)
 
 ```kotlin
-fun reduce(state: EngineState, input: Input, now: Instant): Transition
+fun reduce(state: EngineState, input: Input, env: Environment): Transition
+data class Environment(val now: Instant, val elapsedRealtime: Duration, val bootCount: Int, val quiet: QuietSnapshot)
 data class Transition(val state: EngineState, val commands: List<Command>, val outcome: Outcome)
 ```
+
+`Environment` is sampled **once per input, when the consumer dequeues it** (§3): wall-clock `now` from the
+injected `Clock`, the monotonic reading and boot count (§5), and the device's current ringer/DND state.
 
 - No Android, no coroutines, no I/O. `core:engine` depends only on `core:model` (its current
   `core:common` edge is dropped in #13).
@@ -31,8 +35,9 @@ data class Transition(val state: EngineState, val commands: List<Command>, val o
   `DeviceConnected/Disconnected`, `SpaceEntered/Exited`), user intents (`HoldToStart(modeId)`,
   `StopRequested`, `AnchorTapped(hash)`, `EmergencyUnlock`, `RecoveryRequested`, `RecoveryCancelled`),
   answers to earlier commands, which carry the session id they belong to (`TimerElapsed(sessionId)`,
-  `RecoveryElapsed(sessionId)`, `CommandFailed(commandId)`), and `Reconcile(cause)` (§4). Inputs carry
-  only platform-supplied facts such as an event time. The reducer gets "now" once, from the caller.
+  `RecoveryElapsed(sessionId)`, `CommandFailed(commandId, sessionId)`), and `Reconcile(cause,
+  configuredTriggers)` (§4). Inputs carry only platform-supplied facts; time and device state come from
+  `Environment`.
 - `Command` describes side effects only (`ApplyAppPolicy`, `ClearAppPolicy`, `SetDnd`, `SetRinger`,
   `StartHoldingNotifications`, `ReleaseHeldNotifications`, `ScheduleTimer`, `CancelTimer`, …). Every
   command has a stable `id`.
@@ -45,10 +50,12 @@ data class Transition(val state: EngineState, val commands: List<Command>, val o
 - **Quota is state, not a side effect:** `EmergencyUnlock` appends to the unlock history inside
   `EngineState`, so the record is persisted in the same transaction as the session end. Insights read
   history from session events.
-- **Restore-to values:** when a session starts, the controller passes the current ringer/DND state in the
-  starting input, and the reducer stores it in `EngineState`. `SetRinger`/`SetDnd` at session end restore
-  that stored value; executors never capture "previous" themselves, so a replay can't record SILENT as
-  the user's setting.
+- **Restore-to values:** when a session starts and **no session is active and no restore is pending**, the
+  reducer stores `env.quiet` (the user's ringer/DND) as the restore-to value. If a session starts while
+  another is active (preemption) or while a restore is still pending, the existing restore-to value is
+  carried over, so Anchor's own SILENT/DND is never recorded as the user's setting. At session end the
+  reducer emits `SetRinger`/`SetDnd` with the stored value and marks the restore *pending* until the
+  command succeeds. Executors never capture "previous" themselves.
 
 ### 2. Ports live in `core:engine`; the controller lives in `core:data`
 
@@ -58,8 +65,15 @@ contracts therefore sit next to the types they use:
 ```kotlin
 // core:engine
 interface SessionInputs { suspend fun submit(input: Input) }
-fun interface CommandExecutor { suspend fun execute(command: Command): Boolean } // true = handled
+interface CommandExecutor {
+    val handles: Set<KClass<out Command>>
+    suspend fun execute(command: Command): ExecutionResult // Done | Failed(reason)
+}
 ```
+
+Exactly one executor handles each command type. The controller builds a registry from the `@IntoSet`
+executors at startup and fails fast on a missing or duplicate handler (covered by a test), so "not mine"
+and "failed" can never be confused.
 
 `core:data` implements `SessionInputs` (the controller). Each adapter provides its executors with Hilt
 `@IntoSet` and calls `SessionInputs.submit` from receivers/services. `app` wires the graph.
@@ -72,9 +86,11 @@ fun interface CommandExecutor { suspend fun execute(command: Command): Boolean }
   Then it executes the pending commands in order, marking each done after it succeeds.
 - Executors are **idempotent and dedupe by command id**. On a crash between persist and execute, the
   pending rows run again on the next start. Replaying a done command is harmless.
-- Failures are reported by enqueuing `CommandFailed(commandId)`, never by re-entering the controller, so
-  there is no deadlock and no reordering. The reducer never answers `CommandFailed` by re-emitting the
-  same command. It records a degraded state, and the next `Reconcile` retries by recomputing the desired
+- A `Failed` result is fed back **immediately**: the consumer marks the outbox row failed (not pending, so
+  it is never blindly replayed) and reduces `CommandFailed(commandId, sessionId)` before it dequeues the
+  next input. There is no re-entry into `submit`, so no deadlock and no reordering. The reducer ignores
+  failures from a session that has already ended. It never answers `CommandFailed` by re-emitting the
+  same command; it records a degraded state, and the next `Reconcile` retries by recomputing the desired
   state.
 - Commands from transition N always finish (or fail) before transition N+1 is reduced, so a stale
   `ApplyAppPolicy` can never land after `ClearAppPolicy`.
@@ -82,10 +98,20 @@ fun interface CommandExecutor { suspend fun execute(command: Command): Boolean }
 ### 4. Reconcile is an input, so restore is a rule
 
 On app start, `BOOT_COMPLETED`, `MY_PACKAGE_REPLACED`, `ACTION_TIME_CHANGED` and
-`ACTION_TIMEZONE_CHANGED`, the Android side submits `Reconcile(cause)`. The reducer returns the **complete
-desired-state command set for any state**, including `Idle` (clear the app policy, remove Anchor's DND rule,
-restore the ringer). It first ends sessions whose timer already passed (`now ≥ endsAt`), so an expired
-session is never re-applied after a reboot. It also re-schedules every pending alarm for its instant.
+`ACTION_TIMEZONE_CHANGED`, the controller loads the configured triggers and submits
+`Reconcile(cause, configuredTriggers)`. The reducer returns the **complete desired-state command set for any
+state**:
+
+- It first ends sessions whose timer already passed (`now ≥ endsAt`), so an expired session is never
+  re-applied after a reboot.
+- **Anchor-owned state** is always asserted: the app policy (or `ClearAppPolicy` when `Idle`) and Anchor's
+  own DND rule (or its removal).
+- **User-owned state** (ringer, DND outside Anchor's rule) is touched only when the session needs it or a
+  restore is still pending. An `Idle` reconcile never overwrites a ringer the user changed by hand.
+- **Trigger registrations** are desired state too: `SyncTriggerRegistrations(configuredTriggers)` makes
+  `core:triggers` re-register alarms, geofences, activity transitions, presence observations and BLE scans
+  (brief feature 14), from data in the command, so the adapter needs no `core:data` access.
+- Pending timers and recovery alarms are re-scheduled for their instants.
 Registered alarms are cleared on reboot, and a trigger time in the past fires immediately [1], so
 re-scheduling an expired instant is avoided rather than relied on.
 
@@ -101,7 +127,9 @@ re-scheduling an expired instant is avoided rather than relied on.
   sleep" [2], tagged with `Settings.Global.BOOT_COUNT` (API 24+) [3] to detect reboots. **Invariant: a
   reboot may pause the lost-anchor countdown but never resets it, and recovery always completes.**
   Monotonic time is accumulated per boot segment, and a wall-clock upper bound guarantees completion even
-  if accounting is lost. The exact scheme is #38.
+  if accounting is lost. The reducer gets `env.elapsedRealtime` and `env.bootCount`, and `EngineState`
+  stores the monotonic stamps, so moving the wall clock forward cannot complete the delay. The exact
+  scheme is #38.
 - **UI gesture durations** (2 s hold-to-start, 10 s emergency hold) use the Compose frame clock in the UI
   and never reach the engine.
 

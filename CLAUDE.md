@@ -23,8 +23,9 @@ Android app (Kotlin + Jetpack Compose, minSdk 31, target 37). Tap the phone on a
 ## Architecture rules
 - UI (Compose + ViewModel) → domain/engine → data (repositories) → sources. UDF: one
   `StateFlow<UiState>` per ViewModel, actions are functions, one-off effects via `Channel`.
-- `core:engine` is pure Kotlin: `(SessionState, Input) -> (SessionState, List<Command>)`. Android
-  adapters (services, receivers, NFC) only translate signals into inputs and execute commands.
+- `core:engine` is pure Kotlin: `reduce(EngineState, Input, Environment) -> Transition(state, commands,
+  outcome)`. Adapters only `submit` inputs and execute commands through the `core:engine` ports; they never
+  depend on `core:data` (ADR 0003).
   No business logic in composables, services or receivers.
 - Persist session state **before** running side effects. One active session. Automatic triggers
   never override a manual/anchor session. Essentials (dialer, emergency, launcher, system UI, Anchor)

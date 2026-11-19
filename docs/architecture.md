@@ -7,18 +7,17 @@ is in [`PROJECT_BRIEF.md`](PROJECT_BRIEF.md).
 ## Layers
 
 ```
-UI (Compose screens + ViewModels)      feature/*, widget, core/ui, core/designsystem
-        │  one StateFlow<UiState> per ViewModel, actions are functions, effects via Channel
+UI (Compose screens + ViewModels)                       feature/*, widget, core/ui, core/designsystem
+        │  one StateFlow<UiState> per ViewModel, actions are functions, effects via Channel (ADR 0002)
         ▼
-Domain (use cases, only where they add value) + the mode engine            core/engine
-        │  pure Kotlin: (SessionState, Input) -> (SessionState, List<Command>)
+Data (repositories, session controller, Room, DataStore)  core/data, core/database, core/datastore
+        │  implements the SessionInputs port; persists state + command outbox (ADR 0003)
         ▼
-Data (repositories)                                                        core/data
-        │
-        ▼
-Sources: Room, DataStore, platform adapters      core/database, core/datastore,
-                                                 core/nfc, core/qr, core/triggers,
-                                                 service/blocker, service/notifications
+Mode engine + ports (pure Kotlin)                        core/engine
+        ▲  reduce(EngineState, Input, Environment) -> Transition(state, commands, outcome)
+        │  SessionInputs.submit(input) / CommandExecutor.execute(command)
+Platform adapters                                        core/nfc, core/qr, core/triggers,
+                                                         service/blocker, service/notifications
 ```
 
 Rules:
@@ -26,10 +25,11 @@ Rules:
 - **Unidirectional data flow.** State flows down, events flow up. Composables are stateless where
   possible and contain no business logic.
 - **The engine decides, adapters execute.** Platform code (receivers, services, NFC callbacks) only
-  converts a platform signal into an engine input, and executes the commands the engine returns.
+  converts a platform signal into an engine input (`SessionInputs.submit`) and executes the commands the
+  engine returns (`CommandExecutor`). Adapters depend on `core:engine`, never on `core:data`.
   No decisions in services or receivers.
-- **Persist before side effects.** The new `SessionState` is written before any command runs, so a
-  process death mid-way can be recovered.
+- **Persist before side effects.** The new `EngineState` and its pending commands (outbox) are written in
+  one transaction before any command runs, so a process death mid-way can be recovered.
 - **Inject everything that varies:** dispatchers (`@Dispatcher`), time (`java.time.Clock`, never `Instant.now()`/`System.currentTimeMillis()`; enforcement tracked in #87), platform managers. Tests use fakes and `TestClock`.
 - **Features never depend on other features.** Navigation between them is wired in `app`.
 
@@ -169,4 +169,5 @@ Build configuration lives in `build-logic/` convention plugins (`anchor.android.
 `./gradlew ciCheck` runs everything CI runs: Spotless (ktlint + Compose rules), Detekt, Android Lint
 (errors fail), unit and Robolectric tests, Roborazzi screenshot verification, Kover coverage gates
 (≥ 90 % `core:engine`, ≥ 80 % other pure-Kotlin modules, ≥ 60 % overall) and the privacy check that
-fails if the merged release manifest requests `android.permission.INTERNET`.
+fails if the merged release manifest requests `android.permission.INTERNET`, plus `checkModuleGraph`
+(the Mermaid graph below matches the build files).
