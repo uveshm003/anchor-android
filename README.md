@@ -91,7 +91,7 @@ graph TD
 
     subgraph core[core]
         designsystem & ui & data & database & datastore & engine & model & common
-        nfc & qr & ctriggers[triggers] & testing
+        nfc & qr & ctriggers[triggers] & testing & screenshottesting[screenshot-testing]
     end
 
     app --> features & widget & services
