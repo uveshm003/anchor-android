@@ -1,5 +1,6 @@
 package io.github.uveshm003.anchor.core.designsystem.theme
 
+import android.os.Looper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -23,14 +24,18 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
+import java.time.Duration
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 /**
- * Every colour role and every type style, so palette or typography changes show up in review.
- * The `dynamic_*` goldens show the palette that actually ships (Robolectric's default wallpaper colours).
+ * Every colour role that Material components draw with, and every type style, so palette or typography
+ * changes show up in review. The 12 `*Fixed*` roles are not set by the brand palette yet (#85) and are
+ * not shown. The `dynamic_*` goldens pin the dynamic-colour wiring, rendered with Robolectric's built-in
+ * system colours, not a real wallpaper palette.
  */
 @RunWith(AndroidJUnit4::class)
 class ThemeSpecimenScreenshotTest {
@@ -90,11 +95,16 @@ class ThemeSpecimenScreenshotTest {
                 Surface(content = content)
             }
         }
+        // Compose being idle doesn't guarantee a frame reached the window surface Roborazzi reads. Advance the
+        // Robolectric main-looper clock a few frames so a traversal + draw has run (blank captures under load).
+        composeRule.waitForIdle()
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(FRAME_SETTLE_MILLIS))
         composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage("src/test/screenshots/$name.png")
     }
 
     private companion object {
+        const val FRAME_SETTLE_MILLIS = 100L
         const val PHONE_LIGHT = "w411dp-h891dp-notnight-xxhdpi"
         const val PHONE_DARK = "w411dp-h891dp-night-xxhdpi"
         const val TABLET_LIGHT = "w1280dp-h800dp-notnight-xhdpi"

@@ -62,8 +62,11 @@ private fun Project.configureTests() {
         // Roborazzi/Robolectric: native graphics with the default synchronous software renderer.
         // `robolectric.pixelCopyRenderMode=hardware` renders asynchronously: with the v2 Compose test rules it
         // captured blank or previous-test frames even after waitForIdle() (4 record runs, 4 different results).
-        // Trade-off: software rendering draws no elevation shadows. Follow-up: tech-debt issue on shadows.
+        // Trade-off: software rendering draws no elevation shadows. Follow-up: #84.
         systemProperty("robolectric.graphicsMode", "NATIVE")
         maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+        // Screenshot tests hold several full-resolution bitmaps (goldens, captures, diffs) per test; the 512 MB
+        // Gradle default left later captures in a class blank under ciCheck load.
+        maxHeapSize = "2g"
     }
 }
