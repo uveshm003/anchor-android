@@ -30,7 +30,7 @@ Rules:
   No decisions in services or receivers.
 - **Persist before side effects.** The new `SessionState` is written before any command runs, so a
   process death mid-way can be recovered.
-- **Inject everything that varies:** dispatchers, `Clock`, platform managers. Tests use fakes.
+- **Inject everything that varies:** dispatchers (`@Dispatcher`), time (`java.time.Clock`, never `Instant.now()`/`System.currentTimeMillis()`; enforcement tracked in #87), platform managers. Tests use fakes and `TestClock`.
 - **Features never depend on other features.** Navigation between them is wired in `app`.
 
 ## Modules
@@ -46,7 +46,7 @@ Rules:
 | `core:data` | Android lib | Repositories; the only entry point for features into data |
 | `core:designsystem` | Compose lib | Theme, typography, core components |
 | `core:ui` | Compose lib | Shared UI built on the design system and the model |
-| `core:testing` | Android lib | Test rules, fakes, fake `Clock`, screenshot helpers |
+| `core:testing` | Android lib | Test rules (`MainDispatcherRule`), fakes; re-exports `TestClock` from `core:common` test fixtures |
 | `core:nfc` | Android lib | NFC reader mode, NDEF + AAR writing, UID hashing |
 | `core:qr` | Android lib | QR generation and scanning |
 | `core:triggers` | Android lib | Schedule, driving, Bluetooth, Space and place triggers |

@@ -1,6 +1,10 @@
 package io.github.uveshm003.anchor.core.designsystem.theme
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Looper
+import android.view.ViewGroup
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -19,8 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -40,7 +44,7 @@ import org.robolectric.annotation.Config
 @RunWith(AndroidJUnit4::class)
 class ThemeSpecimenScreenshotTest {
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
     @Config(qualifiers = PHONE_LIGHT)
@@ -100,7 +104,7 @@ class ThemeSpecimenScreenshotTest {
         composeRule.waitForIdle()
         shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(FRAME_SETTLE_MILLIS))
         composeRule.waitForIdle()
-        composeRule.onRoot().captureRoboImage("src/test/screenshots/$name.png")
+        composeRule.captureContent("src/test/screenshots/$name.png")
     }
 
     private companion object {
@@ -188,3 +192,20 @@ private fun typeStyles(t: Typography) = listOf(
     "Label medium" to t.labelMedium,
     "Label small" to t.labelSmall,
 )
+
+/**
+ * Draws the content view synchronously. Capturing via PixelCopy (async callback) produced transparent images
+ * under ciCheck load (#86). Temporary per-file copy until the shared screenshot helper lands (#88).
+ */
+private fun AndroidComposeTestRule<*, out ComponentActivity>.captureContent(path: String) {
+    lateinit var bitmap: Bitmap
+    runOnUiThread {
+        val root = checkNotNull(activity.findViewById<ViewGroup>(android.R.id.content).getChildAt(0)) {
+            "Activity has no content view"
+        }
+        check(root.width > 0 && root.height > 0) { "Content view is not laid out (${root.width}x${root.height})" }
+        bitmap = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
+        root.draw(Canvas(bitmap))
+    }
+    bitmap.captureRoboImage(path)
+}

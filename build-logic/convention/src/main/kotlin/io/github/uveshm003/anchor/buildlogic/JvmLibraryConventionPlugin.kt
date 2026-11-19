@@ -1,7 +1,9 @@
 package io.github.uveshm003.anchor.buildlogic
 
+import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 
 /** Pure Kotlin/JVM module: no Android dependencies allowed. Coverage gate: >= 80% (engine raises it to 90%). */
@@ -19,6 +21,10 @@ class JvmLibraryConventionPlugin : Plugin<Project> {
                 add("testImplementation", libs.lib("truth"))
             }
             configureKover()
+            // Only production code counts: test fixtures (e.g. TestClock) are test support, like src/test.
+            extensions.configure<KoverProjectExtension> {
+                currentProject { sources { excludedSourceSets.add("testFixtures") } }
+            }
             koverMinimumCoverage(PURE_KOTLIN_MIN_COVERAGE)
             registerModuleCheck("test", "lint", "koverVerify")
         }
