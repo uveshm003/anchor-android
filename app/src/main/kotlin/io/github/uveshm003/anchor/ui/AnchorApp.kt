@@ -17,7 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import io.github.uveshm003.anchor.R
-import io.github.uveshm003.anchor.ui.theme.AnchorTheme
+import io.github.uveshm003.anchor.core.designsystem.theme.AnchorTheme
 
 /** Placeholder app shell. Replaced by the adaptive scaffold + navigation in the M0 app-shell issue. */
 @Composable
@@ -54,5 +54,5 @@ fun AnchorApp(modifier: Modifier = Modifier) {
 @PreviewLightDark
 @Composable
 private fun AnchorAppPreview() {
-    AnchorTheme { AnchorApp() }
+    AnchorTheme(dynamicColor = false) { AnchorApp() }
 }

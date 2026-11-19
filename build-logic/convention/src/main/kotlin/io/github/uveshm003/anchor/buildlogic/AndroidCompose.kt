@@ -25,6 +25,7 @@ internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
 
         add("testImplementation", libs.lib("androidx-compose-ui-test-junit4"))
         add("testImplementation", libs.lib("junit4"))
+        add("testImplementation", libs.lib("androidx-test-ext-junit"))
         add("testImplementation", libs.lib("robolectric"))
         // Compose ui-test and Robolectric bring Espresso 3.5, which cannot drive the API 37 InputManager.
         add("testImplementation", libs.lib("androidx-test-espresso-core"))

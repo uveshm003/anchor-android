@@ -5,8 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.uveshm003.anchor.core.designsystem.theme.AnchorTheme
 import io.github.uveshm003.anchor.ui.AnchorApp
-import io.github.uveshm003.anchor.ui.theme.AnchorTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
