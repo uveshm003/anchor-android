@@ -79,9 +79,22 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     }
 }
 
+val checkModuleGraph by tasks.registering(Exec::class) {
+    group = "verification"
+    description = "Fails if the Mermaid module graph in README.md / docs/architecture.md is out of date."
+    commandLine("python3", "scripts/module-graph.py", "--check")
+    inputs.files(
+        fileTree(rootDir) {
+            include("**/build.gradle.kts", "settings.gradle.kts", "README.md", "docs/architecture.md")
+            include("scripts/module-graph.py", "build-logic/**/AndroidFeatureConventionPlugin.kt")
+            exclude("**/build/**", ".gradle/**")
+        },
+    )
+}
+
 tasks.register("ciCheck") {
     group = "verification"
     description = "Runs exactly what CI runs: formatting, static analysis, lint, tests, screenshots, coverage, privacy."
-    dependsOn("spotlessCheck", "detekt", "koverVerify")
+    dependsOn("spotlessCheck", "detekt", "koverVerify", checkModuleGraph)
     dependsOn(subprojects.filter { it.buildFile.exists() }.map { "${it.path}:moduleCheck" })
 }

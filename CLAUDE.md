@@ -15,7 +15,8 @@ Android app (Kotlin + Jetpack Compose, minSdk 31, target 37). Tap the phone on a
 - `./gradlew assembleDebug` / `installDebug`
 - `./gradlew recordRoborazziDebug`: re-record screenshot goldens after an intended UI change
 - `./gradlew :core:engine:test`, `./gradlew :<module>:testDebugUnitTest`
-- `python3 scripts/module-graph.py`: regenerate the module graph after changing module dependencies
+- `python3 scripts/module-graph.py`: regenerate the module graph after changing module dependencies (`ciCheck`
+  fails if it is stale)
 - `./gradlew connectedDebugAndroidTest`: on device. If the phone is asleep:
   `adb shell input keyevent KEYCODE_WAKEUP && adb shell wm dismiss-keyguard`
 
