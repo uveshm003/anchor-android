@@ -2,7 +2,8 @@
 
 Android app (Kotlin + Jetpack Compose, minSdk 31, target 37). Tap the phone on an NFC sticker or QR
 "anchor" to start a focus mode that blocks chosen apps; tap again to end it. On-device only.
-**Source of truth: `docs/PROJECT_BRIEF.md`.** Architecture: `docs/architecture.md`. Decisions: `docs/adr/`.
+**Source of truth: `docs/PROJECT_BRIEF.md`.** Architecture: `docs/architecture.md`. Decisions: `docs/adr/`
+(UDF: [ADR 0002](docs/adr/0002-state-management-and-udf.md); engine: [ADR 0003](docs/adr/0003-engine-command-pattern.md)).
 
 ## Start / resume a session
 1. Read this file and `docs/PROJECT_BRIEF.md`.
@@ -14,6 +15,7 @@ Android app (Kotlin + Jetpack Compose, minSdk 31, target 37). Tap the phone on a
 - `./gradlew assembleDebug` / `installDebug`
 - `./gradlew recordRoborazziDebug`: re-record screenshot goldens after an intended UI change
 - `./gradlew :core:engine:test`, `./gradlew :<module>:testDebugUnitTest`
+- `python3 scripts/module-graph.py`: regenerate the module graph after changing module dependencies
 - `./gradlew connectedDebugAndroidTest`: on device. If the phone is asleep:
   `adb shell input keyevent KEYCODE_WAKEUP && adb shell wm dismiss-keyguard`
 
