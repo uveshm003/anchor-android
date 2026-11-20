@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <plurals name="core_designsystem_hold_hint">
-        <item quantity="one">%1$d सेकंड तक दबाए रखें</item>
-        <item quantity="other">%1$d सेकंड तक दबाए रखें</item>
+        <item quantity="one">दो बार टैप करके %1$d सेकंड तक दबाए रखें</item>
+        <item quantity="other">दो बार टैप करके %1$d सेकंड तक दबाए रखें</item>
     </plurals>
     <string name="core_designsystem_hold_progress">%1$d%% दबाया गया</string>
+    <string name="core_designsystem_hold_confirmed">पुष्टि हो गई</string>
+    <string name="core_designsystem_hold_action_confirm">बिना दबाए पुष्टि करें</string>
+    <plurals name="core_designsystem_hold_action_countdown">
+        <item quantity="one">%1$d सेकंड की उलटी गिनती शुरू करें</item>
+        <item quantity="other">%1$d सेकंड की उलटी गिनती शुरू करें</item>
+    </plurals>
+    <string name="core_designsystem_hold_action_cancel">उलटी गिनती रद्द करें</string>
 </resources>
