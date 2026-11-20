@@ -182,3 +182,5 @@ Every change goes through an issue and a reviewed pull request. See
 ## License
 
 [Apache License 2.0](LICENSE)
+
+Icons are from [Material Symbols](https://github.com/google/material-design-icons) by Google, also Apache License 2.0.
