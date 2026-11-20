@@ -66,7 +66,9 @@ private fun Project.configureTests() {
         systemProperty("robolectric.graphicsMode", "NATIVE")
         // Each fork may take the 2 GB heap below; cap forks so tests don't push the machine into swap
         // (6 forks x 2 GB next to an emulator and Docker thrashed a 24 GB laptop, ~200x slower).
-        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 4).coerceIn(1, MAX_TEST_FORKS)
+        // Override with -Panchor.testForks=N (e.g. on a roomier CI runner).
+        maxParallelForks = providers.gradleProperty("anchor.testForks").map(String::toInt)
+            .getOrElse((Runtime.getRuntime().availableProcessors() / 4).coerceIn(1, MAX_TEST_FORKS))
         // Screenshot tests hold several full-resolution bitmaps (goldens, captures, diffs) per test; the 512 MB
         // Gradle default left later captures in a class blank under ciCheck load.
         maxHeapSize = "2g"

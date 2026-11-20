@@ -1,10 +1,13 @@
 package io.github.uveshm003.anchor.core.designsystem.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -12,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -78,6 +82,10 @@ fun HoldToConfirmButton(
 
     // A change of enabled/duration (or leaving composition) stops any running hold or countdown.
     DisposableEffect(state, enabled, holdDuration) { onDispose { state.reset() } }
+    // Keep "Confirmed" while disabled (so the announcement isn't lost); clear it when enabled again.
+    LaunchedEffect(state, enabled) { if (enabled) state.clearConfirmed() }
+    val interactionSource = remember { MutableInteractionSource() }
+    val focused by interactionSource.collectIsFocusedAsState()
 
     val controller = HoldController(
         state = state,
@@ -102,10 +110,11 @@ fun HoldToConfirmButton(
         text = text,
         progress = { state.progress },
         enabled = enabled,
+        focused = focused,
         modifier = modifier
             .holdSemantics(enabled, accessibleHold, labels, controller)
             .holdKeyInput(enabled, controller)
-            .focusable(enabled)
+            .focusable(enabled, interactionSource)
             .holdPointerInput(enabled, holdDuration, controller),
     )
 }
@@ -130,7 +139,7 @@ private fun holdLabels(state: HoldToConfirmState, holdDuration: Duration, access
     val description = when {
         state.confirmed -> stringResource(R.string.core_designsystem_hold_confirmed)
 
-        state.isHolding || quarter > 0 ->
+        state.isHolding ->
             stringResource(R.string.core_designsystem_hold_progress, quarter * PERCENT / HOLD_TICKS)
 
         else -> pluralStringResource(R.plurals.core_designsystem_hold_hint, seconds, seconds)
@@ -179,7 +188,11 @@ private fun Modifier.holdSemantics(
 private fun Modifier.holdKeyInput(enabled: Boolean, controller: HoldController): Modifier = onKeyEvent { event ->
     if (!enabled || event.key !in CONFIRM_KEYS) return@onKeyEvent false
     when (event.type) {
-        KeyEventType.KeyDown -> if (!controller.state.isHolding) controller.begin()
+        // Auto-repeat sends more KeyDowns while the key is held: only the first one starts a hold.
+        KeyEventType.KeyDown -> if (event.nativeKeyEvent.repeatCount == 0 && !controller.state.isHolding) {
+            controller.begin()
+        }
+
         KeyEventType.KeyUp -> controller.release()
     }
     true
@@ -211,6 +224,7 @@ internal fun HoldToConfirmButtonContent(
     progress: () -> Float,
     enabled: Boolean,
     modifier: Modifier = Modifier,
+    focused: Boolean = false,
 ) {
     val colors = MaterialTheme.colorScheme
     val container = if (enabled) colors.primaryContainer else colors.onSurface.copy(alpha = DISABLED_CONTAINER_ALPHA)
@@ -222,6 +236,18 @@ internal fun HoldToConfirmButtonContent(
             .heightIn(min = 56.dp)
             .clip(MaterialTheme.shapes.extraLarge)
             .background(container)
+            // Keyboard/D-pad focus ring: onPrimaryContainer on the container edge (>= 3:1 change, WCAG 2.4.7).
+            .then(
+                if (focused) {
+                    Modifier.border(
+                        3.dp,
+                        colors.onPrimaryContainer,
+                        MaterialTheme.shapes.extraLarge,
+                    )
+                } else {
+                    Modifier
+                },
+            )
             .drawWithContent {
                 drawContent()
                 val value = progress().coerceIn(0f, 1f)

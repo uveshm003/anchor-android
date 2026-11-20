@@ -37,12 +37,14 @@ class HoldToConfirmState internal constructor() {
         confirmed = false
         isHolding = true
         job = scope.launch {
+            val self = coroutineContext[Job]
             try {
                 holdFor(duration, onProgress = { progress = it }, onTick = onTick)
                 confirmed = true
                 onComplete()
             } finally {
-                isHolding = false
+                // A cancelled job's finally can run after the next start(): only the current job may clear it.
+                if (job === self) isHolding = false
             }
         }
     }
@@ -68,6 +70,11 @@ class HoldToConfirmState internal constructor() {
         progress = 0f
         confirmed = true
         onConfirm()
+    }
+
+    /** Forget a past confirmation (e.g. when the button is enabled again for a new round). */
+    internal fun clearConfirmed() {
+        confirmed = false
     }
 
     internal fun reset() {
