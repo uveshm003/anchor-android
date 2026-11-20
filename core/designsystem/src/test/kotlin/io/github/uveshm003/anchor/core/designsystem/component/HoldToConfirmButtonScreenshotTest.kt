@@ -18,7 +18,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.ParameterizedRobolectricTestRunner
 
-/** Idle, half-held, fully held and disabled states. */
+/** Idle, half-held, fully held, disabled and keyboard-focused states. */
 @RunWith(ParameterizedRobolectricTestRunner::class)
 class HoldToConfirmButtonScreenshotTest(variant: ScreenshotVariant) {
     @get:Rule
@@ -40,6 +40,13 @@ class HoldToConfirmButtonScreenshotTest(variant: ScreenshotVariant) {
                     HoldToConfirmButtonContent("Hold to start Deep Work", {
                         0f
                     }, enabled = false, Modifier.fillMaxWidth())
+                    HoldToConfirmButtonContent(
+                        "Hold to start Deep Work",
+                        { 0f },
+                        enabled = true,
+                        Modifier.fillMaxWidth(),
+                        focused = true,
+                    )
                 }
             }
         }

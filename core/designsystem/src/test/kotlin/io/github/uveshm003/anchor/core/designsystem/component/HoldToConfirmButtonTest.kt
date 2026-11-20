@@ -101,15 +101,20 @@ class HoldToConfirmButtonTest {
     }
 
     @Test
-    fun releasingEarly_cancelsAndAnimatesBack() {
+    fun releasingAt75Percent_cancelsAndAnimatesBack() {
         val button = show()
 
         button.performTouchInput { down(center) }
-        composeRule.mainClock.advanceTimeBy(1_000)
-        assertTrue(state.progress in 0.45f..0.55f)
+        composeRule.mainClock.advanceTimeBy(1_500)
+        assertTrue("about 75 %, was ${state.progress}", state.progress in 0.70f..0.80f)
         button.performTouchInput { up() }
         composeRule.mainClock.advanceTimeBy(48)
-        assertTrue("animating back, was ${state.progress}", state.progress in 0.01f..0.49f)
+        assertTrue("animating back, was ${state.progress}", state.progress in 0.01f..0.74f)
+        assertEquals(
+            "no progress announcement after release",
+            "Double-tap and hold for 2 seconds",
+            button.stateDescription(),
+        )
         composeRule.mainClock.advanceTimeBy(3_000)
 
         assertEquals(0f, state.progress)
@@ -190,15 +195,41 @@ class HoldToConfirmButtonTest {
     }
 
     @Test
-    fun keyboard_holdingEnterConfirms() {
+    fun keyboard_holdingEnterConfirmsOnceDespiteAutoRepeat() {
         val button = show()
         button.requestFocus()
 
-        button.performKeyInput { keyDown(Key.Enter) }
-        composeRule.mainClock.advanceTimeBy(2_100)
-        button.performKeyInput { keyUp(Key.Enter) }
+        // advanceEventTime sends real key auto-repeats while Enter is held.
+        button.performKeyInput {
+            keyDown(Key.Enter)
+            advanceEventTime(4_500)
+            keyUp(Key.Enter)
+        }
+        composeRule.mainClock.advanceTimeBy(100)
 
         assertEquals(1, confirmed)
+        assertEquals("Confirmed", button.stateDescription())
+    }
+
+    @Test
+    fun enablingAgain_clearsAPastConfirmation() {
+        var enabled by mutableStateOf(true)
+        val button = show(enabled = { enabled })
+        button.performTouchInput { down(center) }
+        composeRule.mainClock.advanceTimeBy(2_100)
+        button.performTouchInput { up() }
+        assertEquals("Confirmed", button.stateDescription())
+
+        // State written from the test thread: apply the snapshot, then run a few frames.
+        enabled = false
+        composeRule.waitForIdle()
+        composeRule.mainClock.advanceTimeBy(100)
+        assertEquals("kept while disabled", "Confirmed", button.stateDescription())
+        enabled = true
+        composeRule.waitForIdle()
+        composeRule.mainClock.advanceTimeBy(100)
+
+        assertEquals("Double-tap and hold for 2 seconds", button.stateDescription())
     }
 
     @Test
