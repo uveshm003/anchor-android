@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Hold-to-confirm button (TalkBack). The hint is read while idle; progress is announced in quarters. -->
+    <plurals name="core_designsystem_hold_hint">
+        <item quantity="one">Double-tap and hold for %1$d second</item>
+        <item quantity="other">Double-tap and hold for %1$d seconds</item>
+    </plurals>
+    <string name="core_designsystem_hold_progress">%1$d%% held</string>
+    <string name="core_designsystem_hold_confirmed">Confirmed</string>
+    <string name="core_designsystem_hold_action_confirm">Confirm without holding</string>
+    <plurals name="core_designsystem_hold_action_countdown">
+        <item quantity="one">Start %1$d-second countdown</item>
+        <item quantity="other">Start %1$d-second countdown</item>
+    </plurals>
+    <string name="core_designsystem_hold_action_cancel">Cancel countdown</string>
+</resources>
