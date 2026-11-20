@@ -1,0 +1,96 @@
+package io.github.uveshm003.anchor.core.designsystem.component
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
+import io.github.uveshm003.anchor.core.designsystem.theme.AnchorTheme
+import io.github.uveshm003.anchor.core.screenshottesting.ScreenshotRule
+import io.github.uveshm003.anchor.core.screenshottesting.ScreenshotVariant
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.ParameterizedRobolectricTestRunner
+
+@RunWith(ParameterizedRobolectricTestRunner::class)
+class ComponentsScreenshotTest(variant: ScreenshotVariant) {
+    @get:Rule
+    val screenshot = ScreenshotRule(variant)
+
+    @Test
+    fun gallery() = screenshot.capture("components_gallery") { darkTheme ->
+        AnchorTheme(darkTheme = darkTheme, dynamicColor = false) { Surface { Gallery() } }
+    }
+
+    @Test
+    fun galleryAt200PercentFont() = screenshot.capture("components_gallery_fontscale2") { darkTheme ->
+        AnchorTheme(darkTheme = darkTheme, dynamicColor = false) {
+            CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale = 2f)) {
+                Surface { Gallery() }
+            }
+        }
+    }
+
+    @Test
+    fun emptyState() = screenshot.capture("components_empty_state") { darkTheme ->
+        AnchorTheme(darkTheme = darkTheme, dynamicColor = false) {
+            Surface {
+                EmptyState(
+                    icon = AnchorIcons.Tune,
+                    title = "No modes yet",
+                    body = "Create a mode for each part of your day, or start from a template.",
+                    actionText = "Create mode",
+                )
+            }
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+        fun variants() = ScreenshotVariant.parameters()
+    }
+}
+
+@Composable
+private fun Gallery() {
+    Column(Modifier.fillMaxWidth()) {
+        AnchorTopAppBar(title = "Modes")
+        SectionHeader("Rows")
+        AnchorListRow(
+            title = "Hold notifications",
+            supportingText = "Shown when the session ends",
+            leadingIcon = AnchorIcons.NotificationsPaused,
+            trailing = ListRowTrailing.Switch(checked = true) {},
+        )
+        AnchorListRow(title = "Anchors", leadingIcon = AnchorIcons.Nfc, trailing = ListRowTrailing.Chevron, onClick = {
+        })
+        AnchorListRow(
+            title = "Places",
+            supportingText = "Needs location",
+            leadingIcon = AnchorIcons.LocationOn,
+            enabled = false,
+        )
+        SectionHeader("Buttons and badges")
+        Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            AnchorButton("Save", onClick = {}, leadingIcon = AnchorIcons.Check)
+            AnchorOutlinedButton("Cancel", onClick = {})
+        }
+        Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            ModeBadge(AnchorIcons.Work, Color(0xFF00668B), contentDescription = "Deep Work")
+            ModeBadge(AnchorIcons.School, Color(0xFFFFD54F), contentDescription = "Study")
+            ModeBadge(AnchorIcons.Bedtime, Color(0xFF3949AB), contentDescription = "Sleep")
+            ModeBadge(AnchorIcons.DirectionsCar, Color(0xFFE53935), contentDescription = "Driving")
+            ModeBadge(AnchorIcons.FamilyRestroom, Color(0xFF43A047), contentDescription = "Family Time")
+        }
+    }
+}
