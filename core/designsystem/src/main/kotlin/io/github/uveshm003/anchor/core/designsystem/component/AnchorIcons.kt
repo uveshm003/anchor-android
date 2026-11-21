@@ -6,11 +6,17 @@ import io.github.uveshm003.anchor.core.designsystem.R
 /**
  * Anchor's icon set: a subset of Material Symbols (outlined, Apache-2.0) checked in as vector drawables.
  * Use with `Icon(painterResource(AnchorIcons.Add), contentDescription = …)`; add icons here as features need them.
+ *
+ * Source: `google/material-design-icons`, `symbols/android/<name>/materialsymbolsoutlined/<name>_24px.xml`.
+ * Modified: the AppCompat tint `?attr/colorControlNormal` is replaced by the framework
+ * `?android:attr/colorControlNormal` (no AppCompat here). Keep `android:autoMirrored` on directional icons (RTL).
  */
 object AnchorIcons {
     @DrawableRes val Add = R.drawable.core_designsystem_ic_add
 
     @DrawableRes val Anchor = R.drawable.core_designsystem_ic_anchor
+
+    @DrawableRes val ArrowBack = R.drawable.core_designsystem_ic_arrow_back
 
     @DrawableRes val ArrowDownward = R.drawable.core_designsystem_ic_arrow_downward
 
@@ -61,6 +67,8 @@ object AnchorIcons {
     @DrawableRes val Schedule = R.drawable.core_designsystem_ic_schedule
 
     @DrawableRes val School = R.drawable.core_designsystem_ic_school
+
+    @DrawableRes val Search = R.drawable.core_designsystem_ic_search
 
     @DrawableRes val Settings = R.drawable.core_designsystem_ic_settings
 
