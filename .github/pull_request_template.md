@@ -27,11 +27,6 @@ Plan approved:
 ## Checklist
 
 - [ ] `./gradlew spotlessApply ciCheck` passes locally
-- [ ] About 4 meaningful commits (fewer is fine for a small change; no filler; each builds and references `#<n>`/`T-<n>`); `docs/task-list.md` updated if this completes or adds tasks
-- [ ] Tests cover the acceptance criteria (no tests skipped, no thresholds lowered, no baselines or `@Suppress`)
-- [ ] User-facing strings are in resources, in English and Hindi
-- [ ] Screenshot tests added/updated for UI changes (light/dark, phone/tablet)
-- [ ] Accessibility: content descriptions, 48 dp targets, TalkBack order, 200 % font scale
-- [ ] No `INTERNET` permission; no new exported components or mutable `PendingIntent`s without reason
-- [ ] Permissions are requested only when the feature that needs them is turned on
-- [ ] Docs/ADR updated if a decision was made
+- [ ] 3–4 meaningful commits, each building and referencing `#<n>`/`T-<n>`; `docs/task-list.md` updated if needed
+- [ ] UI: strings in English + Hindi, screenshots updated, accessible (labels, 48 dp, 200 % font)
+- [ ] No `INTERNET`; permissions only when the feature is turned on

@@ -36,9 +36,9 @@ Android app (Kotlin + Jetpack Compose, minSdk 31, target 37). Tap the phone on a
 
 ## The loop
 **Work items:** the existing GitHub issues (backlog M0–M6), issues filed by outside reporters, and
-`docs/task-list.md`. **Never create new GitHub issues**: new work, review follow-ups, tech debt and bugs the user
+`docs/task-list.md`. **Never create new GitHub issues**: new work, follow-ups, tech debt and bugs the user
 reports go into `docs/task-list.md`, with testable acceptance criteria like an issue.
-(This overrides the brief's issue/squash parts, including §4.2's feature/chore issue forms, §4.3 step 2 (squash
+(This overrides the brief's review steps (§5 step 6, §6: no reviewer subagent) and its issue/squash parts, including §4.2's feature/chore issue forms, §4.3 step 2 (squash
 only) and step 7 for new work, §5 steps 1–2 and 4–7 (tech-debt issues, `Closes #<n>`/issue labels for new work,
 issue-only acceptance criteria, squash), "bugs I report become issues", "GitHub issues are the source of truth"
 and §6's issue-only inputs. The brief file stays unchanged; process overrides live here, ADRs cover architecture
@@ -52,24 +52,19 @@ stop and report. Tests, build tooling, refactors and docs proceed without asking
 (This overrides brief §8's "keep working".)
 
 Pick the next unblocked item in the current milestone and claim it (assign / comment on a backlog issue, or a
-draft PR saying `Completes T-<n>` for a task-list item; check `gh pr list` first) (→ wait for OK if feature/UX) → branch `<type>/<n>-<slug>` (issue number or
-`t<n>` for a task-list item) → tests first → **about 4 meaningful Conventional Commits per PR** (e.g. code /
-tests / screenshots or resources / docs + task list; bundle small related items; never filler commits; every
-commit builds, check with `git rebase -x "./gradlew assembleDebug -q" origin/main`; each subject references
-`#<n>` or `T-<n>`) → `./gradlew spotlessApply ciCheck` → `gh pr create` (title `<type>(<scope>): <summary> (#<n>)`
-or `(T-<n>)`, template, labels + milestone) → review: `/code-review high --comment <pr>`, then the
-`android-reviewer` subagent (`size:S` docs/chore PRs: subagent only) → fix BLOCKER/MAJOR, reply to each finding
-with the commit SHA and subject (SHAs change when rebased) → re-review if a BLOCKER (max 2 rounds) →
-`gh pr update-branch <pr> --rebase` if `main` moved (then `git pull --rebase` locally before the next commit) →
-`gh pr checks <pr> --watch` → `gh pr merge <pr> --rebase --delete-branch` (rebase merge keeps each commit on
-`main`). Review-fix commits land as extra commits on top of the ~4; never rewrite history to fold them in
-(`update-branch --rebase` is the one allowed rewrite). If a rebase merge is refused, stop and ask; never squash
-instead. Size labels: `size:S` < 100 changed lines, `size:M` < 250, `size:L` ≤ ~400 (generated files excluded).
+draft PR saying `Completes T-<n>` for a task-list item; check `gh pr list` first) (→ wait for OK if feature/UX) →
+branch `<type>/<n>-<slug>` (issue number or `t<n>` for a task-list item) → tests first → **about 3–4 meaningful
+Conventional Commits per PR** (e.g. code / tests / screenshots or resources / docs + task list; bundle small
+related items; never filler commits; every commit builds; each subject references `#<n>` or `T-<n>`) →
+`./gradlew spotlessApply ciCheck` → `gh pr create` (title `<type>(<scope>): <summary> (#<n>)` or `(T-<n>)`, a
+short description from the template, labels + milestone) → `gh pr checks <pr> --watch` → merge.
+**No review step:** no `/code-review`, no reviewer subagent, no review rounds (user decision, 2026-11-21). The local
+gate and CI are the quality bar. Keep PR descriptions and comments short.
 End of milestone: tag `v0.<m>.0`, update the README roadmap, report to the user with device tests.
 
 ## Definition of done
 Acceptance criteria met with tests; `ciCheck` green; screenshots for UI (light/dark, phone/tablet);
-strings in English + Hindi; accessible (content descriptions, 48 dp, 200 % font); reviewed; merged.
+strings in English + Hindi; accessible (content descriptions, 48 dp, 200 % font); merged.
 
 ## Don'ts
 - No `INTERNET` permission, analytics, crash SDKs, accounts or backend. Never strip a dependency's
@@ -77,7 +72,8 @@ strings in English + Hindi; accessible (content descriptions, 48 dp, 200 % font)
 - No `QUERY_ALL_PACKAGES`, no polling, no always-on foreground service without an ADR.
 - Never get green by deleting/skipping tests, lowering thresholds, lint/detekt baselines or `@Suppress`.
 - No direct pushes to `main`, no force-pushes, never create or commit a keystore.
-- No new GitHub issues (use `docs/task-list.md`); no squash merges (rebase merge keeps the commits).
+- No new GitHub issues (use `docs/task-list.md`). Merge with **rebase** when the ruleset allows it (keeps each
+  commit on `main`); if only squash is allowed, ask the user before merging.
 - No `Co-Authored-By` trailers or "Generated with Claude Code" lines in commits or PRs.
 - Ask the user before: implementing any feature/UX work (plan first), merging strict-mode uninstall protection, any `policy-risk` trade-off, a
   dependency that adds INTERNET, release signing, or after 3 identical CI failures.
