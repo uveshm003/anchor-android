@@ -57,8 +57,9 @@ package + count + time unless you opt in to keeping titles.
 | M5 Strict mode, insights & surfaces | Strict guards, Weekly Activity, widget, tile, shortcuts, Hindi | `v0.5.0` | Planned |
 | M6 Hardening & release | Resilience, battery audit, baseline profile, Play readiness | `v1.0.0` | Planned |
 
-Progress is tracked in [issues](https://github.com/uveshm003/anchor-android/issues) and
-[milestones](https://github.com/uveshm003/anchor-android/milestones).
+Progress is tracked in the original [issues](https://github.com/uveshm003/anchor-android/issues) and
+[milestones](https://github.com/uveshm003/anchor-android/milestones), and new work in
+[`docs/task-list.md`](docs/task-list.md).
 
 ## Building
 
@@ -180,7 +181,7 @@ graph TD
 
 ## Contributing
 
-Every change goes through an issue and a reviewed pull request. See
+Every change goes through a reviewed pull request (backlog issue or task-list item). See
 [CONTRIBUTING.md](CONTRIBUTING.md). Security reports: [SECURITY.md](SECURITY.md).
 
 ## License
