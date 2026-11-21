@@ -58,7 +58,7 @@ tests / screenshots or resources / docs + task list; bundle small related items;
 commit builds; each subject references `#<n>` or `T-<n>`) → `./gradlew spotlessApply ciCheck` → `gh pr create` (title `<type>(<scope>): <summary> (#<n>)`
 or `(T-<n>)`, template, labels + milestone) → review: `/code-review high --comment <pr>`, then the
 `android-reviewer` subagent (`size:S` docs/chore PRs: subagent only) → fix BLOCKER/MAJOR, reply to each finding
-with the SHA → re-review if a BLOCKER (max 2 rounds) → `gh pr checks <pr> --watch` →
+with the SHA → re-review if a BLOCKER (max 2 rounds) →
 `gh pr update-branch <pr> --rebase` if `main` moved (then `git pull --rebase` locally before the next commit) →
 `gh pr checks <pr> --watch` → `gh pr merge <pr> --rebase --delete-branch` (rebase merge keeps each commit on
 `main`). Review-fix commits land as extra commits on top of the ~4; never rewrite history to fold them in. If a
