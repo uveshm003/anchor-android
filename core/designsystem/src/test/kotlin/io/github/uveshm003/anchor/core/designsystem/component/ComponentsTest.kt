@@ -1,21 +1,28 @@
 package io.github.uveshm003.anchor.core.designsystem.component
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertTouchHeightIsEqualTo
+import androidx.compose.ui.test.assertTouchWidthIsEqualTo
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.isHeading
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -32,7 +39,7 @@ class ComponentsTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    private fun show(content: @androidx.compose.runtime.Composable () -> Unit) =
+    private fun show(content: @Composable () -> Unit) =
         composeRule.setContent { AnchorTheme(dynamicColor = false, content = content) }
 
     @Test
@@ -47,6 +54,8 @@ class ComponentsTest {
             )
         }
 
+        // One TalkBack stop: the visual Switch must not be a second toggleable node.
+        composeRule.onAllNodes(isToggleable()).assertCountEquals(1)
         val row = composeRule.onNodeWithText("Hold notifications")
         row.assertIsOff()
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Switch))
@@ -55,17 +64,34 @@ class ComponentsTest {
 
         row.assertIsOn()
         assertEquals(true, checked)
-        assertEquals(
-            ToggleableState.On,
-            row.fetchSemanticsNode().config[SemanticsProperties.ToggleableState],
-        )
     }
 
     @Test
-    fun chevronRow_isAButtonThatClicks() {
-        var clicks = 0
-        show { AnchorListRow(title = "Anchors", trailing = ListRowTrailing.Chevron, onClick = { clicks++ }) }
+    fun disabledSwitchRow_cannotToggle() {
+        var checked by mutableStateOf(false)
+        show {
+            AnchorListRow(
+                title = "Places",
+                supportingText = "Needs location",
+                trailing = ListRowTrailing.Switch(checked) { checked = it },
+                enabled = false,
+            )
+        }
 
+        composeRule.onNodeWithText("Places")
+            .assertIsNotEnabled()
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Switch))
+            .performClick()
+
+        assertEquals(false, checked)
+    }
+
+    @Test
+    fun chevronRow_isOneButtonThatClicks() {
+        var clicks = 0
+        show { AnchorListRow(title = "Anchors", trailing = ListRowTrailing.Chevron { clicks++ }) }
+
+        composeRule.onAllNodes(hasClickAction()).assertCountEquals(1)
         composeRule.onNodeWithText("Anchors")
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
             .assertHeightIsAtLeast(48.dp)
@@ -75,17 +101,24 @@ class ComponentsTest {
     }
 
     @Test
-    fun disabledRow_ignoresClicks() {
+    fun clickableRow_actsInPlace_andStaticRowIsNotAControl() {
         var clicks = 0
-        show { AnchorListRow(title = "Places", enabled = false, onClick = { clicks++ }) }
-        composeRule.onNodeWithText("Places").assertIsNotEnabled().performClick()
-        assertEquals(0, clicks)
+        show {
+            Column {
+                AnchorListRow(title = "Re-pair anchor", trailing = ListRowTrailing.Clickable { clicks++ })
+                AnchorListRow(title = "Version 0.0.1")
+            }
+        }
+
+        composeRule.onAllNodes(hasClickAction()).assertCountEquals(1)
+        composeRule.onNodeWithText("Re-pair anchor").performClick()
+        assertEquals(1, clicks)
     }
 
     @Test
     fun sectionHeaderAndTopAppBarTitle_areHeadings() {
         show {
-            androidx.compose.foundation.layout.Column {
+            Column {
                 AnchorTopAppBar(title = "Modes")
                 SectionHeader("Quiet actions")
             }
@@ -95,20 +128,24 @@ class ComponentsTest {
     }
 
     @Test
-    fun emptyState_hasAHeadingAndAnAction() {
+    fun emptyState_hasAHeadingAndAnOptionalAction() {
         var actions = 0
         show {
-            EmptyState(
-                icon = AnchorIcons.Tune,
-                title = "No modes yet",
-                body = "Create one, or start from a template.",
-                actionText = "Create mode",
-                onAction = { actions++ },
-            )
+            Column {
+                EmptyState(
+                    icon = AnchorIcons.Tune,
+                    title = "No modes yet",
+                    body = "Create one, or start from a template.",
+                    action = EmptyStateAction("Create mode") { actions++ },
+                )
+                EmptyState(icon = AnchorIcons.Nfc, title = "No anchors", body = "Pair one from a sticker.")
+            }
         }
         composeRule.onNodeWithText("No modes yet").assert(isHeading())
         composeRule.onNodeWithText("Create mode").assertHeightIsAtLeast(48.dp).performClick()
         assertEquals(1, actions)
+        // The second empty state has no action, so there's exactly one button on screen.
+        composeRule.onAllNodes(hasClickAction()).assertCountEquals(1)
     }
 
     @Test
@@ -116,7 +153,7 @@ class ComponentsTest {
         var primary = 0
         var secondary = 0
         show {
-            androidx.compose.foundation.layout.Column {
+            Column {
                 AnchorButton("Save", onClick = { primary++ }, leadingIcon = AnchorIcons.Check)
                 AnchorOutlinedButton("Cancel", onClick = { secondary++ })
             }
@@ -128,8 +165,21 @@ class ComponentsTest {
     }
 
     @Test
+    fun iconButton_isLabelledAnd48dp() {
+        var clicks = 0
+        show { AnchorIconButton(AnchorIcons.ArrowBack, contentDescription = "Back", onClick = { clicks++ }) }
+        // M3 draws the icon button at 40 dp and extends its touch target to the 48 dp minimum.
+        composeRule.onNodeWithContentDescription("Back")
+            .assertTouchHeightIsEqualTo(48.dp)
+            .assertTouchWidthIsEqualTo(48.dp)
+            .performClick()
+        assertEquals(1, clicks)
+    }
+
+    @Test
     fun modeBadge_exposesItsContentDescription() {
         show { ModeBadge(icon = AnchorIcons.Work, color = Color(0xFF2E7D32), contentDescription = "Deep Work") }
         composeRule.onNodeWithContentDescription("Deep Work").assertIsDisplayed()
+        composeRule.onAllNodesWithText("Deep Work").assertCountEquals(0)
     }
 }

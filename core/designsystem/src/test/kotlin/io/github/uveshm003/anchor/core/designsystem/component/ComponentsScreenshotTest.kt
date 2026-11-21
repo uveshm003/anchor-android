@@ -42,14 +42,14 @@ class ComponentsScreenshotTest(variant: ScreenshotVariant) {
 
     @Test
     fun emptyState() = screenshot.capture("components_empty_state") { darkTheme ->
+        AnchorTheme(darkTheme = darkTheme, dynamicColor = false) { Surface { SampleEmptyState() } }
+    }
+
+    @Test
+    fun emptyStateAt200PercentFont() = screenshot.capture("components_empty_state_fontscale2") { darkTheme ->
         AnchorTheme(darkTheme = darkTheme, dynamicColor = false) {
-            Surface {
-                EmptyState(
-                    icon = AnchorIcons.Tune,
-                    title = "No modes yet",
-                    body = "Create a mode for each part of your day, or start from a template.",
-                    actionText = "Create mode",
-                )
+            CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale = 2f)) {
+                Surface { SampleEmptyState() }
             }
         }
     }
@@ -62,9 +62,23 @@ class ComponentsScreenshotTest(variant: ScreenshotVariant) {
 }
 
 @Composable
+private fun SampleEmptyState() {
+    EmptyState(
+        icon = AnchorIcons.Tune,
+        title = "No modes yet",
+        body = "Create a mode for each part of your day, or start from a template.",
+        action = EmptyStateAction("Create mode") {},
+    )
+}
+
+@Composable
 private fun Gallery() {
     Column(Modifier.fillMaxWidth()) {
-        AnchorTopAppBar(title = "Modes")
+        AnchorTopAppBar(
+            title = "Modes",
+            navigationIcon = { AnchorIconButton(AnchorIcons.ArrowBack, contentDescription = "Back", onClick = {}) },
+            actions = { AnchorIconButton(AnchorIcons.Search, contentDescription = "Search", onClick = {}) },
+        )
         SectionHeader("Rows")
         AnchorListRow(
             title = "Hold notifications",
@@ -72,12 +86,12 @@ private fun Gallery() {
             leadingIcon = AnchorIcons.NotificationsPaused,
             trailing = ListRowTrailing.Switch(checked = true) {},
         )
-        AnchorListRow(title = "Anchors", leadingIcon = AnchorIcons.Nfc, trailing = ListRowTrailing.Chevron, onClick = {
-        })
+        AnchorListRow(title = "Anchors", leadingIcon = AnchorIcons.Nfc, trailing = ListRowTrailing.Chevron {})
         AnchorListRow(
             title = "Places",
             supportingText = "Needs location",
             leadingIcon = AnchorIcons.LocationOn,
+            trailing = ListRowTrailing.Switch(checked = false) {},
             enabled = false,
         )
         SectionHeader("Buttons and badges")
