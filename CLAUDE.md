@@ -46,23 +46,25 @@ and platform decisions.)
 
 **Features and UX need the user's OK first:** for any user-facing feature, screen, behaviour change or
 product/UX decision (including a fix, perf change or ADR that changes what the user sees or can do), post the
-plan in chat, ask the user and wait for approval before writing code. Record the OK right away (a comment on
-the backlog issue, or `Approved: …` under the task-list item) and quote it in the PR description. While waiting, take the next item that doesn't need approval; if there is none,
+plan in chat, ask the user and wait for approval before writing code. Record the OK right away where it's
+visible: a comment on the backlog issue, or the `Plan approved:` line of the task's draft PR. While waiting, take the next item that doesn't need approval; if there is none,
 stop and report. Tests, build tooling, refactors and docs proceed without asking.
 (This overrides brief §8's "keep working".)
 
-Pick the next unblocked item in the current milestone and claim it (assign / comment on a backlog issue, or
-`In progress: <branch>` under a task-list item; neither creates an issue) (→ wait for OK if feature/UX) → branch `<type>/<n>-<slug>` (issue number or
+Pick the next unblocked item in the current milestone and claim it (assign / comment on a backlog issue, or a
+draft PR saying `Completes T-<n>` for a task-list item; check `gh pr list` first) (→ wait for OK if feature/UX) → branch `<type>/<n>-<slug>` (issue number or
 `t<n>` for a task-list item) → tests first → **about 4 meaningful Conventional Commits per PR** (e.g. code /
 tests / screenshots or resources / docs + task list; bundle small related items; never filler commits; every
-commit builds; each subject references `#<n>` or `T-<n>`) → `./gradlew spotlessApply ciCheck` → `gh pr create` (title `<type>(<scope>): <summary> (#<n>)`
+commit builds, check with `git rebase -x "./gradlew assembleDebug -q" origin/main`; each subject references
+`#<n>` or `T-<n>`) → `./gradlew spotlessApply ciCheck` → `gh pr create` (title `<type>(<scope>): <summary> (#<n>)`
 or `(T-<n>)`, template, labels + milestone) → review: `/code-review high --comment <pr>`, then the
 `android-reviewer` subagent (`size:S` docs/chore PRs: subagent only) → fix BLOCKER/MAJOR, reply to each finding
-with the SHA → re-review if a BLOCKER (max 2 rounds) →
+with the commit SHA and subject (SHAs change when rebased) → re-review if a BLOCKER (max 2 rounds) →
 `gh pr update-branch <pr> --rebase` if `main` moved (then `git pull --rebase` locally before the next commit) →
 `gh pr checks <pr> --watch` → `gh pr merge <pr> --rebase --delete-branch` (rebase merge keeps each commit on
-`main`). Review-fix commits land as extra commits on top of the ~4; never rewrite history to fold them in. If a
-rebase merge is refused, stop and ask; never squash instead.
+`main`). Review-fix commits land as extra commits on top of the ~4; never rewrite history to fold them in
+(`update-branch --rebase` is the one allowed rewrite). If a rebase merge is refused, stop and ask; never squash
+instead. Size labels: `size:S` < 100 changed lines, `size:M` < 250, `size:L` ≤ ~400 (generated files excluded).
 End of milestone: tag `v0.<m>.0`, update the README roadmap, report to the user with device tests.
 
 ## Definition of done

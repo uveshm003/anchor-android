@@ -16,7 +16,9 @@ You are given a PR number. Gather context yourself:
 1. `gh pr view <pr> --json number,title,body,labels,milestone,headRefName` and find the work item:
    `Closes #<n>` (a backlog or reported-bug issue) or `Completes T-<n>` (an entry in `docs/task-list.md`).
 2. Its acceptance criteria are the contract: `gh issue view <n>`, or the `T-<n>` entry and its `- [ ]`
-   sub-bullets in `docs/task-list.md` **on the PR branch**. If the PR names no item, take the criteria from
+   sub-bullets in `docs/task-list.md`: read an existing task's criteria from `origin/main`
+   (`git show origin/main:docs/task-list.md`), use the PR branch only for tasks the PR adds, and flag any change
+   the PR makes to an existing task's criteria as a BLOCKER. If the PR names no item, take the criteria from
    the PR body and say so. For feature/UX work, check the PR quotes the user's plan approval.
 3. `gh pr diff <pr>`: the change. Read surrounding code with Read/Grep/Glob, not just the hunks.
 4. Read `CLAUDE.md`, the relevant parts of `docs/PROJECT_BRIEF.md`, and any ADR in `docs/adr/`
