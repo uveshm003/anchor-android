@@ -12,8 +12,8 @@ Thanks for helping. Every change, including the maintainer's, goes through the s
 ## The loop
 
 1. **Pick** the next item in the current milestone whose dependencies are done (a backlog issue, a
-   reported bug or a task-list item) and claim it: comment on the issue that you're taking it, or add
-   `In progress: <branch>` under the task. For
+   reported bug or a task-list item) and claim it: comment on the issue that you're taking it, or open a
+   draft PR whose body says `Completes T-<n>`. For
    anything user-facing (feature, screen, behaviour or UX change), share a 3–5 line plan and get the
    maintainer's OK before writing code.
 2. **Branch** from `main`: `<type>/<n>-<slug>`, where type is `feat|fix|chore|docs|test|perf|refactor`
@@ -21,7 +21,8 @@ Thanks for helping. Every change, including the maintainer's, goes through the s
 3. **Build it** in about **4 meaningful commits** per PR, e.g. code, tests, screenshots or resources,
    docs and the task list. Write tests first for pure logic (engine, repositories, ViewModels). Use
    [Conventional Commits](https://www.conventionalcommits.org/) that reference the item:
-   `feat(engine): end session on anchor tap (#12)`. Every commit must build; no filler commits.
+   `feat(home): hold-to-start on the home screen (#24)`, or `(T-3)` for a task-list item. Check that each
+   commit builds: `git rebase -x "./gradlew assembleDebug -q" origin/main`. Every commit must build; no filler commits.
 4. **Local gate.** `./gradlew spotlessApply ciCheck` must pass before you push.
 5. **Open a PR** titled `<type>(<scope>): <summary> (#<n>)` (or `(T-<n>)`), fill in the template, and
    use the issue's labels and milestone (for a task-list item: type/area/size labels and the milestone of
@@ -36,6 +37,7 @@ Thanks for helping. Every change, including the maintainer's, goes through the s
    task-list item in the same PR.
 
 Each PR should stay around 400 changed lines or fewer (generated files excluded). If it grows, split it.
+Size labels: `size:S` < 100 changed lines, `size:M` < 250, `size:L` ≤ ~400.
 
 ## Never get green by…
 

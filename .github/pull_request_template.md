@@ -1,8 +1,9 @@
-Closes #<!-- backlog issue number --> <!-- or: Completes T-<n> from docs/task-list.md -->
+<!-- Keep one: -->
+Closes #<issue>
+Completes T-<n>
 
-<!-- Feature/UX work: quote the user's approval of the plan here. -->
+<!-- Feature/UX work only (otherwise delete): quote the user's approval of the plan. -->
 Plan approved: 
-
 ## What & why
 
 <!-- What changed and why. Link ADRs if a decision was made. -->
