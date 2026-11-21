@@ -35,9 +35,12 @@ Android app (Kotlin + Jetpack Compose, minSdk 31, target 37). Tap the phone on a
 - Verify platform APIs on developer.android.com before use; record decisions as ADRs.
 
 ## The loop (brief §5)
-**Features and UX need the maintainer's OK first:** for any user-facing feature, screen, behaviour change or
-product/UX decision, post the plan on the issue, ask the maintainer and wait for approval before writing code.
-Tests, build tooling, refactors and docs proceed without asking. (This overrides brief §8's "keep working".)
+**Features and UX need the user's OK first:** for any user-facing feature, screen, behaviour change or
+product/UX decision (including a fix, perf change or ADR that changes what the user sees or can do), post the
+plan on the issue, ask the user and wait for approval before writing code. Record the OK on the issue (quote it
+there if it came in chat) so later sessions can see it. While waiting, take the next issue that doesn't need
+approval; if there is none, stop and report. Tests, build tooling, refactors and docs proceed without asking.
+(This overrides brief §8's "keep working".)
 
 Pick issue → assign + comment plan (→ wait for OK if feature/UX) → `gh issue develop <n> --checkout --name <type>/<n>-<slug>` →
 tests first, small Conventional Commits referencing `#<n>` → `./gradlew spotlessApply ciCheck` →
