@@ -1,4 +1,7 @@
-Closes #
+Closes #<!-- backlog issue number --> <!-- or: Completes T-<n> from docs/task-list.md -->
+
+<!-- Feature/UX work: quote the user's approval of the plan here. -->
+Plan approved: 
 
 ## What & why
 
@@ -23,6 +26,7 @@ Closes #
 ## Checklist
 
 - [ ] `./gradlew spotlessApply ciCheck` passes locally
+- [ ] About 4 meaningful commits; `docs/task-list.md` updated if this completes or adds tasks
 - [ ] Tests cover the acceptance criteria (no tests skipped, no thresholds lowered, no baselines or `@Suppress`)
 - [ ] User-facing strings are in resources, in English and Hindi
 - [ ] Screenshot tests added/updated for UI changes (light/dark, phone/tablet)
