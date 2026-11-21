@@ -35,7 +35,11 @@ Android app (Kotlin + Jetpack Compose, minSdk 31, target 37). Tap the phone on a
 - Verify platform APIs on developer.android.com before use; record decisions as ADRs.
 
 ## The loop (brief §5)
-Pick issue → assign + comment plan → `gh issue develop <n> --checkout --name <type>/<n>-<slug>` →
+**Features and UX need the maintainer's OK first:** for any user-facing feature, screen, behaviour change or
+product/UX decision, post the plan on the issue, ask the maintainer and wait for approval before writing code.
+Tests, build tooling, refactors and docs proceed without asking. (This overrides brief §8's "keep working".)
+
+Pick issue → assign + comment plan (→ wait for OK if feature/UX) → `gh issue develop <n> --checkout --name <type>/<n>-<slug>` →
 tests first, small Conventional Commits referencing `#<n>` → `./gradlew spotlessApply ciCheck` →
 `gh pr create` (title `<type>(<scope>): <summary> (#<n>)`, template, same labels + milestone) →
 review: `/code-review high --comment <pr>`, then the `android-reviewer` subagent (size:S docs/chore:
@@ -54,5 +58,5 @@ strings in English + Hindi; accessible (content descriptions, 48 dp, 200 % font)
 - Never get green by deleting/skipping tests, lowering thresholds, lint/detekt baselines or `@Suppress`.
 - No direct pushes to `main`, no force-pushes, never create or commit a keystore.
 - No `Co-Authored-By` trailers or "Generated with Claude Code" lines in commits or PRs.
-- Ask the user before: merging strict-mode uninstall protection, any `policy-risk` trade-off, a
+- Ask the user before: implementing any feature/UX work (plan first), merging strict-mode uninstall protection, any `policy-risk` trade-off, a
   dependency that adds INTERNET, release signing, or after 3 identical CI failures.

@@ -24,6 +24,9 @@ have to walk back and tap the anchor again. Flexible to start, strict to stop.
 - **Start however you like**: press and hold in the app, tap an anchor, Quick Settings tile,
   widget, app shortcut, or automatically on a schedule, at a place, while driving, when a Bluetooth
   device connects, or when you walk into a BLE "Space" such as your bedroom.
+- **At your desk or PC, with nothing installed on it**: when the phone is Bluetooth-connected to your
+  computer (Windows, macOS, Linux), near a tiny Bluetooth beacon on your desk, connected to a chosen
+  Wi-Fi network or access point, or plugged into the computer by USB.
 - **Stop deliberately**: by tapping your anchor, when a timer ends, or when the trigger that started
   the mode ends (you leave the place, the car disconnects).
 - **Quiet actions**: Do Not Disturb, ringer mode, hold notifications from blocked apps until the
