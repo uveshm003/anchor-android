@@ -1,6 +1,7 @@
 # Contributing to Anchor
 
-Thanks for helping. Every change, including the maintainer's, goes through the same loop.
+Thanks for helping. Every change, including the maintainer's, goes through the same short loop: there is no
+separate review step; `./gradlew ciCheck` locally and CI on the PR are the quality bar.
 
 ## Where work comes from
 
@@ -27,11 +28,7 @@ Thanks for helping. Every change, including the maintainer's, goes through the s
 5. **Open a PR** titled `<type>(<scope>): <summary> (#<n>)` (or `(T-<n>)`), fill in the template, and
    use the issue's labels and milestone (for a task-list item: type/area/size labels and the milestone of
    its section).
-6. **Review.** Every PR is reviewed against the item's acceptance criteria and the checklist in
-   [`.claude/agents/android-reviewer.md`](.claude/agents/android-reviewer.md). Findings are tagged
-   BLOCKER / MAJOR / NIT. BLOCKERs and MAJORs are fixed in new commits; each finding gets a reply with
-   the fixing commit or a reasoned rejection. NITs are fixed or added to `docs/task-list.md`.
-7. **Merge** with **rebase merge** once `ci` is green, so each commit lands on `main` (update the branch
+6. **Merge** with **rebase merge** once `ci` is green, so each commit lands on `main` (update the branch
    with a rebase first if `main` moved and wait for `ci` again; never squash). Review fixes are extra
    commits on top of the ~4; don't rewrite history to fold them in. A backlog issue closes automatically; tick the
    task-list item in the same PR.
