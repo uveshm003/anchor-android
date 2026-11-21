@@ -1,29 +1,35 @@
 # Contributing to Anchor
 
-Thanks for helping. Anchor is built issue by issue, and every change, including the maintainer's,
-goes through the same loop.
+Thanks for helping. Every change, including the maintainer's, goes through the same loop.
+
+## Where work comes from
+
+- The original backlog: [GitHub issues](https://github.com/uveshm003/anchor-android/issues) in milestones
+  M0–M6. These are completed and closed by PRs, but **no new issues are created**.
+- Everything new (features, follow-ups, tech debt): [`docs/task-list.md`](docs/task-list.md).
 
 ## The loop
 
-1. **Pick an issue.** Open, in the current milestone, with all "Blocked by #x" issues closed. Comment
-   that you're taking it, with a 3–5 line plan.
-2. **Branch** from `main`: `<type>/<issue>-<slug>`, where type is
-   `feat|fix|chore|docs|test|perf|refactor` (for example `feat/12-hold-to-start`).
-   `gh issue develop <n> --checkout --name <branch>` links the branch to the issue.
-3. **Build it.** Write tests first for pure logic (engine transitions, repositories, ViewModels).
-   Make small [Conventional Commits](https://www.conventionalcommits.org/) that reference the issue:
-   `feat(engine): end session on anchor tap (#12)`.
+1. **Pick** the next item whose dependencies are done (a backlog issue or a task-list item). For
+   anything user-facing (feature, screen, behaviour or UX change), share a 3–5 line plan and get the
+   maintainer's OK before writing code.
+2. **Branch** from `main`: `<type>/<n>-<slug>`, where type is `feat|fix|chore|docs|test|perf|refactor`
+   and `<n>` is the issue number or `t<n>` for a task-list item (for example `feat/24-hold-to-start`).
+3. **Build it** in about **4 meaningful commits** per PR, e.g. code, tests, screenshots or resources,
+   docs and the task list. Write tests first for pure logic (engine, repositories, ViewModels). Use
+   [Conventional Commits](https://www.conventionalcommits.org/) that reference the item:
+   `feat(engine): end session on anchor tap (#12)`. Every commit must build; no filler commits.
 4. **Local gate.** `./gradlew spotlessApply ciCheck` must pass before you push.
-5. **Open a PR** titled `<type>(<scope>): <summary> (#<n>)`, fill in the template (it starts with
-   `Closes #<n>`), and copy the issue's labels and milestone.
-6. **Review.** Every PR is reviewed against the issue's acceptance criteria and the checklist in
+5. **Open a PR** titled `<type>(<scope>): <summary> (#<n>)` (or `(T-<n>)`), fill in the template, and
+   copy the issue's labels and milestone.
+6. **Review.** Every PR is reviewed against the item's acceptance criteria and the checklist in
    [`.claude/agents/android-reviewer.md`](.claude/agents/android-reviewer.md). Findings are tagged
    BLOCKER / MAJOR / NIT. BLOCKERs and MAJORs are fixed in new commits; each finding gets a reply with
-   the fixing commit or a reasoned rejection. NITs are fixed or turned into `tech-debt` issues.
-7. **Merge** with squash once `ci` is green. The issue closes automatically.
+   the fixing commit or a reasoned rejection. NITs are fixed or added to `docs/task-list.md`.
+7. **Merge** with **rebase merge** once `ci` is green, so each commit lands on `main`. A backlog issue
+   closes automatically; tick the task-list item in the same PR.
 
-Each issue should fit in one PR of roughly 400 changed lines or fewer (generated files excluded).
-If it grows, split it.
+Each PR should stay around 400 changed lines or fewer (generated files excluded). If it grows, split it.
 
 ## Never get green by…
 
@@ -31,7 +37,7 @@ If it grows, split it.
 - lowering coverage thresholds,
 - adding lint or detekt baselines or `@Suppress`.
 
-Fix the cause. If you truly can't, explain why in the PR and open a `tech-debt` issue.
+Fix the cause. If you truly can't, explain why in the PR and add it to `docs/task-list.md`.
 
 ## Standards
 
