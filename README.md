@@ -24,6 +24,10 @@ have to walk back and tap the anchor again. Flexible to start, strict to stop.
 - **Start however you like**: press and hold in the app, tap an anchor, Quick Settings tile,
   widget, app shortcut, or automatically on a schedule, at a place, while driving, when a Bluetooth
   device connects, or when you walk into a BLE "Space" such as your bedroom.
+- **At your desk or PC, with nothing installed on it**: when the phone is Bluetooth-connected to your
+  computer (Windows keeps a link through Phone Link; on macOS and Linux it works while a Bluetooth
+  connection is open), near a tiny Bluetooth beacon on your desk, connected to a chosen Wi-Fi network or
+  access point, or plugged into the computer by USB.
 - **Stop deliberately**: by tapping your anchor, when a timer ends, or when the trigger that started
   the mode ends (you leave the place, the car disconnects).
 - **Quiet actions**: Do Not Disturb, ringer mode, hold notifications from blocked apps until the
@@ -48,7 +52,7 @@ package + count + time unless you opt in to keeping titles.
 | M0 Foundation | Design system, app shell, test infrastructure, architecture docs | – | In progress |
 | M1 Modes & blocking core | Modes, engine v1, blocker service, hold-to-start, emergency unlock, onboarding | `v0.1.0` | Planned |
 | M2 Anchors | NFC + QR anchors, tap to start/stop, lost-anchor recovery | `v0.2.0` | Planned |
-| M3 Automatic modes | Schedule, driving, Bluetooth, Spaces, places, conflict resolution | `v0.3.0` | Planned |
+| M3 Automatic modes | Schedule, driving, Bluetooth, Spaces, places, Wi-Fi, USB, conflict resolution | `v0.3.0` | Planned |
 | M4 Quiet actions | DND, ringer, notification holding, driving auto-reply | `v0.4.0` | Planned |
 | M5 Strict mode, insights & surfaces | Strict guards, Weekly Activity, widget, tile, shortcuts, Hindi | `v0.5.0` | Planned |
 | M6 Hardening & release | Resilience, battery audit, baseline profile, Play readiness | `v1.0.0` | Planned |
