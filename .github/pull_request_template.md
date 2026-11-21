@@ -26,7 +26,7 @@ Plan approved:
 ## Checklist
 
 - [ ] `./gradlew spotlessApply ciCheck` passes locally
-- [ ] About 4 meaningful commits; `docs/task-list.md` updated if this completes or adds tasks
+- [ ] About 4 meaningful commits (fewer is fine for a small change; no filler; each builds and references `#<n>`/`T-<n>`); `docs/task-list.md` updated if this completes or adds tasks
 - [ ] Tests cover the acceptance criteria (no tests skipped, no thresholds lowered, no baselines or `@Suppress`)
 - [ ] User-facing strings are in resources, in English and Hindi
 - [ ] Screenshot tests added/updated for UI changes (light/dark, phone/tablet)
