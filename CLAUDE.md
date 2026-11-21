@@ -7,8 +7,8 @@ Android app (Kotlin + Jetpack Compose, minSdk 31, target 37). Tap the phone on a
 
 ## Start / resume a session
 1. Read this file and `docs/PROJECT_BRIEF.md`.
-2. `gh pr list --state open` and `gh issue list --milestone "<current>" --state open`.
-3. Finish open PRs first, then continue the loop. GitHub issues track progress.
+2. `gh pr list --state open`, `gh issue list --milestone "<current>" --state open` and `docs/task-list.md`.
+3. Finish open PRs first, then continue the loop. Work items are the existing GitHub issues plus the task list.
 
 ## Commands
 - `./gradlew spotlessApply ciCheck`: local gate, identical to CI (format, detekt, lint, tests, screenshots, Kover, no-INTERNET check)
@@ -34,20 +34,25 @@ Android app (Kotlin + Jetpack Compose, minSdk 31, target 37). Tap the phone on a
 - Features never depend on each other. Build config lives in `build-logic/` convention plugins.
 - Verify platform APIs on developer.android.com before use; record decisions as ADRs.
 
-## The loop (brief §5)
+## The loop
+**Work items:** the existing GitHub issues (backlog M0–M6) and `docs/task-list.md`. **Never create new GitHub
+issues**: new work, review follow-ups and tech debt go into `docs/task-list.md`.
+
 **Features and UX need the user's OK first:** for any user-facing feature, screen, behaviour change or
 product/UX decision (including a fix, perf change or ADR that changes what the user sees or can do), post the
-plan on the issue, ask the user and wait for approval before writing code. Record the OK on the issue (quote it
-there if it came in chat) so later sessions can see it. While waiting, take the next issue that doesn't need
-approval; if there is none, stop and report. Tests, build tooling, refactors and docs proceed without asking.
+plan in chat, ask the user and wait for approval before writing code. Record the OK in the PR description so
+later sessions can see it. While waiting, take the next item that doesn't need approval; if there is none,
+stop and report. Tests, build tooling, refactors and docs proceed without asking.
 (This overrides brief §8's "keep working".)
 
-Pick issue → assign + comment plan (→ wait for OK if feature/UX) → `gh issue develop <n> --checkout --name <type>/<n>-<slug>` →
-tests first, small Conventional Commits referencing `#<n>` → `./gradlew spotlessApply ciCheck` →
-`gh pr create` (title `<type>(<scope>): <summary> (#<n>)`, template, same labels + milestone) →
-review: `/code-review high --comment <pr>`, then the `android-reviewer` subagent (size:S docs/chore:
-subagent only) → fix BLOCKER/MAJOR, reply to each finding with the SHA → re-review if a BLOCKER
-(max 2 rounds) → `gh pr checks <pr> --watch` → `gh pr merge <pr> --squash --delete-branch`.
+Pick the next unblocked item (→ wait for OK if feature/UX) → branch `<type>/<n>-<slug>` (issue number or
+`t<n>` for a task-list item) → tests first → **about 4 meaningful Conventional Commits per PR** (e.g. code /
+tests / screenshots or resources / docs + task list; bundle small related items; never filler commits; every
+commit builds) → `./gradlew spotlessApply ciCheck` → `gh pr create` (title `<type>(<scope>): <summary> (#<n>)`
+or `(T-<n>)`, template, labels + milestone) → review: `/code-review high --comment <pr>`, then the
+`android-reviewer` subagent (small docs/chore PRs: subagent only) → fix BLOCKER/MAJOR, reply to each finding
+with the SHA → re-review if a BLOCKER (max 2 rounds) → `gh pr checks <pr> --watch` →
+`gh pr merge <pr> --rebase --delete-branch` (rebase merge keeps each commit on `main`).
 End of milestone: tag `v0.<m>.0`, update the README roadmap, report to the user with device tests.
 
 ## Definition of done
@@ -60,6 +65,7 @@ strings in English + Hindi; accessible (content descriptions, 48 dp, 200 % font)
 - No `QUERY_ALL_PACKAGES`, no polling, no always-on foreground service without an ADR.
 - Never get green by deleting/skipping tests, lowering thresholds, lint/detekt baselines or `@Suppress`.
 - No direct pushes to `main`, no force-pushes, never create or commit a keystore.
+- No new GitHub issues (use `docs/task-list.md`); no squash merges (rebase merge keeps the commits).
 - No `Co-Authored-By` trailers or "Generated with Claude Code" lines in commits or PRs.
 - Ask the user before: implementing any feature/UX work (plan first), merging strict-mode uninstall protection, any `policy-risk` trade-off, a
   dependency that adds INTERNET, release signing, or after 3 identical CI failures.
