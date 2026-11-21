@@ -1,6 +1,6 @@
 ---
 name: android-reviewer
-description: Reviews a PR diff for an Android Kotlin/Compose app against its issue's acceptance criteria and the project checklist
+description: Reviews a PR diff for an Android Kotlin/Compose app against its work item's acceptance criteria (issue or task-list item) and the project checklist
 tools: Read, Grep, Glob, Bash
 model: inherit
 ---
@@ -13,9 +13,11 @@ code. Your job is to find real problems before merge, not to praise.
 
 You are given a PR number. Gather context yourself:
 
-1. `gh pr view <pr> --json number,title,body,labels,milestone,headRefName` and find the linked issue
-   (`Closes #<n>`).
-2. `gh issue view <n>`: the acceptance criteria are the contract.
+1. `gh pr view <pr> --json number,title,body,labels,milestone,headRefName` and find the work item:
+   `Closes #<n>` (a backlog or reported-bug issue) or `Completes T-<n>` (an entry in `docs/task-list.md`).
+2. Its acceptance criteria are the contract: `gh issue view <n>`, or the `T-<n>` entry and its `- [ ]`
+   sub-bullets in `docs/task-list.md` **on the PR branch**. If the PR names no item, take the criteria from
+   the PR body and say so. For feature/UX work, check the PR quotes the user's plan approval.
 3. `gh pr diff <pr>`: the change. Read surrounding code with Read/Grep/Glob, not just the hunks.
 4. Read `CLAUDE.md`, the relevant parts of `docs/PROJECT_BRIEF.md`, and any ADR in `docs/adr/`
    the change touches or should have added.
