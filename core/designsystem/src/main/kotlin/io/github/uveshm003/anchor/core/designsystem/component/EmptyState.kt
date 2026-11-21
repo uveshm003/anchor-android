@@ -23,7 +23,8 @@ import androidx.compose.ui.unit.dp
 /**
  * Shown in place of an empty list: a decorative icon, a heading, an explanation and an optional [action].
  * Scrolls by itself when the window is short (e.g. landscape at 200 % font), so put it *instead of* the list,
- * not inside another vertically scrolling container.
+ * not inside another vertically scrolling container: measuring it with infinite height (a `LazyColumn` item
+ * without `fillParentMaxSize()`, or inside `Column(Modifier.verticalScroll(…))`) throws at runtime.
  */
 @Composable
 fun EmptyState(

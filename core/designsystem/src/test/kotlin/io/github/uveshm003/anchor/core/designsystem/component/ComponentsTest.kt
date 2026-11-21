@@ -1,10 +1,13 @@
 package io.github.uveshm003.anchor.core.designsystem.component
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -26,6 +29,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.uveshm003.anchor.core.designsystem.theme.AnchorTheme
@@ -146,6 +150,21 @@ class ComponentsTest {
         assertEquals(1, actions)
         // The second empty state has no action, so there's exactly one button on screen.
         composeRule.onAllNodes(hasClickAction()).assertCountEquals(1)
+    }
+
+    @Test
+    fun emptyState_scrollsToItsActionOnAShortWindow() {
+        show {
+            Box(Modifier.height(160.dp)) {
+                EmptyState(
+                    icon = AnchorIcons.Tune,
+                    title = "No modes yet",
+                    body = "Create a mode for each part of your day, or start from a template.",
+                    action = EmptyStateAction("Create mode") {},
+                )
+            }
+        }
+        composeRule.onNodeWithText("Create mode").performScrollTo().assertIsDisplayed()
     }
 
     @Test

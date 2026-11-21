@@ -105,6 +105,8 @@ private fun Gallery() {
             ModeBadge(AnchorIcons.Bedtime, Color(0xFF3949AB), contentDescription = "Sleep")
             ModeBadge(AnchorIcons.DirectionsCar, Color(0xFFE53935), contentDescription = "Driving")
             ModeBadge(AnchorIcons.FamilyRestroom, Color(0xFF43A047), contentDescription = "Family Time")
+            // Translucent colour: judged as drawn over the surface (black icon on light, white on dark).
+            ModeBadge(AnchorIcons.Anchor, Color(0xFF00668B).copy(alpha = 0.3f), contentDescription = "Custom")
         }
     }
 }

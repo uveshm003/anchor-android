@@ -8,7 +8,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -44,26 +43,12 @@ fun AnchorListRow(
             .then(trailing.interaction(enabled))
             .semantics { if (!enabled) disabled() },
         supportingContent = supportingText?.let { { Text(it) } },
-        leadingContent = leadingIcon?.let {
-            {
-                Icon(
-                    painterResource(it),
-                    contentDescription = null,
-                    tint = if (enabled) LocalContentColor.current else dimmed,
-                )
-            }
-        },
+        leadingContent = leadingIcon?.let { { Icon(painterResource(it), contentDescription = null) } },
         trailingContent = when (trailing) {
             ListRowTrailing.None, is ListRowTrailing.Clickable -> null
 
             is ListRowTrailing.Chevron -> {
-                {
-                    Icon(
-                        painterResource(AnchorIcons.ChevronRight),
-                        contentDescription = null,
-                        tint = if (enabled) LocalContentColor.current else dimmed,
-                    )
-                }
+                { Icon(painterResource(AnchorIcons.ChevronRight), contentDescription = null) }
             }
 
             is ListRowTrailing.Switch -> {
