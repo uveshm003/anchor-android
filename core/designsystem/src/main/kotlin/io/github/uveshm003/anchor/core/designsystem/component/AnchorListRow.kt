@@ -6,12 +6,15 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.disabled
@@ -19,8 +22,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
 /**
- * Settings-style row: leading icon, title, optional supporting text and a trailing chevron or switch. The whole
- * row is the touch target (≥ 56 dp) and is announced as a single control.
+ * Settings-style row: leading icon, title, optional supporting text and a [trailing] behaviour. Interactive rows
+ * are one touch target (≥ 56 dp) and one TalkBack stop. When disabled, the title, icon and switch dim, but the
+ * supporting text stays readable because it usually explains why the row is off (e.g. "Needs location").
  */
 @Composable
 fun AnchorListRow(
@@ -30,46 +34,36 @@ fun AnchorListRow(
     @DrawableRes leadingIcon: Int? = null,
     trailing: ListRowTrailing = ListRowTrailing.None,
     enabled: Boolean = true,
-    onClick: (() -> Unit)? = null,
 ) {
-    val interaction = when {
-        trailing is ListRowTrailing.Switch ->
-            Modifier.toggleable(
-                value = trailing.checked,
-                enabled = enabled,
-                role = Role.Switch,
-                onValueChange = trailing.onCheckedChange,
-            )
-
-        onClick != null -> Modifier.clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-
-        else -> Modifier
-    }
     val colors = MaterialTheme.colorScheme
-    val disabled = colors.onSurface.copy(alpha = DISABLED_ALPHA)
+    val dimmed = colors.onSurface.copy(alpha = DISABLED_ALPHA)
     ListItem(
         headlineContent = { Text(title) },
         modifier = modifier
             .heightIn(min = 56.dp)
-            .then(interaction)
+            .then(trailing.interaction(enabled))
             .semantics { if (!enabled) disabled() },
-        colors = if (enabled) {
-            ListItemDefaults.colors()
-        } else {
-            ListItemDefaults.colors(
-                headlineColor = disabled,
-                supportingColor = disabled,
-                leadingIconColor = disabled,
-                trailingIconColor = disabled,
-            )
-        },
         supportingContent = supportingText?.let { { Text(it) } },
-        leadingContent = leadingIcon?.let { { Icon(painterResource(it), contentDescription = null) } },
+        leadingContent = leadingIcon?.let {
+            {
+                Icon(
+                    painterResource(it),
+                    contentDescription = null,
+                    tint = if (enabled) LocalContentColor.current else dimmed,
+                )
+            }
+        },
         trailingContent = when (trailing) {
-            ListRowTrailing.None -> null
+            ListRowTrailing.None, is ListRowTrailing.Clickable -> null
 
-            ListRowTrailing.Chevron -> {
-                { Icon(painterResource(AnchorIcons.ChevronRight), contentDescription = null) }
+            is ListRowTrailing.Chevron -> {
+                {
+                    Icon(
+                        painterResource(AnchorIcons.ChevronRight),
+                        contentDescription = null,
+                        tint = if (enabled) LocalContentColor.current else dimmed,
+                    )
+                }
             }
 
             is ListRowTrailing.Switch -> {
@@ -77,6 +71,32 @@ fun AnchorListRow(
                 { Switch(checked = trailing.checked, onCheckedChange = null, enabled = enabled) }
             }
         },
+        colors = rowColors(enabled, dimmed),
+    )
+}
+
+/** The row-level touch behaviour for each trailing type: one control, one TalkBack stop. */
+private fun ListRowTrailing.interaction(enabled: Boolean): Modifier = when (this) {
+    ListRowTrailing.None -> Modifier
+
+    is ListRowTrailing.Clickable -> Modifier.clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+
+    is ListRowTrailing.Chevron -> Modifier.clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+
+    is ListRowTrailing.Switch ->
+        Modifier.toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onCheckedChange)
+}
+
+/** Disabled rows dim the title and icons but keep the supporting text (the "why") readable. */
+@Composable
+private fun rowColors(enabled: Boolean, dimmed: Color): ListItemColors = if (enabled) {
+    ListItemDefaults.colors()
+} else {
+    ListItemDefaults.colors(
+        headlineColor = dimmed,
+        supportingColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        leadingIconColor = dimmed,
+        trailingIconColor = dimmed,
     )
 }
 

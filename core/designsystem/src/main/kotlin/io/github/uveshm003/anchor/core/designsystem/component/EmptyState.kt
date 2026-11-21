@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,19 +20,23 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
-/** Shown when a list has nothing yet: a decorative icon, a heading, an explanation and an optional action. */
+/**
+ * Shown in place of an empty list: a decorative icon, a heading, an explanation and an optional [action].
+ * Scrolls by itself when the window is short (e.g. landscape at 200 % font), so put it *instead of* the list,
+ * not inside another vertically scrolling container.
+ */
 @Composable
 fun EmptyState(
     @DrawableRes icon: Int,
     title: String,
     body: String,
     modifier: Modifier = Modifier,
-    actionText: String? = null,
-    onAction: () -> Unit = {},
+    action: EmptyStateAction? = null,
 ) {
     Column(
         modifier = modifier
             .widthIn(max = 480.dp)
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -53,6 +59,6 @@ fun EmptyState(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        if (actionText != null) AnchorButton(text = actionText, onClick = onAction)
+        if (action != null) AnchorButton(text = action.label, onClick = action.onClick)
     }
 }

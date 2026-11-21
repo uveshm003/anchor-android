@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -27,7 +29,9 @@ fun ModeBadge(
     modifier: Modifier = Modifier,
     size: Dp = 40.dp,
 ) {
-    val iconColor = if (color.luminance() > LIGHT_BACKGROUND_LUMINANCE) Color.Black else Color.White
+    // A translucent badge shows the surface through it: judge the colour as it is drawn.
+    val drawn = color.compositeOver(MaterialTheme.colorScheme.surface)
+    val iconColor = if (drawn.luminance() > LIGHT_BACKGROUND_LUMINANCE) Color.Black else Color.White
     Box(
         modifier = modifier
             .size(size)
@@ -43,6 +47,7 @@ fun ModeBadge(
     }
 }
 
-// Above this luminance black text/icons contrast better than white (≈ the 4.5:1 crossover).
+// Luminance where black and white give equal contrast (≈ 4.58:1 each): above it black wins, below it white,
+// so the icon always gets at least 4.58:1 against an opaque fill.
 private const val LIGHT_BACKGROUND_LUMINANCE = 0.179f
 private const val ICON_FRACTION = 0.55f
