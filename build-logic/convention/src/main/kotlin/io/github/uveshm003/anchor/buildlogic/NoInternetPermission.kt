@@ -22,7 +22,7 @@ private val FORBIDDEN_PERMISSIONS = setOf("android.permission.INTERNET")
 /**
  * Anchor is on-device only: the merged *release* manifest must never request INTERNET.
  * If a dependency adds it, the build fails. Do not strip it with `tools:node="remove"`;
- * raise it on the issue instead (docs/PROJECT_BRIEF.md §3).
+ * raise it in the PR and ask the user instead (docs/PROJECT_BRIEF.md §3).
  */
 @CacheableTask
 abstract class CheckNoInternetPermissionTask : DefaultTask() {
@@ -48,7 +48,7 @@ abstract class CheckNoInternetPermissionTask : DefaultTask() {
             throw GradleException(
                 "Privacy check failed: the merged release manifest requests $violations. " +
                     "Anchor must never have network access. Find the dependency that adds it " +
-                    "(build/intermediates/merged_manifest/) and raise it on the issue instead of stripping it.",
+                    "(build/intermediates/merged_manifest/) and raise it in the PR instead of stripping it.",
             )
         }
         report.get().asFile.writeText("OK: no forbidden permissions in ${requested.size} requested permissions\n")

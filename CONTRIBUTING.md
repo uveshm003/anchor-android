@@ -1,29 +1,40 @@
 # Contributing to Anchor
 
-Thanks for helping. Anchor is built issue by issue, and every change, including the maintainer's,
-goes through the same loop.
+Thanks for helping. Every change, including the maintainer's, goes through the same short loop: there is no
+separate review step; `./gradlew ciCheck` locally and CI on the PR are the quality bar.
+
+## Where work comes from
+
+- The original backlog: [GitHub issues](https://github.com/uveshm003/anchor-android/issues) in milestones
+  M0–M6. These are completed and closed by PRs, but the maintainer and agents **create no new issues**.
+- Outside contributors can still report bugs with the **Bug report** issue form; those are picked up too.
+- Everything new (features, follow-ups, tech debt): [`docs/task-list.md`](docs/task-list.md).
 
 ## The loop
 
-1. **Pick an issue.** Open, in the current milestone, with all "Blocked by #x" issues closed. Comment
-   that you're taking it, with a 3–5 line plan.
-2. **Branch** from `main`: `<type>/<issue>-<slug>`, where type is
-   `feat|fix|chore|docs|test|perf|refactor` (for example `feat/12-hold-to-start`).
-   `gh issue develop <n> --checkout --name <branch>` links the branch to the issue.
-3. **Build it.** Write tests first for pure logic (engine transitions, repositories, ViewModels).
-   Make small [Conventional Commits](https://www.conventionalcommits.org/) that reference the issue:
-   `feat(engine): end session on anchor tap (#12)`.
+1. **Pick** the next item in the current milestone whose dependencies are done (a backlog issue, a
+   reported bug or a task-list item) and claim it: comment on the issue that you're taking it, or open a
+   draft PR whose body says `Completes T-<n>`. For
+   anything user-facing (feature, screen, behaviour or UX change), share a 3–5 line plan and get the
+   maintainer's OK before writing code.
+2. **Branch** from `main`: `<type>/<n>-<slug>`, where type is `feat|fix|chore|docs|test|perf|refactor`
+   and `<n>` is the issue number or `t<n>` for a task-list item (for example `feat/24-hold-to-start`).
+3. **Build it** in about **4 meaningful commits** per PR, e.g. code, tests, screenshots or resources,
+   docs and the task list. Write tests first for pure logic (engine, repositories, ViewModels). Use
+   [Conventional Commits](https://www.conventionalcommits.org/) that reference the item:
+   `feat(home): hold-to-start on the home screen (#24)`, or `(T-3)` for a task-list item. Check that each
+   commit builds: `git rebase -x "./gradlew assembleDebug -q" origin/main`. Every commit must build; no filler commits.
 4. **Local gate.** `./gradlew spotlessApply ciCheck` must pass before you push.
-5. **Open a PR** titled `<type>(<scope>): <summary> (#<n>)`, fill in the template (it starts with
-   `Closes #<n>`), and copy the issue's labels and milestone.
-6. **Review.** Every PR is reviewed against the issue's acceptance criteria and the checklist in
-   [`.claude/agents/android-reviewer.md`](.claude/agents/android-reviewer.md). Findings are tagged
-   BLOCKER / MAJOR / NIT. BLOCKERs and MAJORs are fixed in new commits; each finding gets a reply with
-   the fixing commit or a reasoned rejection. NITs are fixed or turned into `tech-debt` issues.
-7. **Merge** with squash once `ci` is green. The issue closes automatically.
+5. **Open a PR** titled `<type>(<scope>): <summary> (#<n>)` (or `(T-<n>)`), fill in the template, and
+   use the issue's labels and milestone (for a task-list item: type/area/size labels and the milestone of
+   its section).
+6. **Merge** with **rebase merge** once `ci` is green, so each commit lands on `main` (update the branch
+   with a rebase first if `main` moved and wait for `ci` again; never squash). Review fixes are extra
+   commits on top of the ~4; don't rewrite history to fold them in. A backlog issue closes automatically; tick the
+   task-list item in the same PR.
 
-Each issue should fit in one PR of roughly 400 changed lines or fewer (generated files excluded).
-If it grows, split it.
+Each PR should stay around 400 changed lines or fewer (generated files excluded). If it grows, split it.
+Size labels: `size:S` < 100 changed lines, `size:M` < 250, `size:L` ≤ ~400.
 
 ## Never get green by…
 
@@ -31,7 +42,7 @@ If it grows, split it.
 - lowering coverage thresholds,
 - adding lint or detekt baselines or `@Suppress`.
 
-Fix the cause. If you truly can't, explain why in the PR and open a `tech-debt` issue.
+Fix the cause. If you truly can't, explain why in the PR and add it to `docs/task-list.md`.
 
 ## Standards
 
@@ -44,8 +55,7 @@ Fix the cause. If you truly can't, explain why in the PR and open a `tech-debt` 
   `./gradlew recordRoborazziDebug` and commit the PNGs.
 - Our own UI must be accessible: content descriptions, 48 dp touch targets, sensible TalkBack
   order, usable at 200 % font size.
-- **No `INTERNET` permission.** If a dependency adds it, CI fails. Don't strip it; raise it on the
-  issue.
+- **No `INTERNET` permission.** If a dependency adds it, CI fails. Don't strip it; raise it in the PR.
 - Verify platform APIs against current developer.android.com docs and record significant decisions
   as ADRs in `docs/adr/` ([ADR 0001](docs/adr/0001-record-architecture-decisions.md)).
 - Ask for a permission only when the user turns on the feature that needs it.

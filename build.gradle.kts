@@ -92,9 +92,16 @@ val checkModuleGraph by tasks.registering(Exec::class) {
     )
 }
 
+val checkTaskList by tasks.registering(Exec::class) {
+    group = "verification"
+    description = "Fails if docs/task-list.md has duplicate T-<n> ids."
+    commandLine("python3", "scripts/check-task-list.py")
+    inputs.files("docs/task-list.md", "scripts/check-task-list.py")
+}
+
 tasks.register("ciCheck") {
     group = "verification"
     description = "Runs exactly what CI runs: formatting, static analysis, lint, tests, screenshots, coverage, privacy."
-    dependsOn("spotlessCheck", "detekt", "koverVerify", checkModuleGraph)
+    dependsOn("spotlessCheck", "detekt", "koverVerify", checkModuleGraph, checkTaskList)
     dependsOn(subprojects.filter { it.buildFile.exists() }.map { "${it.path}:moduleCheck" })
 }
