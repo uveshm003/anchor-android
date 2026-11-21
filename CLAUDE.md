@@ -38,9 +38,11 @@ Android app (Kotlin + Jetpack Compose, minSdk 31, target 37). Tap the phone on a
 **Work items:** the existing GitHub issues (backlog M0–M6), issues filed by outside reporters, and
 `docs/task-list.md`. **Never create new GitHub issues**: new work, review follow-ups, tech debt and bugs the user
 reports go into `docs/task-list.md`, with testable acceptance criteria like an issue.
-(This overrides the brief's issue/squash parts: §4.3 step 7 for new work, §5 steps 1–2, 6c and 7, "bugs I report
-become issues", "GitHub issues are the source of truth", and §6's issue-only inputs. The brief file itself stays
-unchanged.)
+(This overrides the brief's issue/squash parts, including §4.2's feature/chore issue forms, §4.3 step 2 (squash
+only) and step 7 for new work, §5 steps 1–2 and 4–7 (tech-debt issues, `Closes #<n>`/issue labels for new work,
+issue-only acceptance criteria, squash), "bugs I report become issues", "GitHub issues are the source of truth"
+and §6's issue-only inputs. The brief file stays unchanged; process overrides live here, ADRs cover architecture
+and platform decisions.)
 
 **Features and UX need the user's OK first:** for any user-facing feature, screen, behaviour change or
 product/UX decision (including a fix, perf change or ADR that changes what the user sees or can do), post the
@@ -49,15 +51,18 @@ the backlog issue, or `Approved: …` under the task-list item) and quote it in 
 stop and report. Tests, build tooling, refactors and docs proceed without asking.
 (This overrides brief §8's "keep working".)
 
-Pick the next unblocked item in the current milestone (→ wait for OK if feature/UX) → branch `<type>/<n>-<slug>` (issue number or
+Pick the next unblocked item in the current milestone and claim it (assign / comment on a backlog issue, or
+`In progress: <branch>` under a task-list item; neither creates an issue) (→ wait for OK if feature/UX) → branch `<type>/<n>-<slug>` (issue number or
 `t<n>` for a task-list item) → tests first → **about 4 meaningful Conventional Commits per PR** (e.g. code /
 tests / screenshots or resources / docs + task list; bundle small related items; never filler commits; every
 commit builds; each subject references `#<n>` or `T-<n>`) → `./gradlew spotlessApply ciCheck` → `gh pr create` (title `<type>(<scope>): <summary> (#<n>)`
 or `(T-<n>)`, template, labels + milestone) → review: `/code-review high --comment <pr>`, then the
-`android-reviewer` subagent (small docs/chore PRs: subagent only) → fix BLOCKER/MAJOR, reply to each finding
+`android-reviewer` subagent (`size:S` docs/chore PRs: subagent only) → fix BLOCKER/MAJOR, reply to each finding
 with the SHA → re-review if a BLOCKER (max 2 rounds) → `gh pr checks <pr> --watch` →
-`gh pr update-branch <pr> --rebase` if `main` moved → `gh pr merge <pr> --rebase --delete-branch` (rebase merge
-keeps each commit on `main`). If a rebase merge is refused, stop and ask; never squash instead.
+`gh pr update-branch <pr> --rebase` if `main` moved (then `git pull --rebase` locally before the next commit) →
+`gh pr checks <pr> --watch` → `gh pr merge <pr> --rebase --delete-branch` (rebase merge keeps each commit on
+`main`). Review-fix commits land as extra commits on top of the ~4; never rewrite history to fold them in. If a
+rebase merge is refused, stop and ask; never squash instead.
 End of milestone: tag `v0.<m>.0`, update the README roadmap, report to the user with device tests.
 
 ## Definition of done

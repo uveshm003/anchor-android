@@ -12,7 +12,8 @@ Thanks for helping. Every change, including the maintainer's, goes through the s
 ## The loop
 
 1. **Pick** the next item in the current milestone whose dependencies are done (a backlog issue, a
-   reported bug or a task-list item). For
+   reported bug or a task-list item) and claim it: comment on the issue that you're taking it, or add
+   `In progress: <branch>` under the task. For
    anything user-facing (feature, screen, behaviour or UX change), share a 3–5 line plan and get the
    maintainer's OK before writing code.
 2. **Branch** from `main`: `<type>/<n>-<slug>`, where type is `feat|fix|chore|docs|test|perf|refactor`
@@ -30,7 +31,8 @@ Thanks for helping. Every change, including the maintainer's, goes through the s
    BLOCKER / MAJOR / NIT. BLOCKERs and MAJORs are fixed in new commits; each finding gets a reply with
    the fixing commit or a reasoned rejection. NITs are fixed or added to `docs/task-list.md`.
 7. **Merge** with **rebase merge** once `ci` is green, so each commit lands on `main` (update the branch
-   with a rebase first if `main` moved; never squash). A backlog issue closes automatically; tick the
+   with a rebase first if `main` moved and wait for `ci` again; never squash). Review fixes are extra
+   commits on top of the ~4; don't rewrite history to fold them in. A backlog issue closes automatically; tick the
    task-list item in the same PR.
 
 Each PR should stay around 400 changed lines or fewer (generated files excluded). If it grows, split it.
