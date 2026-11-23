@@ -61,3 +61,5 @@ include(":widget")
 
 include(":baselineprofile")
 include(":benchmark")
+
+include(":lint-rules")

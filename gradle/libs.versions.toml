@@ -7,6 +7,8 @@ jvmTarget = "17"
 
 # Build tooling
 androidGradlePlugin = "9.5.1"
+# Lint libraries are versioned AGP + 23 (AGP 9.5.1 -> lint 32.5.1).
+androidLint = "32.5.1"
 kotlin = "2.4.21"
 ksp = "2.3.14"
 detekt = "1.23.8"
@@ -91,6 +93,10 @@ roborazzi-junit-rule = { module = "io.github.takahirom.roborazzi:roborazzi-junit
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
+# Used only by :lint-rules (custom Android Lint checks)
+android-lint-api = { module = "com.android.tools.lint:lint-api", version.ref = "androidLint" }
+android-lint-tests = { module = "com.android.tools.lint:lint-tests", version.ref = "androidLint" }
+
 # Used only by build-logic (convention plugins)
 android-gradlePlugin = { module = "com.android.tools.build:gradle", version.ref = "androidGradlePlugin" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
@@ -125,3 +131,4 @@ anchor-android-library-compose = { id = "anchor.android.library.compose" }
 anchor-android-test = { id = "anchor.android.test" }
 anchor-hilt = { id = "anchor.hilt" }
 anchor-jvm-library = { id = "anchor.jvm.library" }
+anchor-lint-rules = { id = "anchor.lint.rules" }
