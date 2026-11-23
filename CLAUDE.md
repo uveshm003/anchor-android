@@ -9,6 +9,7 @@ Android app (Kotlin + Jetpack Compose, minSdk 31, target 37). Tap the phone on a
 1. Read this file and `docs/PROJECT_BRIEF.md`.
 2. `gh pr list --state open`, `gh issue list --milestone "<current>" --state open` and `docs/task-list.md`.
 3. Finish open PRs first, then continue the loop. Work items are the existing GitHub issues plus the task list.
+4. Current focus: the **MVP** milestone, in the order listed in [`docs/mvp.md`](docs/mvp.md).
 
 ## Commands
 - `./gradlew spotlessApply ciCheck`: local gate, identical to CI (format, detekt, lint, tests, screenshots, Kover, no-INTERNET check)
