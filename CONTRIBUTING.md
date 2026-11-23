@@ -46,6 +46,9 @@ Fix the cause. If you truly can't, explain why in the PR and add it to `docs/tas
 
 ## Standards
 
+- **JDK 25.** The Gradle daemon is pinned to Java 25 in `gradle/gradle-daemon-jvm.properties`, the same
+  version CI uses. Change it only with `./gradlew updateDaemonJvm --jvm-version=<n>`, together with CI's
+  `java-version`.
 - Kotlin + Jetpack Compose. No XML layouts except where the platform requires XML.
 - Each ViewModel exposes one `StateFlow<UiState>`; user actions are functions; one-off effects go
   through a `Channel`. No business logic in composables, services or receivers.

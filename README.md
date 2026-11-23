@@ -63,7 +63,8 @@ Progress is tracked in the original [issues](https://github.com/uveshm003/anchor
 
 ## Building
 
-Requirements: JDK 21 or newer (CI uses 25), Android SDK with platform 37, and an Android 12+ device
+Requirements: JDK 25 (the Gradle daemon is pinned to it in `gradle/gradle-daemon-jvm.properties`, as in
+CI; Gradle downloads it if it's missing), Android SDK with platform 37, and an Android 12+ device
 or emulator. NFC needs a real phone.
 
 ```bash
