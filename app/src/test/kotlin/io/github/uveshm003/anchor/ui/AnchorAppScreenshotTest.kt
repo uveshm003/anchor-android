@@ -21,7 +21,7 @@ class AnchorAppScreenshotTest(private val variant: ScreenshotVariant) {
 
     @Test
     fun anchorApp() = screenshot.capture("anchor_app") { darkTheme ->
-        AnchorTheme(darkTheme = darkTheme, dynamicColor = false) { AnchorApp() }
+        AnchorTheme(darkTheme = darkTheme, dynamicColor = false) { AnchorApp(graph = { stubGraph() }) }
     }
 
     @Test
@@ -29,7 +29,7 @@ class AnchorAppScreenshotTest(private val variant: ScreenshotVariant) {
         assumeTrue(variant.device == ScreenshotDevice.Phone)
         screenshot.capture("anchor_app_fontscale2") { darkTheme ->
             CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale = 2f)) {
-                AnchorTheme(darkTheme = darkTheme, dynamicColor = false) { AnchorApp() }
+                AnchorTheme(darkTheme = darkTheme, dynamicColor = false) { AnchorApp(graph = { stubGraph() }) }
             }
         }
     }

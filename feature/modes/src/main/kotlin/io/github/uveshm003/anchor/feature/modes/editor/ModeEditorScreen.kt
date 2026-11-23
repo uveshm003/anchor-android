@@ -168,9 +168,15 @@ private fun EditorForm(state: ModeEditorUiState, actions: ModeEditorActions) {
 private fun LookSection(state: ModeEditorUiState, actions: ModeEditorActions) {
     Column {
         val draft = state.draft
+        // Local, synchronous text state (seeded once the draft has loaded): a field fed back through an async
+        // flow drops fast keystrokes.
+        var name by rememberSaveable { mutableStateOf(draft.name) }
         OutlinedTextField(
-            value = draft.name,
-            onValueChange = actions.onName,
+            value = name,
+            onValueChange = {
+                name = it
+                actions.onName(it)
+            },
             label = { Text(stringResource(R.string.feature_modes_name)) },
             isError = state.nameError,
             supportingText = if (state.nameError) {

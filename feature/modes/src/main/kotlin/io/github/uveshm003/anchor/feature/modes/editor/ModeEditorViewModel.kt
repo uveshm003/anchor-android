@@ -89,8 +89,9 @@ class ModeEditorViewModel @Inject constructor(
             original = existing?.toDraft() ?: ModeDraft()
             val restored = savedState.get<String>(DRAFT_KEY)?.let { json.decodeFromString<ModeDraft>(it) }
             val essentials = essentialApps.packages(includeDefaultSms = settings.settings.first().allowDefaultSmsApp)
-            editor.update { it.copy(loading = false, essentials = essentials) }
+            // The draft first: the form (and its name field) is seeded when loading turns false.
             edit { restored ?: original }
+            editor.update { it.copy(loading = false, essentials = essentials) }
         }
     }
 
