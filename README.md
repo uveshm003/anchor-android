@@ -121,6 +121,7 @@ graph TD
     end
     app --> core_data
     app --> core_designsystem
+    app --> core_triggers
     app --> core_ui
     app --> feature_anchors
     app --> feature_home
@@ -174,7 +175,8 @@ graph TD
     feature_triggers --> core_designsystem
     feature_triggers --> core_ui
     service_blocker --> core_common
-    service_blocker --> core_data
+    service_blocker --> core_designsystem
+    service_blocker --> core_engine
     service_notifications --> core_common
     service_notifications --> core_data
     widget --> core_data
