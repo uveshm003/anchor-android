@@ -13,6 +13,7 @@ class JvmLibraryConventionPlugin : Plugin<Project> {
             pluginManager.apply("org.jetbrains.kotlin.jvm")
             pluginManager.apply("com.android.lint")
             configureKotlinJvm()
+            addLintRules()
             dependencies {
                 add("testImplementation", libs.lib("junit4"))
                 add("testImplementation", libs.lib("kotlin-test"))

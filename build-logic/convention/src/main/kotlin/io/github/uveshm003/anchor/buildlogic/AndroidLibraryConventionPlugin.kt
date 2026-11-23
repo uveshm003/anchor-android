@@ -23,6 +23,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 add("testImplementation", libs.lib("turbine"))
                 add("testImplementation", libs.lib("truth"))
             }
+            addLintRules()
             configureKover()
             registerModuleCheck("testDebugUnitTest", "lintDebug")
         }

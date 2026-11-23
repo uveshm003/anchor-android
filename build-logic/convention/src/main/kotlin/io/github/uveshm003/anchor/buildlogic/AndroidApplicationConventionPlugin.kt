@@ -15,6 +15,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 testOptions.animationsDisabled = true
                 configureLint(lint)
             }
+            addLintRules()
             configureKover()
             registerNoInternetPermissionCheck()
             registerModuleCheck("testDebugUnitTest", "lintDebug", "checkNoInternetPermission")
