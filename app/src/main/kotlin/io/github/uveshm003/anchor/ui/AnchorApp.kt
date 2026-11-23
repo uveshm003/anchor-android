@@ -46,7 +46,7 @@ fun AnchorApp(modifier: Modifier = Modifier, navController: NavHostController = 
     ) {
         NavHost(navController = navController, startDestination = HomeRoute) {
             homeScreen()
-            modesScreen()
+            modesScreen(navController)
             anchorsScreen()
             settingsScreen()
         }

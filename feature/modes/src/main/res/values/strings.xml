@@ -2,4 +2,59 @@
 <resources>
     <string name="feature_modes_title">Modes</string>
     <string name="feature_modes_placeholder">Create modes and choose which apps each one blocks.</string>
+    <string name="feature_modes_create">Create mode</string>
+    <string name="feature_modes_empty_title">No modes yet</string>
+    <string name="feature_modes_empty_body">A mode chooses which apps to block and how the session ends.</string>
+    <string name="feature_modes_deleted">Deleted %1$s</string>
+    <string name="feature_modes_undo">Undo</string>
+    <string name="feature_modes_delete">Delete</string>
+    <string name="feature_modes_delete_named">Delete %1$s</string>
+    <string name="feature_modes_delete_title">Delete %1$s?</string>
+    <string name="feature_modes_delete_body">The mode and its app list are removed. Past sessions stay in your history.</string>
+    <string name="feature_modes_cancel">Cancel</string>
+    <string name="feature_modes_move_up">Move %1$s up</string>
+    <string name="feature_modes_move_down">Move %1$s down</string>
+    <plurals name="feature_modes_summary_blocks">
+        <item quantity="one">Blocks %1$d app</item>
+        <item quantity="other">Blocks %1$d apps</item>
+    </plurals>
+    <plurals name="feature_modes_summary_allows">
+        <item quantity="one">Allows only %1$d app</item>
+        <item quantity="other">Allows only %1$d apps</item>
+    </plurals>
+    <string name="feature_modes_summary_exit_anchor">ends with an anchor tap</string>
+    <string name="feature_modes_summary_exit_timer">ends after %1$d min</string>
+    <string name="feature_modes_summary_exit_trigger">ends with its trigger</string>
+    <string name="feature_modes_summary">%1$s · %2$s</string>
+    <string name="feature_modes_editor_new">New mode</string>
+    <string name="feature_modes_editor_edit">Edit mode</string>
+    <string name="feature_modes_save">Save</string>
+    <string name="feature_modes_name">Name</string>
+    <string name="feature_modes_name_error">Give the mode a name</string>
+    <string name="feature_modes_icon">Icon</string>
+    <string name="feature_modes_color">Colour</string>
+    <string name="feature_modes_policy">Apps</string>
+    <string name="feature_modes_block_list">Block list</string>
+    <string name="feature_modes_block_list_body">Block the apps you pick. Everything else works.</string>
+    <string name="feature_modes_allow_list">Allow list</string>
+    <string name="feature_modes_allow_list_body">Only the apps you pick work. Everything else is blocked.</string>
+    <string name="feature_modes_apps_blocked">Apps to block</string>
+    <string name="feature_modes_apps_allowed">Apps to allow</string>
+    <plurals name="feature_modes_apps_selected">
+        <item quantity="one">%1$d app selected</item>
+        <item quantity="other">%1$d apps selected</item>
+    </plurals>
+    <string name="feature_modes_exit">How it ends</string>
+    <string name="feature_modes_exit_anchor">Tap an anchor</string>
+    <string name="feature_modes_exit_anchor_body">Walk to one of your anchors and tap your phone on it.</string>
+    <string name="feature_modes_exit_timer">Timer</string>
+    <string name="feature_modes_exit_timer_body">Ends by itself after the time you choose.</string>
+    <string name="feature_modes_minutes">%1$d min</string>
+    <string name="feature_modes_discard_title">Discard your changes?</string>
+    <string name="feature_modes_discard">Discard</string>
+    <string name="feature_modes_keep_editing">Keep editing</string>
+    <string name="feature_modes_done">Done</string>
+    <string name="feature_modes_select_all_shown">Select all shown</string>
+    <string name="feature_modes_search_apps">Search apps</string>
+    <string name="feature_modes_always_allowed">Always allowed</string>
 </resources>
