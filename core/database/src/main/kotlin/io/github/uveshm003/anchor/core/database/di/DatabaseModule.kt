@@ -8,6 +8,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.uveshm003.anchor.core.database.AnchorDatabase
+import io.github.uveshm003.anchor.core.database.RoomTransactionRunner
+import io.github.uveshm003.anchor.core.database.TransactionRunner
 import io.github.uveshm003.anchor.core.database.dao.AnchorDao
 import io.github.uveshm003.anchor.core.database.dao.EngineDao
 import io.github.uveshm003.anchor.core.database.dao.ModeDao
@@ -29,4 +31,6 @@ internal object DatabaseModule {
     @Provides fun sessionDao(db: AnchorDatabase): SessionDao = db.sessionDao()
 
     @Provides fun engineDao(db: AnchorDatabase): EngineDao = db.engineDao()
+
+    @Provides fun transactionRunner(db: AnchorDatabase): TransactionRunner = RoomTransactionRunner(db)
 }

@@ -22,3 +22,8 @@ sealed interface ExecutionResult {
 
     data class Failed(val reason: String) : ExecutionResult
 }
+
+/** Turns a tag UID or QR secret into the stored anchor hash (salted SHA-256, hex). Implemented in `core:data`. */
+fun interface AnchorHasher {
+    suspend fun hash(secret: ByteArray): String
+}
