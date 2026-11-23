@@ -32,7 +32,7 @@ class ScreenshotRuleTest(private val variant: ScreenshotVariant) {
     companion object {
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
-        fun variants() = ScreenshotVariant.parameters()
+        fun variants() = ScreenshotVariant.parameters(ScreenshotDevice.entries)
     }
 }
 
@@ -54,6 +54,6 @@ class ScreenshotRuleIsolationTest(private val variant: ScreenshotVariant) {
     companion object {
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
-        fun variants() = ScreenshotVariant.parameters()
+        fun variants() = ScreenshotVariant.parameters(ScreenshotDevice.entries)
     }
 }

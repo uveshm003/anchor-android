@@ -8,7 +8,13 @@ package io.github.uveshm003.anchor.core.screenshottesting
 enum class ScreenshotDevice(internal val qualifiers: String, internal val density: String) {
     Phone(qualifiers = "sw411dp-w411dp-h891dp-normal-long-port", density = "xxhdpi"),
     Tablet(qualifiers = "sw800dp-w1280dp-h800dp-xlarge-notlong-land", density = "xhdpi"),
+
+    /** Unfolded book-style foldable (medium width class). Opt in with `parameters(ScreenshotDevice.entries)`. */
+    Foldable(qualifiers = "sw673dp-w673dp-h841dp-large-notlong-port", density = "xhdpi"),
 }
+
+/** Phone + tablet: what every screen is captured on (brief §3). */
+val DefaultScreenshotDevices: List<ScreenshotDevice> = listOf(ScreenshotDevice.Phone, ScreenshotDevice.Tablet)
 
 /** One screenshot configuration. Its [toString] names the JUnit test and the golden file suffix. */
 data class ScreenshotVariant(val device: ScreenshotDevice, val darkTheme: Boolean) {
@@ -22,11 +28,11 @@ data class ScreenshotVariant(val device: ScreenshotDevice, val darkTheme: Boolea
     override fun toString(): String = "${device.name.lowercase()}_${if (darkTheme) "dark" else "light"}"
 
     companion object {
-        fun all(devices: List<ScreenshotDevice> = ScreenshotDevice.entries): List<ScreenshotVariant> =
+        fun all(devices: List<ScreenshotDevice> = DefaultScreenshotDevices): List<ScreenshotVariant> =
             devices.flatMap { device -> listOf(false, true).map { dark -> ScreenshotVariant(device, dark) } }
 
         /** For `@ParameterizedRobolectricTestRunner.Parameters(name = "{0}")`. */
-        fun parameters(devices: List<ScreenshotDevice> = ScreenshotDevice.entries): List<Array<Any>> =
+        fun parameters(devices: List<ScreenshotDevice> = DefaultScreenshotDevices): List<Array<Any>> =
             all(devices).map { arrayOf(it) }
     }
 }
