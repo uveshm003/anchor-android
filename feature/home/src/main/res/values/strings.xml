@@ -2,4 +2,52 @@
 <resources>
     <string name="feature_home_title">Home</string>
     <string name="feature_home_placeholder">Hold to start a mode here, and see the active session.</string>
+    <string name="feature_home_app_title">Anchor</string>
+    <string name="feature_home_empty_title">Create your first mode</string>
+    <string name="feature_home_empty_body">Choose the apps a mode blocks, then hold here to start it. Tap an anchor to end it.</string>
+    <string name="feature_home_create_mode">Create mode</string>
+    <string name="feature_home_choose_mode">Choose a mode</string>
+    <string name="feature_home_hold_to_start">Hold to start %1$s</string>
+    <string name="feature_home_hold_hint">Starting is easy. Ending it takes a tap on one of your anchors.</string>
+    <string name="feature_home_blocker_off_title">Blocking is off</string>
+    <string name="feature_home_blocker_off_body">Turn on Anchor app blocking so modes can block apps.</string>
+    <string name="feature_home_turn_on_blocking">Turn on blocking</string>
+    <string name="feature_home_disclosure_title">Anchor needs Accessibility access</string>
+    <string name="feature_home_disclosure_body">To block apps during a focus session, Anchor uses an Accessibility service to see which app is on screen and to cover apps you chose to block. It reads app names only, never what is on screen, and nothing leaves your phone. You can turn it off any time in Settings › Accessibility.\n\nIn the next screen, open Installed apps › Anchor app blocking and turn it on.</string>
+    <string name="feature_home_disclosure_agree">Agree and open settings</string>
+    <string name="feature_home_not_now">Not now</string>
+    <string name="feature_home_active_title">%1$s is on</string>
+    <plurals name="feature_home_elapsed">
+        <item quantity="one">Anchored for %1$d minute</item>
+        <item quantity="other">Anchored for %1$d minutes</item>
+    </plurals>
+    <string name="feature_home_ends_anchor">To end it, tap your phone on one of your anchors.</string>
+    <string name="feature_home_ends_at">Ends at %1$s</string>
+    <string name="feature_home_ends_trigger">Ends when its trigger ends.</string>
+    <string name="feature_home_emergency_unlock">Emergency unlock</string>
+    <string name="feature_home_emergency_left">%1$d of %2$d emergency unlocks left this week</string>
+    <string name="feature_home_reject_active">A session is already running.</string>
+    <string name="feature_home_reject_trigger">This mode can\'t be started by holding.</string>
+    <string name="feature_home_reject_generic">That didn\'t work. Try again.</string>
+    <string name="feature_home_close">Close</string>
+    <string name="feature_home_emergency_title">Emergency unlock</string>
+    <string name="feature_home_emergency_intro">Use this only when you really need your phone and can\'t reach an anchor. It ends the session now.</string>
+    <string name="feature_home_emergency_continue">Continue</string>
+    <string name="feature_home_emergency_hold_body">Hold the button for 10 seconds.</string>
+    <string name="feature_home_emergency_hold">Hold to continue</string>
+    <string name="feature_home_emergency_type_body">Type this sentence exactly:</string>
+    <string name="feature_home_emergency_type_label">Sentence</string>
+    <string name="feature_home_emergency_mismatch">That doesn\'t match. Check the sentence and try again.</string>
+    <string name="feature_home_emergency_unlock_now">Unlock now</string>
+    <string name="feature_home_emergency_done">Session ended. Your apps are unblocked.</string>
+    <string name="feature_home_emergency_exhausted_title">No emergency unlocks left this week</string>
+    <string name="feature_home_emergency_exhausted_body">Your quota frees up as unlocks turn a week old. If you have lost your anchor, lost-anchor recovery is coming in the next update; until then you can turn off Anchor app blocking in Settings › Accessibility.</string>
+    <string name="feature_home_emergency_no_session">No session is running.</string>
+    <string-array name="feature_home_emergency_sentences">
+        <item>I am choosing to end my focus session early</item>
+        <item>I will come back to what matters after this</item>
+        <item>This unlock is a decision and not a reflex</item>
+        <item>I know where my anchor is and I am skipping it</item>
+        <item>My attention is worth protecting today</item>
+    </string-array>
 </resources>
