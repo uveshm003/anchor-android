@@ -1,53 +1,67 @@
 package io.github.uveshm003.anchor.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
-import io.github.uveshm003.anchor.R
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import io.github.uveshm003.anchor.core.designsystem.theme.AnchorTheme
+import io.github.uveshm003.anchor.feature.anchors.navigation.anchorsScreen
+import io.github.uveshm003.anchor.feature.home.navigation.HomeRoute
+import io.github.uveshm003.anchor.feature.home.navigation.homeScreen
+import io.github.uveshm003.anchor.feature.modes.navigation.modesScreen
+import io.github.uveshm003.anchor.feature.settings.navigation.settingsScreen
 
-/** Placeholder app shell. Replaced by the adaptive scaffold + navigation in the M0 app-shell issue. */
+/**
+ * App shell: top-level destinations in a [NavigationSuiteScaffold], which shows a bottom bar on compact widths
+ * and a navigation rail on medium and expanded widths (window size class from `currentWindowAdaptiveInfo`).
+ */
 @Composable
-fun AnchorApp(modifier: Modifier = Modifier) {
-    Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.displaySmall,
-                modifier = Modifier.semantics { heading() },
-            )
-            Text(
-                text = stringResource(R.string.app_tagline),
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center,
-            )
-            Text(
-                text = stringResource(R.string.app_shell_placeholder),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+fun AnchorApp(modifier: Modifier = Modifier, navController: NavHostController = rememberNavController()) {
+    val currentDestination = navController.currentBackStackEntryAsState().value?.destination
+    NavigationSuiteScaffold(
+        modifier = modifier,
+        navigationSuiteItems = {
+            TopLevelDestination.entries.forEach { destination ->
+                item(
+                    selected = currentDestination.isOn(destination),
+                    onClick = { navController.navigateToTopLevel(destination) },
+                    icon = { Icon(painterResource(destination.icon), contentDescription = null) },
+                    label = { Text(stringResource(destination.label)) },
+                )
+            }
+        },
+    ) {
+        NavHost(navController = navController, startDestination = HomeRoute) {
+            homeScreen()
+            modesScreen()
+            anchorsScreen()
+            settingsScreen()
         }
+    }
+}
+
+private fun NavDestination?.isOn(destination: TopLevelDestination): Boolean =
+    this?.hierarchy?.any { it.hasRoute(destination.route::class) } == true
+
+/** Single top: keep one copy of each top-level destination and restore its state when coming back. */
+private fun NavHostController.navigateToTopLevel(destination: TopLevelDestination) {
+    navigate(destination.route) {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
     }
 }
 

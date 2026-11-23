@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
+import io.github.uveshm003.anchor.feature.modes.R as ModesR
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,7 +25,7 @@ class MainActivityTest {
 
     @Test
     fun launches_and_shows_app_shell() {
-        val tagline = composeRule.activity.getString(R.string.app_tagline)
-        composeRule.onNodeWithText(tagline).assertIsDisplayed()
+        val modes = composeRule.activity.getString(ModesR.string.feature_modes_title)
+        composeRule.onNodeWithText(modes).assertIsDisplayed()
     }
 }
