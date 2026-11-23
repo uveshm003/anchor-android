@@ -2,4 +2,24 @@
 <resources>
     <string name="feature_anchors_title">Anchors</string>
     <string name="feature_anchors_placeholder">Pair NFC stickers, then tap one to start or end a session.</string>
+    <string name="feature_anchors_empty_title">No anchors yet</string>
+    <string name="feature_anchors_empty_body">Stick an NFC sticker where you want to leave your phone (desk, bedroom, car) and pair it. Tapping it starts and ends your modes.</string>
+    <string name="feature_anchors_pair">Pair an anchor</string>
+    <string name="feature_anchors_no_nfc">This phone has no NFC. QR code anchors are coming in the next update.</string>
+    <string name="feature_anchors_nfc_off">NFC is off. Turn it on to pair and tap anchors.</string>
+    <string name="feature_anchors_turn_on_nfc">Turn on NFC</string>
+    <string name="feature_anchors_nfc_sticker">NFC sticker</string>
+    <string name="feature_anchors_unpair">Unpair %1$s</string>
+    <string name="feature_anchors_rename">Rename anchor</string>
+    <string name="feature_anchors_waiting_title">Hold your phone to the sticker</string>
+    <string name="feature_anchors_waiting_body">Touch the back of your phone to the NFC sticker and keep it there for a second.</string>
+    <string name="feature_anchors_cancel">Cancel</string>
+    <string name="feature_anchors_name_title">Name this anchor</string>
+    <string name="feature_anchors_written">Done. Tapping this sticker opens Anchor, even when it\'s closed.</string>
+    <string name="feature_anchors_not_written">This sticker can\'t be written, so taps work while Anchor is open.</string>
+    <string name="feature_anchors_already_paired">This sticker is already paired as %1$s.</string>
+    <string name="feature_anchors_ok">OK</string>
+    <string name="feature_anchors_name">Name</string>
+    <string name="feature_anchors_name_hint">Desk</string>
+    <string name="feature_anchors_save">Save</string>
 </resources>

@@ -2,4 +2,24 @@
 <resources>
     <string name="feature_anchors_title">एंकर</string>
     <string name="feature_anchors_placeholder">NFC स्टिकर जोड़ें, फिर सत्र शुरू या खत्म करने के लिए उस पर फ़ोन टैप करें।</string>
+    <string name="feature_anchors_empty_title">अभी कोई एंकर नहीं</string>
+    <string name="feature_anchors_empty_body">जहाँ आप फ़ोन छोड़ना चाहते हैं (डेस्क, बेडरूम, कार) वहाँ एक NFC स्टिकर लगाएँ और उसे जोड़ें। उस पर टैप करने से आपके मोड शुरू और खत्म होते हैं।</string>
+    <string name="feature_anchors_pair">एंकर जोड़ें</string>
+    <string name="feature_anchors_no_nfc">इस फ़ोन में NFC नहीं है। QR कोड एंकर अगले अपडेट में आ रहे हैं।</string>
+    <string name="feature_anchors_nfc_off">NFC बंद है। एंकर जोड़ने और टैप करने के लिए इसे चालू करें।</string>
+    <string name="feature_anchors_turn_on_nfc">NFC चालू करें</string>
+    <string name="feature_anchors_nfc_sticker">NFC स्टिकर</string>
+    <string name="feature_anchors_unpair">%1$s हटाएँ</string>
+    <string name="feature_anchors_rename">एंकर का नाम बदलें</string>
+    <string name="feature_anchors_waiting_title">फ़ोन को स्टिकर से लगाएँ</string>
+    <string name="feature_anchors_waiting_body">फ़ोन का पिछला हिस्सा NFC स्टिकर से छुआएँ और एक सेकंड वहीं रखें।</string>
+    <string name="feature_anchors_cancel">रद्द करें</string>
+    <string name="feature_anchors_name_title">इस एंकर को नाम दें</string>
+    <string name="feature_anchors_written">हो गया। इस स्टिकर पर टैप करने से Anchor खुल जाएगा, बंद होने पर भी।</string>
+    <string name="feature_anchors_not_written">इस स्टिकर पर लिखा नहीं जा सकता, इसलिए टैप तभी काम करेंगे जब Anchor खुला हो।</string>
+    <string name="feature_anchors_already_paired">यह स्टिकर पहले से %1$s के नाम से जुड़ा है।</string>
+    <string name="feature_anchors_ok">ठीक है</string>
+    <string name="feature_anchors_name">नाम</string>
+    <string name="feature_anchors_name_hint">डेस्क</string>
+    <string name="feature_anchors_save">सेव करें</string>
 </resources>
