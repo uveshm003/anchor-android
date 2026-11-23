@@ -2,4 +2,59 @@
 <resources>
     <string name="feature_modes_title">मोड</string>
     <string name="feature_modes_placeholder">मोड बनाएँ और चुनें कि हर मोड कौन-से ऐप ब्लॉक करे।</string>
+    <string name="feature_modes_create">मोड बनाएँ</string>
+    <string name="feature_modes_empty_title">अभी कोई मोड नहीं</string>
+    <string name="feature_modes_empty_body">मोड तय करता है कि कौन-से ऐप ब्लॉक हों और सत्र कैसे खत्म हो।</string>
+    <string name="feature_modes_deleted">%1$s हटाया गया</string>
+    <string name="feature_modes_undo">पहले जैसा करें</string>
+    <string name="feature_modes_delete">हटाएँ</string>
+    <string name="feature_modes_delete_named">%1$s हटाएँ</string>
+    <string name="feature_modes_delete_title">%1$s हटाएँ?</string>
+    <string name="feature_modes_delete_body">मोड और उसकी ऐप सूची हटा दी जाएगी। पुराने सत्र आपके इतिहास में रहेंगे।</string>
+    <string name="feature_modes_cancel">रद्द करें</string>
+    <string name="feature_modes_move_up">%1$s को ऊपर ले जाएँ</string>
+    <string name="feature_modes_move_down">%1$s को नीचे ले जाएँ</string>
+    <plurals name="feature_modes_summary_blocks">
+        <item quantity="one">%1$d ऐप ब्लॉक करता है</item>
+        <item quantity="other">%1$d ऐप ब्लॉक करता है</item>
+    </plurals>
+    <plurals name="feature_modes_summary_allows">
+        <item quantity="one">सिर्फ़ %1$d ऐप चलने देता है</item>
+        <item quantity="other">सिर्फ़ %1$d ऐप चलने देता है</item>
+    </plurals>
+    <string name="feature_modes_summary_exit_anchor">एंकर पर टैप करने से खत्म</string>
+    <string name="feature_modes_summary_exit_timer">%1$d मिनट बाद खत्म</string>
+    <string name="feature_modes_summary_exit_trigger">ट्रिगर के साथ खत्म</string>
+    <string name="feature_modes_summary">%1$s · %2$s</string>
+    <string name="feature_modes_editor_new">नया मोड</string>
+    <string name="feature_modes_editor_edit">मोड बदलें</string>
+    <string name="feature_modes_save">सेव करें</string>
+    <string name="feature_modes_name">नाम</string>
+    <string name="feature_modes_name_error">मोड को एक नाम दें</string>
+    <string name="feature_modes_icon">आइकन</string>
+    <string name="feature_modes_color">रंग</string>
+    <string name="feature_modes_policy">ऐप</string>
+    <string name="feature_modes_block_list">ब्लॉक सूची</string>
+    <string name="feature_modes_block_list_body">चुने गए ऐप ब्लॉक होंगे। बाकी सब चलेगा।</string>
+    <string name="feature_modes_allow_list">अनुमति सूची</string>
+    <string name="feature_modes_allow_list_body">सिर्फ़ चुने गए ऐप चलेंगे। बाकी सब ब्लॉक होगा।</string>
+    <string name="feature_modes_apps_blocked">ब्लॉक करने वाले ऐप</string>
+    <string name="feature_modes_apps_allowed">अनुमति वाले ऐप</string>
+    <plurals name="feature_modes_apps_selected">
+        <item quantity="one">%1$d ऐप चुना गया</item>
+        <item quantity="other">%1$d ऐप चुने गए</item>
+    </plurals>
+    <string name="feature_modes_exit">कैसे खत्म हो</string>
+    <string name="feature_modes_exit_anchor">एंकर पर टैप करें</string>
+    <string name="feature_modes_exit_anchor_body">अपने किसी एंकर तक जाएँ और उस पर फ़ोन टैप करें।</string>
+    <string name="feature_modes_exit_timer">टाइमर</string>
+    <string name="feature_modes_exit_timer_body">चुने गए समय के बाद अपने-आप खत्म होगा।</string>
+    <string name="feature_modes_minutes">%1$d मिनट</string>
+    <string name="feature_modes_discard_title">बदलाव छोड़ दें?</string>
+    <string name="feature_modes_discard">छोड़ दें</string>
+    <string name="feature_modes_keep_editing">बदलाव जारी रखें</string>
+    <string name="feature_modes_done">हो गया</string>
+    <string name="feature_modes_select_all_shown">दिखाए गए सभी चुनें</string>
+    <string name="feature_modes_search_apps">ऐप खोजें</string>
+    <string name="feature_modes_always_allowed">हमेशा अनुमति</string>
 </resources>
