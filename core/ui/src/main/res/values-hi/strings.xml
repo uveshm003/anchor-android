@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_ui_icon_focus">फ़ोकस</string>
+    <string name="core_ui_icon_study">पढ़ाई</string>
+    <string name="core_ui_icon_sleep">नींद</string>
+    <string name="core_ui_icon_driving">ड्राइविंग</string>
+    <string name="core_ui_icon_family">परिवार</string>
+    <string name="core_ui_icon_timer">टाइमर</string>
+    <string name="core_ui_color_teal">टील</string>
+    <string name="core_ui_color_indigo">नील</string>
+    <string name="core_ui_color_purple">बैंगनी</string>
+    <string name="core_ui_color_rose">गुलाबी</string>
+    <string name="core_ui_color_amber">कहरुवा</string>
+    <string name="core_ui_color_green">हरा</string>
+</resources>

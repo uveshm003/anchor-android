@@ -123,3 +123,9 @@ class FakeSessionInputs : SessionInputs {
         submitted += input
     }
 }
+
+class FakeInstalledAppsRepository(
+    initial: List<io.github.uveshm003.anchor.core.data.repository.InstalledApp> = emptyList(),
+) : io.github.uveshm003.anchor.core.data.repository.InstalledAppsRepository {
+    override val apps = MutableStateFlow(initial)
+}

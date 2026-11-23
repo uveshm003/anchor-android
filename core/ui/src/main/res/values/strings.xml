@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_ui_icon_focus">Focus</string>
+    <string name="core_ui_icon_study">Study</string>
+    <string name="core_ui_icon_sleep">Sleep</string>
+    <string name="core_ui_icon_driving">Driving</string>
+    <string name="core_ui_icon_family">Family</string>
+    <string name="core_ui_icon_timer">Timer</string>
+    <string name="core_ui_color_teal">Teal</string>
+    <string name="core_ui_color_indigo">Indigo</string>
+    <string name="core_ui_color_purple">Purple</string>
+    <string name="core_ui_color_rose">Rose</string>
+    <string name="core_ui_color_amber">Amber</string>
+    <string name="core_ui_color_green">Green</string>
+</resources>
