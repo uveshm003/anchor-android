@@ -1,7 +1,7 @@
 # Architecture
 
 Anchor is a single-activity Jetpack Compose app split into Gradle modules by layer and feature.
-This page is the overview; decisions and their reasons live in [`adr/`](adr/) (UDF: [0002](adr/0002-state-management-and-udf.md), engine: [0003](adr/0003-engine-command-pattern.md)), and the product brief
+This page is the overview; decisions and their reasons live in [`adr/`](adr/) (UDF: [0002](adr/0002-state-management-and-udf.md), engine: [0003](adr/0003-engine-command-pattern.md), navigation: [0004](adr/0004-navigation.md)), and the product brief
 is in [`PROJECT_BRIEF.md`](PROJECT_BRIEF.md).
 
 ## Layers
