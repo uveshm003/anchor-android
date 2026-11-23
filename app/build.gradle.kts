@@ -70,6 +70,8 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
 
     debugImplementation(libs.leakcanary.android)
@@ -77,6 +79,7 @@ dependencies {
     testImplementation(projects.core.testing)
     testImplementation(projects.core.screenshotTesting)
     testImplementation(libs.hilt.android.testing)
+    testImplementation(libs.truth)
     kspTest(libs.hilt.compiler)
 
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
