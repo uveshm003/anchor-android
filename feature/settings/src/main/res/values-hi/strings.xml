@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_settings_title">सेटिंग</string>
+    <string name="feature_settings_placeholder">अनुमतियाँ, आपातकालीन अनलॉक और ऐप सेटिंग।</string>
+</resources>

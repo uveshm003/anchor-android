@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_modes_title">मोड</string>
+    <string name="feature_modes_placeholder">मोड बनाएँ और चुनें कि हर मोड कौन-से ऐप ब्लॉक करे।</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_anchors_title">एंकर</string>
+    <string name="feature_anchors_placeholder">NFC स्टिकर जोड़ें, फिर सत्र शुरू या खत्म करने के लिए उस पर फ़ोन टैप करें।</string>
+</resources>
