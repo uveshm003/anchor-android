@@ -67,5 +67,9 @@ gradlePlugin {
             id = libs.plugins.anchor.jvm.library.get().pluginId
             implementationClass = "io.github.uveshm003.anchor.buildlogic.JvmLibraryConventionPlugin"
         }
+        register("lintRules") {
+            id = libs.plugins.anchor.lint.rules.get().pluginId
+            implementationClass = "io.github.uveshm003.anchor.buildlogic.LintRulesConventionPlugin"
+        }
     }
 }

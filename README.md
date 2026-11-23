@@ -88,6 +88,7 @@ graph TD
     app[app]
     baselineprofile[baselineprofile]
     benchmark[benchmark]
+    lint_rules[lint-rules]
     widget[widget]
     subgraph core
         core_common[common]
