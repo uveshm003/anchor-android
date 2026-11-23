@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_modes_title">Modes</string>
+    <string name="feature_modes_placeholder">Create modes and choose which apps each one blocks.</string>
+</resources>

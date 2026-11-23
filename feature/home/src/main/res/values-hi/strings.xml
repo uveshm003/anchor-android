@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_home_title">होम</string>
+    <string name="feature_home_placeholder">यहाँ दबाकर रखें और कोई मोड शुरू करें, और चल रहा सत्र देखें।</string>
+</resources>
