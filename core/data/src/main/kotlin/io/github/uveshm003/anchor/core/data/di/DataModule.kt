@@ -13,6 +13,7 @@ import io.github.uveshm003.anchor.core.data.repository.AndroidInstalledAppsRepos
 import io.github.uveshm003.anchor.core.data.repository.InstalledAppsRepository
 import io.github.uveshm003.anchor.core.data.repository.ModeRepository
 import io.github.uveshm003.anchor.core.data.repository.OfflineAnchorRepository
+import io.github.uveshm003.anchor.core.data.repository.OfflineBlockAttemptRecorder
 import io.github.uveshm003.anchor.core.data.repository.OfflineModeRepository
 import io.github.uveshm003.anchor.core.data.repository.OfflineSessionRepository
 import io.github.uveshm003.anchor.core.data.repository.OfflineSettingsRepository
@@ -22,6 +23,7 @@ import io.github.uveshm003.anchor.core.data.repository.SettingsRepository
 import io.github.uveshm003.anchor.core.data.repository.UnlockHistoryRepository
 import io.github.uveshm003.anchor.core.data.session.SessionController
 import io.github.uveshm003.anchor.core.engine.AnchorHasher
+import io.github.uveshm003.anchor.core.engine.BlockAttemptRecorder
 import io.github.uveshm003.anchor.core.engine.CommandExecutor
 import io.github.uveshm003.anchor.core.engine.SessionInputs
 
@@ -43,6 +45,8 @@ internal abstract class DataModule {
     @Binds abstract fun installedApps(impl: AndroidInstalledAppsRepository): InstalledAppsRepository
 
     @Binds abstract fun hasher(impl: SaltedAnchorHasher): AnchorHasher
+
+    @Binds abstract fun blockAttempts(impl: OfflineBlockAttemptRecorder): BlockAttemptRecorder
 
     @Binds abstract fun inputs(controller: SessionController): SessionInputs
 
