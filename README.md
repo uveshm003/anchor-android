@@ -140,7 +140,6 @@ graph TD
     core_database --> core_model
     core_datastore --> core_common
     core_datastore --> core_model
-    core_engine --> core_common
     core_engine --> core_model
     core_nfc --> core_common
     core_nfc --> core_engine
