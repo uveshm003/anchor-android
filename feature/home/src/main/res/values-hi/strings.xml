@@ -2,4 +2,52 @@
 <resources>
     <string name="feature_home_title">होम</string>
     <string name="feature_home_placeholder">यहाँ दबाकर रखें और कोई मोड शुरू करें, और चल रहा सत्र देखें।</string>
+    <string name="feature_home_app_title">Anchor</string>
+    <string name="feature_home_empty_title">अपना पहला मोड बनाएँ</string>
+    <string name="feature_home_empty_body">चुनें कि मोड कौन-से ऐप ब्लॉक करे, फिर उसे शुरू करने के लिए यहाँ दबाकर रखें। खत्म करने के लिए किसी एंकर पर टैप करें।</string>
+    <string name="feature_home_create_mode">मोड बनाएँ</string>
+    <string name="feature_home_choose_mode">मोड चुनें</string>
+    <string name="feature_home_hold_to_start">%1$s शुरू करने के लिए दबाकर रखें</string>
+    <string name="feature_home_hold_hint">शुरू करना आसान है। खत्म करने के लिए अपने किसी एंकर पर टैप करना होगा।</string>
+    <string name="feature_home_blocker_off_title">ब्लॉकिंग बंद है</string>
+    <string name="feature_home_blocker_off_body">Anchor ऐप ब्लॉकिंग चालू करें ताकि मोड ऐप ब्लॉक कर सकें।</string>
+    <string name="feature_home_turn_on_blocking">ब्लॉकिंग चालू करें</string>
+    <string name="feature_home_disclosure_title">Anchor को सुलभता (Accessibility) अनुमति चाहिए</string>
+    <string name="feature_home_disclosure_body">फ़ोकस सत्र के दौरान ऐप ब्लॉक करने के लिए Anchor एक सुलभता सेवा से देखता है कि स्क्रीन पर कौन-सा ऐप है और आपके चुने हुए ऐप को ढकता है। यह सिर्फ़ ऐप के नाम पढ़ता है, स्क्रीन पर क्या है यह कभी नहीं, और कुछ भी आपके फ़ोन से बाहर नहीं जाता। आप इसे कभी भी सेटिंग › सुलभता में बंद कर सकते हैं।\n\nअगली स्क्रीन में इंस्टॉल किए गए ऐप › Anchor ऐप ब्लॉकिंग खोलें और इसे चालू करें।</string>
+    <string name="feature_home_disclosure_agree">सहमत हूँ, सेटिंग खोलें</string>
+    <string name="feature_home_not_now">अभी नहीं</string>
+    <string name="feature_home_active_title">%1$s चालू है</string>
+    <plurals name="feature_home_elapsed">
+        <item quantity="one">%1$d मिनट से एंकर किया हुआ</item>
+        <item quantity="other">%1$d मिनट से एंकर किया हुआ</item>
+    </plurals>
+    <string name="feature_home_ends_anchor">इसे खत्म करने के लिए अपने किसी एंकर पर फ़ोन टैप करें।</string>
+    <string name="feature_home_ends_at">%1$s पर खत्म होगा</string>
+    <string name="feature_home_ends_trigger">ट्रिगर के खत्म होने पर खत्म होगा।</string>
+    <string name="feature_home_emergency_unlock">आपातकालीन अनलॉक</string>
+    <string name="feature_home_emergency_left">इस हफ़्ते %2$d में से %1$d आपातकालीन अनलॉक बचे हैं</string>
+    <string name="feature_home_reject_active">एक सत्र पहले से चल रहा है।</string>
+    <string name="feature_home_reject_trigger">यह मोड दबाकर रखने से शुरू नहीं हो सकता।</string>
+    <string name="feature_home_reject_generic">यह नहीं हो पाया। फिर से कोशिश करें।</string>
+    <string name="feature_home_close">बंद करें</string>
+    <string name="feature_home_emergency_title">आपातकालीन अनलॉक</string>
+    <string name="feature_home_emergency_intro">इसका इस्तेमाल तभी करें जब आपको सच में फ़ोन चाहिए और आप एंकर तक नहीं पहुँच सकते। यह सत्र को अभी खत्म कर देगा।</string>
+    <string name="feature_home_emergency_continue">आगे बढ़ें</string>
+    <string name="feature_home_emergency_hold_body">बटन को 10 सेकंड तक दबाकर रखें।</string>
+    <string name="feature_home_emergency_hold">आगे बढ़ने के लिए दबाकर रखें</string>
+    <string name="feature_home_emergency_type_body">यह वाक्य हूबहू टाइप करें:</string>
+    <string name="feature_home_emergency_type_label">वाक्य</string>
+    <string name="feature_home_emergency_mismatch">यह मेल नहीं खाता। वाक्य देखें और फिर से कोशिश करें।</string>
+    <string name="feature_home_emergency_unlock_now">अभी अनलॉक करें</string>
+    <string name="feature_home_emergency_done">सत्र खत्म हुआ। आपके ऐप अनब्लॉक हो गए हैं।</string>
+    <string name="feature_home_emergency_exhausted_title">इस हफ़्ते कोई आपातकालीन अनलॉक नहीं बचा</string>
+    <string name="feature_home_emergency_exhausted_body">अनलॉक एक हफ़्ता पुराने होते ही आपका कोटा फिर से मिल जाएगा। अगर आपका एंकर खो गया है, तो खोए एंकर की रिकवरी अगले अपडेट में आ रही है; तब तक आप सेटिंग › सुलभता में Anchor ऐप ब्लॉकिंग बंद कर सकते हैं।</string>
+    <string name="feature_home_emergency_no_session">कोई सत्र नहीं चल रहा है।</string>
+    <string-array name="feature_home_emergency_sentences">
+        <item>मैं अपना फ़ोकस सत्र जल्दी खत्म करना चुन रहा हूँ</item>
+        <item>इसके बाद मैं ज़रूरी काम पर लौटूँगा</item>
+        <item>यह अनलॉक मेरा फ़ैसला है आदत नहीं</item>
+        <item>मुझे पता है मेरा एंकर कहाँ है फिर भी मैं इसे छोड़ रहा हूँ</item>
+        <item>आज मेरा ध्यान बचाने लायक है</item>
+    </string-array>
 </resources>

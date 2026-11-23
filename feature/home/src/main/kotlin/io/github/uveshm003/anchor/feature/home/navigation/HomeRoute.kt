@@ -1,14 +1,25 @@
 package io.github.uveshm003.anchor.feature.home.navigation
 
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import io.github.uveshm003.anchor.feature.home.HomeScreen
+import io.github.uveshm003.anchor.feature.home.HomeRoute as HomeScreenRoute
+import io.github.uveshm003.anchor.feature.home.emergency.EmergencyUnlockRoute as EmergencyUnlockScreenRoute
 import kotlinx.serialization.Serializable
 
 /** Top-level Home destination. */
 @Serializable
 data object HomeRoute
 
-fun NavGraphBuilder.homeScreen() {
-    composable<HomeRoute> { HomeScreen() }
+@Serializable
+data object EmergencyUnlockRoute
+
+fun NavController.navigateToEmergencyUnlock() = navigate(EmergencyUnlockRoute) { launchSingleTop = true }
+
+/** [onCreateMode] is wired by the app (features don't depend on each other). */
+fun NavGraphBuilder.homeScreen(navController: NavController, onCreateMode: () -> Unit) {
+    composable<HomeRoute> {
+        HomeScreenRoute(onCreateMode = onCreateMode, onEmergencyUnlock = navController::navigateToEmergencyUnlock)
+    }
+    composable<EmergencyUnlockRoute> { EmergencyUnlockScreenRoute(onClose = { navController.popBackStack() }) }
 }
