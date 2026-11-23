@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Bound only by the system (BIND_ACCESSIBILITY_SERVICE); enabled by the user after the disclosure. -->
+        <service
+            android:name=".BlockerService"
+            android:exported="false"
+            android:label="@string/service_blocker_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/service_blocker_config" />
+        </service>
+
+        <activity
+            android:name=".ui.BlockActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity="io.github.uveshm003.anchor.block"
+            android:theme="@android:style/Theme.Material.NoActionBar" />
+    </application>
+
+</manifest>

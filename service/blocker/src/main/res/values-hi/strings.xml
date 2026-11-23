@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="service_blocker_label">Anchor ऐप ब्लॉकिंग</string>
+    <string name="service_blocker_description">फ़ोकस सत्र के दौरान स्क्रीन पर कौन-सा ऐप है, यह देखने और आपके चुने हुए ऐप को ढकने के लिए Anchor इस सेवा का इस्तेमाल करता है। यह सिर्फ़ ऐप के नाम पढ़ता है, स्क्रीन का टेक्स्ट कभी नहीं, और कुछ भी आपके फ़ोन से बाहर नहीं जाता।</string>
+    <string name="service_blocker_title">%1$s चालू है</string>
+    <plurals name="service_blocker_elapsed">
+        <item quantity="one">%1$d मिनट से एंकर किया हुआ</item>
+        <item quantity="other">%1$d मिनट से एंकर किया हुआ</item>
+    </plurals>
+    <string name="service_blocker_ends_any_anchor">इसे खत्म करने के लिए अपने किसी एंकर पर फ़ोन टैप करें।</string>
+    <string name="service_blocker_ends_specific_anchor">इसे खत्म करने के लिए अपने %1$s एंकर पर फ़ोन टैप करें।</string>
+    <string name="service_blocker_ends_at">यह %1$s पर अपने-आप खत्म होगा।</string>
+    <string name="service_blocker_ends_trigger">यह अपने ट्रिगर के खत्म होने पर खत्म होगा।</string>
+    <string name="service_blocker_go_home">होम पर जाएँ</string>
+    <string name="service_blocker_emergency">आपातकालीन अनलॉक</string>
+</resources>
