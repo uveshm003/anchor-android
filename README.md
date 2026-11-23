@@ -146,6 +146,7 @@ graph TD
     core_qr --> core_common
     core_qr --> core_engine
     core_testing --> core_common
+    core_testing --> core_data
     core_testing --> core_model
     core_triggers --> core_common
     core_triggers --> core_engine
