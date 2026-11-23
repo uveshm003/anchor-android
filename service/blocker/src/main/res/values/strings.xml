@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="service_blocker_label">Anchor app blocking</string>
+    <string name="service_blocker_description">Anchor uses this service to see which app is on screen during a focus session and to cover apps you chose to block. It reads app names only, never the text on screen, and nothing leaves your phone.</string>
+    <string name="service_blocker_title">%1$s is on</string>
+    <plurals name="service_blocker_elapsed">
+        <item quantity="one">Anchored for %1$d minute</item>
+        <item quantity="other">Anchored for %1$d minutes</item>
+    </plurals>
+    <string name="service_blocker_ends_any_anchor">To end it, tap your phone on one of your anchors.</string>
+    <string name="service_blocker_ends_specific_anchor">To end it, tap your phone on your %1$s anchor.</string>
+    <string name="service_blocker_ends_at">It ends by itself at %1$s.</string>
+    <string name="service_blocker_ends_trigger">It ends when its trigger ends.</string>
+    <string name="service_blocker_go_home">Go home</string>
+    <string name="service_blocker_emergency">Emergency unlock</string>
+</resources>
