@@ -40,5 +40,15 @@ internal fun assertConfigurationMatches(rule: ScreenshotRule<*>, expectedLanguag
             assertEquals(Configuration.ORIENTATION_LANDSCAPE, configuration.orientation)
             assertEquals(320, configuration.densityDpi)
         }
+
+        ScreenshotDevice.Foldable -> {
+            assertEquals(673, configuration.smallestScreenWidthDp)
+            assertEquals(673, configuration.screenWidthDp)
+            assertEquals(841, configuration.screenHeightDp)
+            assertEquals(Configuration.SCREENLAYOUT_SIZE_LARGE, size)
+            assertEquals(Configuration.SCREENLAYOUT_LONG_NO, long)
+            assertEquals(Configuration.ORIENTATION_PORTRAIT, configuration.orientation)
+            assertEquals(320, configuration.densityDpi)
+        }
     }
 }
