@@ -9,6 +9,8 @@ import io.github.uveshm003.anchor.core.data.repository.QuotaChange
 import io.github.uveshm003.anchor.core.data.repository.SettingsRepository
 import io.github.uveshm003.anchor.core.data.repository.UserSettings
 import io.github.uveshm003.anchor.core.data.session.EngineJson
+import io.github.uveshm003.anchor.core.data.session.EngineStore
+import io.github.uveshm003.anchor.core.data.session.EnvironmentSampler
 import io.github.uveshm003.anchor.core.data.session.SessionController
 import io.github.uveshm003.anchor.core.database.AnchorDatabase
 import io.github.uveshm003.anchor.core.database.entity.OutboxEntity
@@ -70,14 +72,14 @@ class SessionControllerTest {
 
     private fun TestScope.controller(database: AnchorDatabase = db) = SessionController(
         scope = backgroundScope,
-        clock = clock,
-        transaction = database.transactions(),
-        engineDao = database.engineDao(),
-        sessionDao = database.sessionDao(),
-        modes = OfflineModeRepository(database.modeDao()),
-        anchors = OfflineAnchorRepository(database.anchorDao()),
-        settings = settings,
-        essentialApps = { setOf("com.android.dialer") },
+        environment = EnvironmentSampler(
+            clock = clock,
+            modes = OfflineModeRepository(database.modeDao()),
+            anchors = OfflineAnchorRepository(database.anchorDao()),
+            settings = settings,
+            essentialApps = { setOf("com.android.dialer") },
+        ),
+        store = EngineStore(database.transactions(), database.engineDao(), database.sessionDao()),
         executors = setOf(executor),
     ).also { it.start() }
 
