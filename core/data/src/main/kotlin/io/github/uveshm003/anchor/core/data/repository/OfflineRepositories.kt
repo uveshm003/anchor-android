@@ -8,6 +8,7 @@ import io.github.uveshm003.anchor.core.database.dao.SessionDao
 import io.github.uveshm003.anchor.core.database.entity.BlockAttemptEntity
 import io.github.uveshm003.anchor.core.datastore.AnchorSettings
 import io.github.uveshm003.anchor.core.datastore.SettingsDataSource
+import io.github.uveshm003.anchor.core.engine.BlockAttemptRecorder
 import io.github.uveshm003.anchor.core.engine.EmergencyQuota
 import io.github.uveshm003.anchor.core.engine.EngineState
 import io.github.uveshm003.anchor.core.model.Anchor
@@ -15,6 +16,7 @@ import io.github.uveshm003.anchor.core.model.AnchorId
 import io.github.uveshm003.anchor.core.model.Mode
 import io.github.uveshm003.anchor.core.model.ModeId
 import io.github.uveshm003.anchor.core.model.Session
+import io.github.uveshm003.anchor.core.model.SessionId
 import java.time.Clock
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -111,4 +113,14 @@ internal class OfflineSettingsRepository @Inject constructor(
         onboardingCompleted = onboardingCompleted,
         defaultModeId = defaultModeId?.let(::ModeId),
     )
+}
+
+internal class OfflineBlockAttemptRecorder @Inject constructor(
+    private val sessionDao: SessionDao,
+    private val clock: Clock,
+) : BlockAttemptRecorder {
+    override suspend fun record(sessionId: SessionId, packageName: String) {
+        sessionDao.insertBlockAttempt(BlockAttemptEntity(0, sessionId.value, packageName, clock.millis()))
+        sessionDao.incrementBlockAttempts(sessionId.value)
+    }
 }
