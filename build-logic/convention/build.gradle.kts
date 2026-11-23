@@ -24,6 +24,7 @@ dependencies {
     compileOnly(libs.kover.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.roborazzi.gradlePlugin)
+    compileOnly(libs.room.gradlePlugin)
 }
 
 tasks {
@@ -54,6 +55,10 @@ gradlePlugin {
         register("androidFeature") {
             id = libs.plugins.anchor.android.feature.get().pluginId
             implementationClass = "io.github.uveshm003.anchor.buildlogic.AndroidFeatureConventionPlugin"
+        }
+        register("androidRoom") {
+            id = libs.plugins.anchor.android.room.get().pluginId
+            implementationClass = "io.github.uveshm003.anchor.buildlogic.AndroidRoomConventionPlugin"
         }
         register("androidTest") {
             id = libs.plugins.anchor.android.test.get().pluginId
