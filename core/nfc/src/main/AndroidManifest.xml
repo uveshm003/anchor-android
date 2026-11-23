@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.NFC" />
+    <!-- NFC is optional: phones without it will use QR anchors (M2). -->
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="false" />
+
+    <application>
+        <!-- Background taps on tags carrying Anchor's URI (written at pairing). Exported so NFC dispatch can reach it. -->
+        <activity
+            android:name=".AnchorTapActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data
+                    android:host="tap"
+                    android:scheme="io.github.uveshm003.anchor" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

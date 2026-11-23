@@ -57,6 +57,7 @@ dependencies {
     implementation(projects.core.ui)
     implementation(projects.core.data)
     implementation(projects.core.triggers)
+    implementation(projects.core.nfc)
     implementation(projects.service.blocker)
     implementation(projects.service.notifications)
     implementation(projects.feature.onboarding)
