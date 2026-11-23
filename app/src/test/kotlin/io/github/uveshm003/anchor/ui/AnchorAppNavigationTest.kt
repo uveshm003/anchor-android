@@ -28,7 +28,7 @@ class AnchorAppNavigationTest {
 
     @Test
     fun navigates_between_top_level_destinations_and_back_returns_home() {
-        composeRule.setContent { AnchorTheme(dynamicColor = false) { AnchorApp() } }
+        composeRule.setContent { AnchorTheme(dynamicColor = false) { AnchorApp(graph = { stubGraph() }) } }
         composeRule.onNodeWithText(text(HomeR.string.feature_home_placeholder)).assertIsDisplayed()
 
         composeRule.onNodeWithText(text(AnchorsR.string.feature_anchors_title), useUnmergedTree = true).performClick()
@@ -36,6 +36,18 @@ class AnchorAppNavigationTest {
 
         pressBack()
         composeRule.onNodeWithText(text(HomeR.string.feature_home_placeholder)).assertIsDisplayed()
+    }
+
+    @Test
+    fun an_emergency_unlock_request_opens_that_screen_once() {
+        var handled = 0
+        composeRule.setContent {
+            AnchorTheme(dynamicColor = false) {
+                AnchorApp(openEmergencyUnlock = true, onOpenHandle = { handled++ }, graph = { stubGraph() })
+            }
+        }
+        composeRule.onNodeWithText("emergency").assertIsDisplayed()
+        assertThat(handled).isEqualTo(1)
     }
 
     @Test
@@ -56,7 +68,7 @@ class AnchorAppNavigationTest {
     }
 
     private fun settingsItemBounds(): DpRect {
-        composeRule.setContent { AnchorTheme(dynamicColor = false) { AnchorApp() } }
+        composeRule.setContent { AnchorTheme(dynamicColor = false) { AnchorApp(graph = { stubGraph() }) } }
         return composeRule.onNodeWithText(text(SettingsR.string.feature_settings_title), useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
     }
