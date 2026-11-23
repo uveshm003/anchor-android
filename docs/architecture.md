@@ -30,7 +30,7 @@ Rules:
   No decisions in services or receivers.
 - **Persist before side effects.** The new `EngineState` and its pending commands (outbox) are written in
   one transaction before any command runs, so a process death mid-way can be recovered.
-- **Inject everything that varies:** dispatchers (`@Dispatcher`), time (`java.time.Clock`, never `Instant.now()`/`System.currentTimeMillis()`; enforcement tracked in #87), platform managers. Tests use fakes and `TestClock`.
+- **Inject everything that varies:** dispatchers (`@Dispatcher`), time (`java.time.Clock`, never `Instant.now()`/`System.currentTimeMillis()`; the `SystemTimeCall` lint check in `lint-rules` fails the build otherwise), platform managers. Tests use fakes and `TestClock`.
 - **Features never depend on other features.** Navigation between them is wired in `app`.
 
 ## Modules
@@ -56,6 +56,7 @@ Rules:
 | `feature:*` | Compose lib | Screens + ViewModels: onboarding, home, modes, anchors, triggers, insights, settings |
 | `widget` | Compose lib | Glance widget, Quick Settings tile, app shortcuts |
 | `baselineprofile`, `benchmark` | Android test | Baseline Profile generation and Macrobenchmarks |
+| `lint-rules` | JVM (build only) | Custom Android Lint checks run by every module via `lintChecks`, e.g. `SystemTimeCall` (no direct system clock or default zone reads outside `SystemZoneClock`) |
 
 ### Module graph
 
