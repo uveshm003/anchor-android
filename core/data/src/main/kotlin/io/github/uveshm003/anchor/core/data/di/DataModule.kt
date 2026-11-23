@@ -9,6 +9,8 @@ import io.github.uveshm003.anchor.core.data.platform.AndroidEssentialApps
 import io.github.uveshm003.anchor.core.data.platform.EssentialApps
 import io.github.uveshm003.anchor.core.data.platform.SaltedAnchorHasher
 import io.github.uveshm003.anchor.core.data.repository.AnchorRepository
+import io.github.uveshm003.anchor.core.data.repository.AndroidInstalledAppsRepository
+import io.github.uveshm003.anchor.core.data.repository.InstalledAppsRepository
 import io.github.uveshm003.anchor.core.data.repository.ModeRepository
 import io.github.uveshm003.anchor.core.data.repository.OfflineAnchorRepository
 import io.github.uveshm003.anchor.core.data.repository.OfflineModeRepository
@@ -37,6 +39,8 @@ internal abstract class DataModule {
     @Binds abstract fun settings(impl: OfflineSettingsRepository): SettingsRepository
 
     @Binds abstract fun essentials(impl: AndroidEssentialApps): EssentialApps
+
+    @Binds abstract fun installedApps(impl: AndroidInstalledAppsRepository): InstalledAppsRepository
 
     @Binds abstract fun hasher(impl: SaltedAnchorHasher): AnchorHasher
 
