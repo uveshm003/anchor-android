@@ -8,8 +8,11 @@ dependencies {
     api(projects.core.common)
     api(testFixtures(projects.core.common))
     api(projects.core.model)
+    api(projects.core.data)
 
     api(libs.junit4)
     api(libs.kotlinx.coroutines.test)
     api(libs.turbine)
+
+    testImplementation(libs.truth)
 }
