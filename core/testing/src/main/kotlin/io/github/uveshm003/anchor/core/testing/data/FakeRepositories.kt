@@ -129,3 +129,21 @@ class FakeInstalledAppsRepository(
 ) : io.github.uveshm003.anchor.core.data.repository.InstalledAppsRepository {
     override val apps = MutableStateFlow(initial)
 }
+
+class FakeBlockerStatus(enabled: Boolean = true) : io.github.uveshm003.anchor.core.data.platform.BlockerStatus {
+    override val enabled = MutableStateFlow(enabled)
+}
+
+/** Records requests and answers with [outcome] (by default: a session with id 1 started/ended as asked). */
+class FakeSessionRequests(
+    var outcome: (Input) -> io.github.uveshm003.anchor.core.engine.Outcome = {
+        io.github.uveshm003.anchor.core.engine.Outcome.Reconciled
+    },
+) : io.github.uveshm003.anchor.core.data.session.SessionRequests {
+    val requested = mutableListOf<Input>()
+
+    override suspend fun request(input: Input): io.github.uveshm003.anchor.core.engine.Outcome {
+        requested += input
+        return outcome(input)
+    }
+}

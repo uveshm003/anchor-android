@@ -32,7 +32,8 @@ class SessionController @Inject constructor(
     private val environment: EnvironmentSampler,
     private val store: EngineStore,
     executors: Set<@JvmSuppressWildcards CommandExecutor>,
-) : SessionInputs {
+) : SessionInputs,
+    SessionRequests {
     private val registry: Map<KClass<out Command>, CommandExecutor> = buildRegistry(executors)
     private val queue = Channel<Queued>(Channel.UNLIMITED)
     private val _outcomes = MutableSharedFlow<Outcome>(extraBufferCapacity = OUTCOME_BUFFER)
@@ -60,7 +61,7 @@ class SessionController @Inject constructor(
     }
 
     /** Submits [input] and waits for its outcome (for the UI's own actions). */
-    suspend fun request(input: Input): Outcome {
+    override suspend fun request(input: Input): Outcome {
         val result = CompletableDeferred<Outcome>()
         queue.send(Queued(input, result))
         return result.await()
