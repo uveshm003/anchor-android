@@ -23,10 +23,7 @@ in GitHub issues (milestones M0–M6) and is completed through PRs that close th
 
 ### M0 – Foundation
 
-- [ ] **T-1** Decide on Android Studio's local Gradle changes. *Waiting for the user.*
-  - [ ] `org.gradle.tooling.parallel=true` (`gradle.properties`) and `gradle/gradle-daemon-jvm.properties`
-    (pins the Gradle daemon to Java 25) are either committed in a chore PR or discarded
-  - [ ] If committed: CI still green, and `CONTRIBUTING.md` names the JDK the daemon uses
+*(none yet)*
 
 ### M1 – Modes & blocking core
 
@@ -34,4 +31,9 @@ in GitHub issues (milestones M0–M6) and is completed through PRs that close th
 
 ## Done
 
-*(none yet)*
+### M0 – Foundation
+
+- [x] **T-1** Decide on Android Studio's local Gradle changes. The user chose to commit both (2026-11-23).
+  - [x] `org.gradle.tooling.parallel=true` (`gradle.properties`) and `gradle/gradle-daemon-jvm.properties`
+    (pins the Gradle daemon to Java 25) are either committed in a chore PR or discarded
+  - [x] If committed: CI still green, and `CONTRIBUTING.md` names the JDK the daemon uses
