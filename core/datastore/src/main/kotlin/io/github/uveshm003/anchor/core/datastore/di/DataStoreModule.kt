@@ -32,8 +32,8 @@ internal object DataStoreModule {
     ): DataStore<AnchorSettings> = settingsDataStore(scope + io) { context.dataStoreFile("settings.json") }
 }
 
-/** Corrupt data falls back to defaults instead of crashing. */
-internal fun settingsDataStore(scope: CoroutineScope, file: () -> java.io.File): DataStore<AnchorSettings> =
+/** The settings store. Corrupt data falls back to defaults instead of crashing. Public for tests in other modules. */
+fun settingsDataStore(scope: CoroutineScope, file: () -> java.io.File): DataStore<AnchorSettings> =
     DataStoreFactory.create(
         serializer = AnchorSettingsSerializer,
         corruptionHandler = ReplaceFileCorruptionHandler { AnchorSettings() },
