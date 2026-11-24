@@ -161,7 +161,7 @@ graph TD
     service_blocker --> core_designsystem
     service_blocker --> core_engine
     service_notifications --> core_common
-    service_notifications --> core_data
+    service_notifications --> core_engine
     widget --> core_data
     widget --> core_designsystem
 ```
