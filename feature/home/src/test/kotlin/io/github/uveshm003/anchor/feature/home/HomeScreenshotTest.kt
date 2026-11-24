@@ -75,6 +75,19 @@ class HomeScreenshotTest(variant: ScreenshotVariant) {
     fun active() = home("home_active", idle.copy(active = timerSession))
 
     @Test
+    fun activeWithRecovery() = home(
+        "home_active_recovery",
+        idle.copy(active = timerSession, recoveryRemaining = java.time.Duration.ofMinutes(22 * 60 + 15)),
+    )
+
+    @Test
+    fun repairOffer() = home("home_repair", idle.copy(offerRepair = true))
+
+    @Test
+    fun emergencyRecoveryStarted() =
+        emergency("emergency_recovery_started", EmergencyUiState(EmergencyStep.RecoveryStarted, left = 0, quota = 3))
+
+    @Test
     fun emergencyIntro() = emergency("emergency_intro", EmergencyUiState(EmergencyStep.Intro, left = 2, quota = 3))
 
     @Test
