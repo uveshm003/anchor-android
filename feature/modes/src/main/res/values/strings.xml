@@ -57,4 +57,17 @@
     <string name="feature_modes_select_all_shown">Select all shown</string>
     <string name="feature_modes_search_apps">Search apps</string>
     <string name="feature_modes_always_allowed">Always allowed</string>
+    <string name="feature_modes_template_title">Start a new mode</string>
+    <string name="feature_modes_template_blank">Start from scratch</string>
+    <string name="feature_modes_template_blank_body">Choose everything yourself.</string>
+    <string name="feature_modes_template_deep_work">Deep Work</string>
+    <string name="feature_modes_template_deep_work_body">Blocks social, games, video and news. Ends with an anchor tap.</string>
+    <string name="feature_modes_template_study">Study</string>
+    <string name="feature_modes_template_study_body">Blocks social, games and video for 45 minutes.</string>
+    <string name="feature_modes_template_sleep">Sleep</string>
+    <string name="feature_modes_template_sleep_body">Blocks distracting apps until you tap your bedside anchor in the morning.</string>
+    <string name="feature_modes_template_driving">Driving</string>
+    <string name="feature_modes_template_driving_body">Only maps and music work. Ends with an anchor tap.</string>
+    <string name="feature_modes_template_family">Family Time</string>
+    <string name="feature_modes_template_family_body">Puts the phone away for 2 hours: social, games, video and news blocked.</string>
 </resources>

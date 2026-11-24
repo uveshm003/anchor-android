@@ -52,12 +52,16 @@ import io.github.uveshm003.anchor.core.model.Mode
 import io.github.uveshm003.anchor.core.ui.color
 import io.github.uveshm003.anchor.core.ui.drawable
 import io.github.uveshm003.anchor.feature.modes.R
+import io.github.uveshm003.anchor.feature.modes.templates.ModeTemplate
+import io.github.uveshm003.anchor.feature.modes.templates.TemplateChooserSheet
 
 @Composable
 fun ModesRoute(
     onEditMode: (Long) -> Unit,
+    onCreateMode: (ModeTemplate?, String?) -> Unit,
     viewModel: ModesViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
 ) {
+    var choosing by rememberSaveable { mutableStateOf(false) }
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val resources = LocalResources.current
@@ -77,12 +81,21 @@ fun ModesRoute(
     ModesScreen(
         state = state,
         snackbar = snackbar,
-        onCreate = { onEditMode(0) },
+        onCreate = { choosing = true },
         onEdit = { onEditMode(it.id.value) },
         onMoveUp = { viewModel.moveUp(it.id) },
         onMoveDown = { viewModel.moveDown(it.id) },
         onDelete = viewModel::delete,
     )
+    if (choosing) {
+        TemplateChooserSheet(
+            onPick = { template ->
+                choosing = false
+                onCreateMode(template, template?.let { resources.getString(it.title) })
+            },
+            onDismiss = { choosing = false },
+        )
+    }
 }
 
 @Composable

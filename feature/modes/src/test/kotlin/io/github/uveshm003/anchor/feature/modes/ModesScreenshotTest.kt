@@ -1,5 +1,6 @@
 package io.github.uveshm003.anchor.feature.modes
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
@@ -21,6 +22,7 @@ import io.github.uveshm003.anchor.feature.modes.editor.ModeEditorScreen
 import io.github.uveshm003.anchor.feature.modes.editor.ModeEditorUiState
 import io.github.uveshm003.anchor.feature.modes.list.ModesScreen
 import io.github.uveshm003.anchor.feature.modes.list.ModesUiState
+import io.github.uveshm003.anchor.feature.modes.templates.TemplateChooser
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
@@ -81,6 +83,11 @@ class ModesScreenshotTest(private val variant: ScreenshotVariant) {
 
     @Test
     fun appPicker() = capture("app_picker") { AppPickerScreen(editor.copy(pickingApps = true), {}, {}, {}, {}) }
+
+    @Test
+    fun templateChooser() = capture("template_chooser") {
+        androidx.compose.material3.Surface(androidx.compose.ui.Modifier.fillMaxSize()) { TemplateChooser(onPick = {}) }
+    }
 
     @Test
     fun appPicker_fontScale2() {
