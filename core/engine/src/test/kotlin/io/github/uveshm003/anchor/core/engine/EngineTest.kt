@@ -59,6 +59,7 @@ class EngineTest {
     private val clear = ClearAppPolicy::class
     private val schedule = ScheduleTimer::class
     private val cancel = CancelTimer::class
+    private val scheduleRecovery = Command.ScheduleRecovery::class
 
     /** Every (state, input) pair: the outcome type and the command types, in order. */
     private val table = listOf(
@@ -97,6 +98,21 @@ class EngineTest {
         Case("trigger", Input.TimerElapsed(SessionId(1)), ended, listOf(clear)),
         Case("trigger", Input.CommandFailed("x", null), ignored, emptyList()),
         Case("trigger", Input.Reconcile(ReconcileCause.TimeZoneChanged), reconciled, listOf(apply)),
+        Case("idle", Input.RecoveryRequested, rejected, emptyList()),
+        Case("idle", Input.RecoveryCancelled, ignored, emptyList()),
+        Case("idle", Input.RecoveryElapsed(SessionId(1)), ignored, emptyList()),
+        Case("any anchor", Input.RecoveryRequested, Outcome.RecoveryScheduled::class, listOf(scheduleRecovery)),
+        Case("any anchor", Input.RecoveryCancelled, ignored, emptyList()),
+        Case("any anchor", Input.RecoveryElapsed(SessionId(1)), ignored, emptyList()),
+        Case("timer", Input.RecoveryRequested, Outcome.RecoveryScheduled::class, listOf(scheduleRecovery)),
+        Case("timer", Input.RecoveryCancelled, ignored, emptyList()),
+        Case("timer", Input.RecoveryElapsed(SessionId(1)), ignored, emptyList()),
+        Case("specific anchor", Input.RecoveryRequested, Outcome.RecoveryScheduled::class, listOf(scheduleRecovery)),
+        Case("specific anchor", Input.RecoveryCancelled, ignored, emptyList()),
+        Case("specific anchor", Input.RecoveryElapsed(SessionId(1)), ignored, emptyList()),
+        Case("trigger", Input.RecoveryRequested, Outcome.RecoveryScheduled::class, listOf(scheduleRecovery)),
+        Case("trigger", Input.RecoveryCancelled, ignored, emptyList()),
+        Case("trigger", Input.RecoveryElapsed(SessionId(1)), ignored, emptyList()),
     )
 
     @Test
@@ -129,6 +145,9 @@ class EngineTest {
         is Input.TimerElapsed -> "timer"
         is Input.CommandFailed -> "failed"
         is Input.Reconcile -> "reconcile"
+        Input.RecoveryRequested -> "recovery_requested"
+        Input.RecoveryCancelled -> "recovery_cancelled"
+        is Input.RecoveryElapsed -> "recovery_elapsed"
     }
 
     @Test
@@ -328,6 +347,17 @@ class EngineTest {
     }
 
     private companion object {
-        val ALL_KINDS = setOf("hold", "stop", "anchor", "emergency", "timer", "failed", "reconcile")
+        val ALL_KINDS = setOf(
+            "hold",
+            "stop",
+            "anchor",
+            "emergency",
+            "timer",
+            "failed",
+            "reconcile",
+            "recovery_requested",
+            "recovery_cancelled",
+            "recovery_elapsed",
+        )
     }
 }

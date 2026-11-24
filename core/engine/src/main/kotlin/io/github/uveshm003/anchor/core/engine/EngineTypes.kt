@@ -9,6 +9,7 @@ import io.github.uveshm003.anchor.core.model.ModeId
 import io.github.uveshm003.anchor.core.model.Session
 import io.github.uveshm003.anchor.core.model.SessionId
 import io.github.uveshm003.anchor.core.model.UnlockRecord
+import java.time.Duration
 import java.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -22,6 +23,22 @@ data class EngineState(
     val nextSessionId: Long = 1,
     /** A command for the active session failed; the next reconcile retries by recomputing desired state. */
     val degraded: Boolean = false,
+    /** Lost-anchor recovery counting down for the active session (see [Recovery]). */
+    val recovery: PendingRecovery? = null,
+)
+
+/**
+ * A lost-anchor recovery request. [countedMillis] is monotonic time already counted, up to the stamp
+ * ([stampElapsed] in boot [stampBoot]); time in a boot that ended before it was stamped is lost, so a reboot pauses
+ * the countdown but never resets it. [requestedAt] bounds it by wall clock so it always completes.
+ */
+@Serializable
+data class PendingRecovery(
+    val sessionId: SessionId,
+    @Serializable(with = InstantAsEpochMillis::class) val requestedAt: Instant,
+    val countedMillis: Long,
+    val stampBoot: Int,
+    val stampElapsed: Long,
 )
 
 /** The running session plus the mode as it was when it started (later edits don't change a running session). */
@@ -39,6 +56,10 @@ data class Environment(
     val defaultModeId: ModeId? = null,
     val essentials: Set<String> = emptySet(),
     val emergencyQuotaPerWeek: Int = DEFAULT_EMERGENCY_QUOTA,
+    /** `SystemClock.elapsedRealtime()`: monotonic, includes deep sleep, resets on reboot. */
+    val elapsedRealtimeMillis: Long = 0,
+    /** `Settings.Global.BOOT_COUNT`, to tell boots apart. */
+    val bootCount: Int = 0,
 )
 
 const val DEFAULT_EMERGENCY_QUOTA = 3
@@ -74,6 +95,19 @@ sealed interface Input {
     @Serializable
     @SerialName("reconcile")
     data class Reconcile(val cause: ReconcileCause) : Input
+
+    /** Lost anchor: end the active session after a 24 h delay, whatever its exit rule or the quota. */
+    @Serializable
+    @SerialName("recovery_requested")
+    data object RecoveryRequested : Input
+
+    @Serializable
+    @SerialName("recovery_cancelled")
+    data object RecoveryCancelled : Input
+
+    @Serializable
+    @SerialName("recovery_elapsed")
+    data class RecoveryElapsed(val sessionId: SessionId) : Input
 }
 
 @Serializable
@@ -114,6 +148,16 @@ sealed interface Command {
     @Serializable
     @SerialName("cancel_timer")
     data class CancelTimer(override val id: String, val sessionId: SessionId) : Command
+
+    /** Wake at `elapsedRealtime` [elapsedRealtimeAt] (monotonic) to check the recovery again. */
+    @Serializable
+    @SerialName("schedule_recovery")
+    data class ScheduleRecovery(override val id: String, val sessionId: SessionId, val elapsedRealtimeAt: Long) :
+        Command
+
+    @Serializable
+    @SerialName("cancel_recovery")
+    data class CancelRecovery(override val id: String, val sessionId: SessionId) : Command
 }
 
 /** What happened, for the UI. Rejections and ignores are values, never exceptions. */
@@ -129,6 +173,11 @@ sealed interface Outcome {
     data object Reconciled : Outcome
 
     data class Degraded(val commandId: String) : Outcome
+
+    /** Recovery is counting down; the session ends after [remaining] more monotonic time. */
+    data class RecoveryScheduled(val remaining: Duration) : Outcome
+
+    data object RecoveryCancelled : Outcome
 }
 
 sealed interface RejectReason {
@@ -152,8 +201,10 @@ sealed interface RejectReason {
 
     /** Quota used up; the next unlock frees up at [nextAvailableAt]. Lost-anchor recovery is the way out. */
     data class QuotaExhausted(val nextAvailableAt: Instant) : RejectReason
+
+    data object RecoveryAlreadyPending : RejectReason
 }
 
-enum class IgnoreReason { UnknownAnchor, StaleTimer, StaleCommand }
+enum class IgnoreReason { UnknownAnchor, StaleTimer, StaleCommand, NoRecovery }
 
 data class Transition(val state: EngineState, val commands: List<Command>, val outcome: Outcome)
