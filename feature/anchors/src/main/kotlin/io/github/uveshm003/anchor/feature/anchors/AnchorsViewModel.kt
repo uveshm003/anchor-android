@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.uveshm003.anchor.core.data.repository.AnchorRepository
+import io.github.uveshm003.anchor.core.data.repository.ModeRepository
 import io.github.uveshm003.anchor.core.model.Anchor
 import io.github.uveshm003.anchor.core.model.AnchorId
 import io.github.uveshm003.anchor.core.model.AnchorType
+import io.github.uveshm003.anchor.core.model.ExitRule
 import io.github.uveshm003.anchor.core.nfc.AnchorTags
 import io.github.uveshm003.anchor.core.nfc.NfcAvailability
 import io.github.uveshm003.anchor.core.nfc.NfcStatus
@@ -41,6 +43,7 @@ data class AnchorsUiState(
 @HiltViewModel
 class AnchorsViewModel @Inject constructor(
     private val repository: AnchorRepository,
+    private val modes: ModeRepository,
     private val tags: AnchorTags,
     private val nfcStatus: NfcStatus,
 ) : ViewModel() {
@@ -91,8 +94,14 @@ class AnchorsViewModel @Inject constructor(
         viewModelScope.launch { repository.upsert(anchor.copy(name = name.trim())) }
     }
 
+    /** Unpairs [anchor]; modes that required it fall back to any anchor, so no mode is left impossible to end. */
     fun unpair(anchor: Anchor) {
-        viewModelScope.launch { repository.delete(anchor.id) }
+        viewModelScope.launch {
+            modes.getModes()
+                .filter { (it.exitRule as? ExitRule.RequiresAnchor)?.anchorId == anchor.id }
+                .forEach { modes.upsert(it.copy(exitRule = ExitRule.RequiresAnchor())) }
+            repository.delete(anchor.id)
+        }
     }
 
     override fun onCleared() {

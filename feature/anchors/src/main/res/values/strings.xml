@@ -22,4 +22,7 @@
     <string name="feature_anchors_name">Name</string>
     <string name="feature_anchors_name_hint">Desk</string>
     <string name="feature_anchors_save">Save</string>
+    <string name="feature_anchors_unpair_title">Unpair %1$s?</string>
+    <string name="feature_anchors_unpair_body">Tapping this sticker will no longer start or end sessions. Modes that need this anchor will accept any of your anchors instead.</string>
+    <string name="feature_anchors_unpair_confirm">Unpair</string>
 </resources>
