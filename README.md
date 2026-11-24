@@ -49,7 +49,7 @@ package + count + time unless you opt in to keeping titles.
 
 | Milestone | Goal | Release | Status |
 |---|---|---|---|
-| **MVP** | Create a mode, hold to start, block apps, tap an NFC anchor to stop, emergency unlock ([plan](docs/mvp.md)) | `v0.1.0` | In progress |
+| **MVP** | Create a mode, hold to start, block apps, tap an NFC anchor to stop, emergency unlock ([plan](docs/mvp.md)) | `v0.1.0` | Done |
 | M0 Foundation | Design system, app shell, test infrastructure, architecture docs | – | Mostly done |
 | M1 Modes & blocking core | What the MVP leaves out: templates, reorder, ongoing notification, battery/OEM guides | `v0.2.0` | Planned |
 | M2 Anchors | What the MVP leaves out: QR anchors, lost-anchor recovery, specific-anchor exit rule | `v0.2.0` | Planned |
