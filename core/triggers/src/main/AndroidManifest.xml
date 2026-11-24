@@ -3,11 +3,27 @@
 
     <!-- Timer modes end on time when the user allows exact alarms; otherwise an inexact alarm is used. -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- Re-apply an active session and re-register its alarms after a reboot. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application>
         <receiver
             android:name=".timer.TimerReceiver"
             android:exported="false" />
+        <receiver
+            android:name=".recovery.RecoveryReceiver"
+            android:exported="false" />
+        <!-- System broadcasts only (protected actions), so it isn't exported. -->
+        <receiver
+            android:name=".system.SystemEventsReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
