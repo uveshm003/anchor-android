@@ -111,7 +111,7 @@ sealed interface Input {
 }
 
 @Serializable
-enum class ReconcileCause { AppStart, Boot, PackageReplaced, TimeChanged, TimeZoneChanged }
+enum class ReconcileCause { AppStart, Boot, PackageReplaced, TimeChanged, TimeZoneChanged, PermissionGranted }
 
 /** Side effects for the Android executors. Every command has a stable [id]; executors dedupe by it. */
 @Serializable
@@ -148,6 +148,23 @@ sealed interface Command {
     @Serializable
     @SerialName("cancel_timer")
     data class CancelTimer(override val id: String, val sessionId: SessionId) : Command
+
+    /** The ongoing "session is on" notification (what the block screen shows, in the shade). */
+    @Serializable
+    @SerialName("show_notification")
+    data class ShowSessionNotification(
+        override val id: String,
+        val sessionId: SessionId,
+        val modeName: String,
+        @Serializable(with = InstantAsEpochMillis::class) val startedAt: Instant,
+        val exitRule: ExitRule,
+        @Serializable(with = InstantAsEpochMillis::class) val endsAt: Instant?,
+        val requiredAnchorName: String?,
+    ) : Command
+
+    @Serializable
+    @SerialName("hide_notification")
+    data class HideSessionNotification(override val id: String) : Command
 
     /** Wake at `elapsedRealtime` [elapsedRealtimeAt] (monotonic) to check the recovery again. */
     @Serializable
