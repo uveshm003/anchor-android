@@ -1,5 +1,7 @@
 # MVP plan
 
+**Status: done (2026-11-24), released as `v0.1.0`.** All issues in the MVP milestone are closed; the deferred list below is next.
+
 **User decision (2026-11-23):** "Can you just create working MVP first & change the plan accordingly & then we can
 add more & more features??" plus "proceed complete as much as you can in this session I need this app completed
 ASAP". This is the user's OK for the MVP plan below, recorded here as `CLAUDE.md` asks; each MVP PR quotes it
