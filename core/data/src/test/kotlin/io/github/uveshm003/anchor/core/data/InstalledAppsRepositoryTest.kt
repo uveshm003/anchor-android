@@ -11,6 +11,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import io.github.uveshm003.anchor.core.data.repository.AndroidInstalledAppsRepository
+import io.github.uveshm003.anchor.core.data.repository.AppCategory
 import io.github.uveshm003.anchor.core.data.repository.InstalledApp
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -24,10 +25,11 @@ class InstalledAppsRepositoryTest {
     private val context = ApplicationProvider.getApplicationContext<android.app.Application>()
     private val pm = shadowOf(context.packageManager)
 
-    private fun install(pkg: String, label: String) {
+    private fun install(pkg: String, label: String, category: Int = ApplicationInfo.CATEGORY_UNDEFINED) {
         val app = ApplicationInfo().apply {
             packageName = pkg
             nonLocalizedLabel = label
+            this.category = category
         }
         val info = ResolveInfo().apply {
             activityInfo =
@@ -53,7 +55,7 @@ class InstalledAppsRepositoryTest {
 
     @Test
     fun lists_launchable_apps_sorted_by_label_without_anchor_and_refreshes_on_changes() = runTest {
-        install("com.zebra", "Zebra")
+        install("com.zebra", "Zebra", ApplicationInfo.CATEGORY_SOCIAL)
         install("com.apple", "apple")
         install(context.packageName, "Anchor")
         val repo = AndroidInstalledAppsRepository(context, UnconfinedTestDispatcher(testScheduler))
@@ -61,7 +63,10 @@ class InstalledAppsRepositoryTest {
         repo.apps.test {
             assertThat(
                 awaitItem(),
-            ).containsExactly(InstalledApp("com.apple", "apple"), InstalledApp("com.zebra", "Zebra")).inOrder()
+            ).containsExactly(
+                InstalledApp("com.apple", "apple"),
+                InstalledApp("com.zebra", "Zebra", AppCategory.Social),
+            ).inOrder()
 
             install("com.mango", "Mango")
             context.sendBroadcast(
