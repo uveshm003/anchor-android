@@ -4,6 +4,7 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.core.content.IntentCompat
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -18,7 +19,7 @@ class AnchorTapActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        intent.getParcelableExtra(NfcAdapter.EXTRA_TAG, Tag::class.java)?.let { tags.onTag(it.id) }
+        IntentCompat.getParcelableExtra(intent, NfcAdapter.EXTRA_TAG, Tag::class.java)?.let { tags.onTag(it.id) }
         finish()
     }
 }
