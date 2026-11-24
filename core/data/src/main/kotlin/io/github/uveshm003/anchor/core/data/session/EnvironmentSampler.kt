@@ -1,5 +1,6 @@
 package io.github.uveshm003.anchor.core.data.session
 
+import io.github.uveshm003.anchor.core.data.platform.DeviceUptime
 import io.github.uveshm003.anchor.core.data.platform.EssentialApps
 import io.github.uveshm003.anchor.core.data.repository.AnchorRepository
 import io.github.uveshm003.anchor.core.data.repository.ModeRepository
@@ -16,6 +17,7 @@ class EnvironmentSampler @Inject constructor(
     private val anchors: AnchorRepository,
     private val settings: SettingsRepository,
     private val essentialApps: EssentialApps,
+    private val uptime: DeviceUptime,
 ) {
     suspend fun sample(): Environment {
         val user = settings.settings.first()
@@ -26,6 +28,8 @@ class EnvironmentSampler @Inject constructor(
             defaultModeId = user.defaultModeId,
             essentials = essentialApps.packages(includeDefaultSms = user.allowDefaultSmsApp),
             emergencyQuotaPerWeek = user.emergencyQuotaPerWeek,
+            elapsedRealtimeMillis = uptime.elapsedRealtimeMillis(),
+            bootCount = uptime.bootCount(),
         )
     }
 }

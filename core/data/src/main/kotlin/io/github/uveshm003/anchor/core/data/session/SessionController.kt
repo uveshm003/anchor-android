@@ -93,6 +93,8 @@ class SessionController @Inject constructor(
         is Command.ApplyAppPolicy -> sessionId
         is Command.ScheduleTimer -> sessionId
         is Command.CancelTimer -> sessionId
+        is Command.ScheduleRecovery -> sessionId
+        is Command.CancelRecovery -> sessionId
         is Command.ClearAppPolicy -> null
     }
 
@@ -105,6 +107,8 @@ class SessionController @Inject constructor(
             Command.ClearAppPolicy::class,
             Command.ScheduleTimer::class,
             Command.CancelTimer::class,
+            Command.ScheduleRecovery::class,
+            Command.CancelRecovery::class,
         )
 
         /** Fails fast on a missing or duplicate handler, so "not mine" and "failed" are never confused. */

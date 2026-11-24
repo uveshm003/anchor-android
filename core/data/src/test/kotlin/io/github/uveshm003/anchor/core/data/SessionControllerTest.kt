@@ -3,6 +3,7 @@ package io.github.uveshm003.anchor.core.data
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import io.github.uveshm003.anchor.core.common.time.TestClock
+import io.github.uveshm003.anchor.core.data.platform.DeviceUptime
 import io.github.uveshm003.anchor.core.data.repository.OfflineAnchorRepository
 import io.github.uveshm003.anchor.core.data.repository.OfflineModeRepository
 import io.github.uveshm003.anchor.core.data.repository.QuotaChange
@@ -78,6 +79,11 @@ class SessionControllerTest {
             anchors = OfflineAnchorRepository(database.anchorDao()),
             settings = settings,
             essentialApps = { setOf("com.android.dialer") },
+            uptime = object : DeviceUptime {
+                override fun elapsedRealtimeMillis() = 0L
+
+                override fun bootCount() = 1
+            },
         ),
         store = EngineStore(database.transactions(), database.engineDao(), database.sessionDao()),
         executors = setOf(executor),
