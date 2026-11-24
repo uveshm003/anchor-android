@@ -12,6 +12,7 @@ import io.github.uveshm003.anchor.core.data.repository.UnlockHistoryRepository
 import io.github.uveshm003.anchor.core.data.session.SessionRequests
 import io.github.uveshm003.anchor.core.engine.Input
 import io.github.uveshm003.anchor.core.engine.Outcome
+import io.github.uveshm003.anchor.core.engine.ReconcileCause
 import io.github.uveshm003.anchor.core.engine.RejectReason
 import io.github.uveshm003.anchor.core.model.Mode
 import io.github.uveshm003.anchor.core.model.ModeId
@@ -123,6 +124,11 @@ class HomeViewModel @Inject constructor(
             val outcome = session.requests.request(Input.HoldToStart(modeId))
             if (outcome is Outcome.Rejected) _effects.send(HomeEffect.Rejected(outcome.reason))
         }
+    }
+
+    /** A permission the session uses (notifications) was just granted: re-assert the session's effects. */
+    fun permissionGranted() {
+        viewModelScope.launch { session.requests.request(Input.Reconcile(ReconcileCause.PermissionGranted)) }
     }
 
     fun cancelRecovery() {

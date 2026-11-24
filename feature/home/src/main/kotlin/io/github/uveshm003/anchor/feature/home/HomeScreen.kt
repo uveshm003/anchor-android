@@ -1,7 +1,13 @@
 package io.github.uveshm003.anchor.feature.home
 
+import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +49,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.uveshm003.anchor.core.designsystem.component.AnchorButton
@@ -77,6 +84,11 @@ fun HomeRoute(
     val snackbar = remember { SnackbarHostState() }
     var explainBlocker by rememberSaveable { mutableStateOf(false) }
     val resources = LocalResources.current
+    val context = LocalContext.current
+    val notificationPermission =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) viewModel.permissionGranted()
+        }
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
@@ -92,7 +104,16 @@ fun HomeRoute(
         snackbar = snackbar,
         actions = HomeActions(
             onSelect = viewModel::select,
-            onStart = viewModel::start,
+            onStart = {
+                viewModel.start()
+                // Asked for when the user starts their first session, never at launch.
+                if (needsNotificationPermission(
+                        context,
+                    )
+                ) {
+                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            },
             onCreateMode = onCreateMode,
             onEmergencyUnlock = onEmergencyUnlock,
             onTurnOnBlocking = { explainBlocker = true },
@@ -297,6 +318,11 @@ private fun BlockerDisclosureDialog(onDismiss: () -> Unit) {
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.feature_home_not_now)) } },
     )
 }
+
+private fun needsNotificationPermission(context: Context): Boolean =
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+        PackageManager.PERMISSION_GRANTED
 
 private fun RejectReason.message(): Int = when (this) {
     is RejectReason.AlreadyActive -> R.string.feature_home_reject_active
