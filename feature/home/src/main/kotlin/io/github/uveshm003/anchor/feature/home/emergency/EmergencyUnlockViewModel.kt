@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class EmergencyStep { Intro, Hold, Type, Done, Exhausted, NoSession }
+enum class EmergencyStep { Intro, Hold, Type, Done, Exhausted, RecoveryStarted, NoSession }
 
 data class EmergencyUiState(
     val step: EmergencyStep = EmergencyStep.Intro,
@@ -31,6 +31,8 @@ data class EmergencyUiState(
     val sentenceIndex: Int = 0,
     val typed: String = "",
     val mismatch: Boolean = false,
+    /** A lost-anchor recovery is already counting down for this session. */
+    val recoveryPending: Boolean = false,
 )
 
 /**
@@ -54,22 +56,29 @@ class EmergencyUnlockViewModel @Inject constructor(
 
     val uiState: StateFlow<EmergencyUiState> = combine(
         flow,
-        sessions.activeSession,
+        sessions.engineState,
         unlocks.remainingEmergencyUnlocks,
         settings.settings,
     ) {
             state,
-            active,
+            engine,
             left,
             user,
         ->
         val step = when {
             state.step == EmergencyStep.Done -> EmergencyStep.Done
-            active == null -> EmergencyStep.NoSession
+            state.step == EmergencyStep.RecoveryStarted -> EmergencyStep.RecoveryStarted
+            engine.active == null -> EmergencyStep.NoSession
             left == 0 && state.step == EmergencyStep.Intro -> EmergencyStep.Exhausted
             else -> state.step
         }
-        state.copy(step = step, left = left, quota = user.emergencyQuotaPerWeek)
+        state.copy(
+            step = step,
+            left = left,
+            quota = user.emergencyQuotaPerWeek,
+            recoveryPending =
+                engine.recovery != null,
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), flow.value)
 
     fun begin() = flow.update { it.copy(step = EmergencyStep.Hold) }
@@ -101,6 +110,16 @@ class EmergencyUnlockViewModel @Inject constructor(
                 else -> EmergencyStep.NoSession
             }
             flow.update { it.copy(step = step) }
+        }
+    }
+
+    /** Lost anchor and no unlocks left: end the session after a 24 h delay (cancellable from Home). */
+    fun startRecovery() {
+        viewModelScope.launch {
+            val outcome = requests.request(Input.RecoveryRequested)
+            val started = outcome is Outcome.RecoveryScheduled ||
+                (outcome is Outcome.Rejected && outcome.reason == RejectReason.RecoveryAlreadyPending)
+            if (started) flow.update { it.copy(step = EmergencyStep.RecoveryStarted) }
         }
     }
 

@@ -66,7 +66,12 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 @Composable
-fun HomeRoute(onCreateMode: () -> Unit, onEmergencyUnlock: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeRoute(
+    onCreateMode: () -> Unit,
+    onEmergencyUnlock: () -> Unit,
+    onPairAnchor: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel(),
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val now by viewModel.now.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
@@ -91,6 +96,8 @@ fun HomeRoute(onCreateMode: () -> Unit, onEmergencyUnlock: () -> Unit, viewModel
             onCreateMode = onCreateMode,
             onEmergencyUnlock = onEmergencyUnlock,
             onTurnOnBlocking = { explainBlocker = true },
+            onCancelRecovery = viewModel::cancelRecovery,
+            onPairAnchor = onPairAnchor,
         ),
     )
     if (explainBlocker) BlockerDisclosureDialog(onDismiss = { explainBlocker = false })
@@ -102,6 +109,8 @@ data class HomeActions(
     val onCreateMode: () -> Unit = {},
     val onEmergencyUnlock: () -> Unit = {},
     val onTurnOnBlocking: () -> Unit = {},
+    val onCancelRecovery: () -> Unit = {},
+    val onPairAnchor: () -> Unit = {},
 )
 
 @Composable
@@ -123,7 +132,7 @@ fun HomeScreen(
             when {
                 state.loading -> Unit
 
-                active != null -> ActiveSession(active, state, now, zone, actions.onEmergencyUnlock)
+                active != null -> ActiveSession(active, state, now, zone, actions)
 
                 state.modes.isEmpty() -> EmptyState(
                     icon = AnchorIcons.Anchor,
@@ -146,6 +155,7 @@ private fun Idle(state: HomeUiState, actions: HomeActions) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (!state.blockerEnabled) BlockerOffCard(actions.onTurnOnBlocking)
+        if (state.offerRepair) RepairCard(actions.onPairAnchor)
         Text(
             stringResource(R.string.feature_home_choose_mode),
             style = MaterialTheme.typography.titleMedium,
@@ -185,6 +195,17 @@ private fun ModeChoice(mode: Mode, selected: Boolean, onSelect: () -> Unit) {
 }
 
 @Composable
+private fun RepairCard(onPairAnchor: () -> Unit) {
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.feature_home_repair_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.feature_home_repair_body), style = MaterialTheme.typography.bodyMedium)
+            AnchorButton(text = stringResource(R.string.feature_home_repair_action), onClick = onPairAnchor)
+        }
+    }
+}
+
+@Composable
 private fun BlockerOffCard(onTurnOn: () -> Unit) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -196,13 +217,7 @@ private fun BlockerOffCard(onTurnOn: () -> Unit) {
 }
 
 @Composable
-private fun ActiveSession(
-    session: Session,
-    state: HomeUiState,
-    now: Instant,
-    zone: ZoneId,
-    onEmergencyUnlock: () -> Unit,
-) {
+private fun ActiveSession(session: Session, state: HomeUiState, now: Instant, zone: ZoneId, actions: HomeActions) {
     val mode = state.modes.find { it.id == session.modeId }
     Column(
         Modifier.widthIn(max = 640.dp).fillMaxWidth().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -225,7 +240,24 @@ private fun ActiveSession(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(howItEnds(session, zone), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
-        AnchorOutlinedButton(text = stringResource(R.string.feature_home_emergency_unlock), onClick = onEmergencyUnlock)
+        state.recoveryRemaining?.let { remaining ->
+            Text(
+                stringResource(
+                    R.string.feature_home_recovery_countdown,
+                    remaining.toHours(),
+                    remaining.toMinutesPart(),
+                ),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+            )
+            TextButton(onClick = actions.onCancelRecovery) {
+                Text(stringResource(R.string.feature_home_recovery_cancel))
+            }
+        }
+        AnchorOutlinedButton(
+            text = stringResource(R.string.feature_home_emergency_unlock),
+            onClick = actions.onEmergencyUnlock,
+        )
         Text(
             stringResource(R.string.feature_home_emergency_left, state.emergencyUnlocksLeft, state.emergencyQuota),
             style = MaterialTheme.typography.bodyMedium,

@@ -68,7 +68,11 @@ fun AnchorApp(
 
 /** The real destinations; tests of the shell pass stand-ins instead. */
 fun NavGraphBuilder.anchorGraph(navController: NavHostController) {
-    homeScreen(navController, onCreateMode = { navController.navigate(ModeEditorRoute()) })
+    homeScreen(
+        navController,
+        onCreateMode = { navController.navigate(ModeEditorRoute()) },
+        onPairAnchor = { navController.navigateToTopLevel(TopLevelDestination.Anchors) },
+    )
     modesScreen(navController)
     anchorsScreen()
     settingsScreen()

@@ -41,8 +41,18 @@
     <string name="feature_home_emergency_unlock_now">Unlock now</string>
     <string name="feature_home_emergency_done">Session ended. Your apps are unblocked.</string>
     <string name="feature_home_emergency_exhausted_title">No emergency unlocks left this week</string>
-    <string name="feature_home_emergency_exhausted_body">Your quota frees up as unlocks turn a week old. If you have lost your anchor, lost-anchor recovery is coming in the next update; until then you can turn off Anchor app blocking in Settings › Accessibility.</string>
+    <string name="feature_home_emergency_exhausted_body">Your quota frees up as unlocks turn a week old.</string>
     <string name="feature_home_emergency_no_session">No session is running.</string>
+    <string name="feature_home_recovery_explain">Lost your anchor? Start lost-anchor recovery: this session ends 24 hours from now. You can cancel it from Home at any time.</string>
+    <string name="feature_home_recovery_start">Start lost-anchor recovery</string>
+    <string name="feature_home_recovery_already_running">Lost-anchor recovery is already running. Home shows how long is left.</string>
+    <string name="feature_home_recovery_started_title">Recovery started</string>
+    <string name="feature_home_recovery_started_body">This session ends in 24 hours. Restarting the phone pauses the countdown but never resets it. You can cancel from Home.</string>
+    <string name="feature_home_recovery_countdown">Lost-anchor recovery ends this session in %1$d h %2$d min.</string>
+    <string name="feature_home_recovery_cancel">Cancel recovery</string>
+    <string name="feature_home_repair_title">Your last session ended through recovery</string>
+    <string name="feature_home_repair_body">Pair a new anchor, or pair your old sticker again if you found it.</string>
+    <string name="feature_home_repair_action">Pair an anchor</string>
     <string-array name="feature_home_emergency_sentences">
         <item>I am choosing to end my focus session early</item>
         <item>I will come back to what matters after this</item>

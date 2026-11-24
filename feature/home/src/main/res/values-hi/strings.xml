@@ -41,8 +41,18 @@
     <string name="feature_home_emergency_unlock_now">अभी अनलॉक करें</string>
     <string name="feature_home_emergency_done">सत्र खत्म हुआ। आपके ऐप अनब्लॉक हो गए हैं।</string>
     <string name="feature_home_emergency_exhausted_title">इस हफ़्ते कोई आपातकालीन अनलॉक नहीं बचा</string>
-    <string name="feature_home_emergency_exhausted_body">अनलॉक एक हफ़्ता पुराने होते ही आपका कोटा फिर से मिल जाएगा। अगर आपका एंकर खो गया है, तो खोए एंकर की रिकवरी अगले अपडेट में आ रही है; तब तक आप सेटिंग › सुलभता में Anchor ऐप ब्लॉकिंग बंद कर सकते हैं।</string>
+    <string name="feature_home_emergency_exhausted_body">अनलॉक एक हफ़्ता पुराने होते ही आपका कोटा फिर से मिल जाएगा।</string>
     <string name="feature_home_emergency_no_session">कोई सत्र नहीं चल रहा है।</string>
+    <string name="feature_home_recovery_explain">एंकर खो गया? खोए एंकर की रिकवरी शुरू करें: यह सत्र अब से 24 घंटे बाद खत्म होगा। आप इसे होम से कभी भी रद्द कर सकते हैं।</string>
+    <string name="feature_home_recovery_start">खोए एंकर की रिकवरी शुरू करें</string>
+    <string name="feature_home_recovery_already_running">खोए एंकर की रिकवरी पहले से चल रही है। होम पर बचा हुआ समय दिखता है।</string>
+    <string name="feature_home_recovery_started_title">रिकवरी शुरू हो गई</string>
+    <string name="feature_home_recovery_started_body">यह सत्र 24 घंटे में खत्म होगा। फ़ोन रीस्टार्ट करने से उलटी गिनती रुकती है, पर कभी शुरू से नहीं होती। आप होम से इसे रद्द कर सकते हैं।</string>
+    <string name="feature_home_recovery_countdown">खोए एंकर की रिकवरी इस सत्र को %1$d घंटे %2$d मिनट में खत्म करेगी।</string>
+    <string name="feature_home_recovery_cancel">रिकवरी रद्द करें</string>
+    <string name="feature_home_repair_title">आपका पिछला सत्र रिकवरी से खत्म हुआ</string>
+    <string name="feature_home_repair_body">नया एंकर जोड़ें, या पुराना स्टिकर मिल गया हो तो उसे फिर से जोड़ें।</string>
+    <string name="feature_home_repair_action">एंकर जोड़ें</string>
     <string-array name="feature_home_emergency_sentences">
         <item>मैं अपना फ़ोकस सत्र जल्दी खत्म करना चुन रहा हूँ</item>
         <item>इसके बाद मैं ज़रूरी काम पर लौटूँगा</item>

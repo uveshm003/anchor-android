@@ -53,6 +53,7 @@ fun EmergencyUnlockRoute(onClose: () -> Unit, viewModel: EmergencyUnlockViewMode
             onHoldCompleted = viewModel::holdCompleted,
             onType = viewModel::type,
             onSubmit = viewModel::submit,
+            onStartRecovery = viewModel::startRecovery,
         ),
     )
 }
@@ -64,6 +65,7 @@ data class EmergencyActions(
     /** Returns whether the change is accepted (pastes are not). */
     val onType: (String) -> Boolean = { true },
     val onSubmit: (String) -> Unit = {},
+    val onStartRecovery: () -> Unit = {},
 )
 
 @Composable
@@ -118,6 +120,21 @@ private fun StepContent(state: EmergencyUiState, actions: EmergencyActions) {
         EmergencyStep.Exhausted -> {
             Heading(stringResource(R.string.feature_home_emergency_exhausted_title))
             Body(stringResource(R.string.feature_home_emergency_exhausted_body))
+            if (state.recoveryPending) {
+                Body(stringResource(R.string.feature_home_recovery_already_running))
+            } else {
+                Body(stringResource(R.string.feature_home_recovery_explain))
+                AnchorButton(
+                    text = stringResource(R.string.feature_home_recovery_start),
+                    onClick = actions.onStartRecovery,
+                )
+            }
+        }
+
+        EmergencyStep.RecoveryStarted -> {
+            Heading(stringResource(R.string.feature_home_recovery_started_title))
+            Body(stringResource(R.string.feature_home_recovery_started_body))
+            AnchorButton(text = stringResource(R.string.feature_home_close), onClick = actions.onClose)
         }
 
         EmergencyStep.NoSession -> {

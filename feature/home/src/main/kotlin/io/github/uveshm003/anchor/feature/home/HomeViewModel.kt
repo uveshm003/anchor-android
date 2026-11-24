@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.uveshm003.anchor.core.data.platform.BlockerStatus
+import io.github.uveshm003.anchor.core.data.platform.RecoveryCountdown
 import io.github.uveshm003.anchor.core.data.repository.ModeRepository
 import io.github.uveshm003.anchor.core.data.repository.SessionRepository
 import io.github.uveshm003.anchor.core.data.repository.SettingsRepository
@@ -15,7 +16,9 @@ import io.github.uveshm003.anchor.core.engine.RejectReason
 import io.github.uveshm003.anchor.core.model.Mode
 import io.github.uveshm003.anchor.core.model.ModeId
 import io.github.uveshm003.anchor.core.model.Session
+import io.github.uveshm003.anchor.core.model.SessionEnd
 import java.time.Clock
+import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import javax.inject.Inject
@@ -40,6 +43,10 @@ data class HomeUiState(
     val blockerEnabled: Boolean = true,
     val emergencyUnlocksLeft: Int = 0,
     val emergencyQuota: Int = 0,
+    /** Time left on a lost-anchor recovery for the active session, if one is running. */
+    val recoveryRemaining: Duration? = null,
+    /** The last session ended through recovery: offer to pair a new anchor. */
+    val offerRepair: Boolean = false,
 )
 
 sealed interface HomeEffect {
@@ -54,6 +61,7 @@ class SessionSources @Inject constructor(
     val sessions: SessionRepository,
     val unlocks: UnlockHistoryRepository,
     val requests: SessionRequests,
+    val countdown: RecoveryCountdown,
 )
 
 @HiltViewModel
@@ -66,24 +74,6 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
     private val selected = MutableStateFlow<ModeId?>(null)
 
-    val uiState: StateFlow<HomeUiState> = combine(
-        combine(modes.modes, settings.settings, selected, ::Triple),
-        session.sessions.activeSession,
-        blocker.enabled,
-        session.unlocks.remainingEmergencyUnlocks,
-    ) { (all, user, pick), active, enabled, left ->
-        val ordered = all.sortedByDescending { it.id == user.defaultModeId }
-        HomeUiState(
-            loading = false,
-            modes = ordered,
-            selectedModeId = pick?.takeIf { id -> ordered.any { it.id == id } } ?: ordered.firstOrNull()?.id,
-            active = active,
-            blockerEnabled = enabled,
-            emergencyUnlocksLeft = left,
-            emergencyQuota = user.emergencyQuotaPerWeek,
-        )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState())
-
     /** Wall-clock now for the elapsed time, sampled from the injected Clock (not a counter). */
     val now: StateFlow<Instant> = flow {
         while (true) {
@@ -91,6 +81,26 @@ class HomeViewModel @Inject constructor(
             delay(TICK_MS)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), clock.instant())
+
+    val uiState: StateFlow<HomeUiState> = combine(
+        combine(modes.modes, settings.settings, selected, ::Triple),
+        combine(session.sessions.engineState, session.sessions.history, now, ::Triple),
+        blocker.enabled,
+        session.unlocks.remainingEmergencyUnlocks,
+    ) { (all, user, pick), (engine, history, _), enabled, left ->
+        val ordered = all.sortedByDescending { it.id == user.defaultModeId }
+        HomeUiState(
+            loading = false,
+            modes = ordered,
+            selectedModeId = pick?.takeIf { id -> ordered.any { it.id == id } } ?: ordered.firstOrNull()?.id,
+            active = engine.active?.session,
+            blockerEnabled = enabled,
+            emergencyUnlocksLeft = left,
+            emergencyQuota = user.emergencyQuotaPerWeek,
+            recoveryRemaining = engine.recovery?.let { session.countdown.remaining(it) },
+            offerRepair = engine.active == null && history.firstOrNull()?.endedBy == SessionEnd.Recovery,
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState())
 
     val zone: ZoneId get() = clock.zone
 
@@ -113,6 +123,10 @@ class HomeViewModel @Inject constructor(
             val outcome = session.requests.request(Input.HoldToStart(modeId))
             if (outcome is Outcome.Rejected) _effects.send(HomeEffect.Rejected(outcome.reason))
         }
+    }
+
+    fun cancelRecovery() {
+        viewModelScope.launch { session.requests.request(Input.RecoveryCancelled) }
     }
 
     private companion object {
