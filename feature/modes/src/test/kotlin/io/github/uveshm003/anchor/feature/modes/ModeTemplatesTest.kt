@@ -9,6 +9,7 @@ import io.github.uveshm003.anchor.core.data.repository.InstalledApp
 import io.github.uveshm003.anchor.core.model.AppPolicy
 import io.github.uveshm003.anchor.core.model.ExitRule
 import io.github.uveshm003.anchor.core.testing.MainDispatcherRule
+import io.github.uveshm003.anchor.core.testing.data.FakeAnchorRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeInstalledAppsRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeModeRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeSettingsRepository
@@ -55,6 +56,7 @@ class ModeTemplatesTest {
                 repo,
                 FakeSettingsRepository(),
                 FakeInstalledAppsRepository(apps),
+                FakeAnchorRepository(),
             ) { essentials }
             val state = vm.uiState.first { !it.loading }
             assertThat(state.dirty).isTrue() // nothing saved until the user saves

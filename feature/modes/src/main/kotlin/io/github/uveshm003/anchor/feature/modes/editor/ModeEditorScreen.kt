@@ -54,6 +54,7 @@ import io.github.uveshm003.anchor.core.designsystem.component.AnchorListRow
 import io.github.uveshm003.anchor.core.designsystem.component.AnchorTopAppBar
 import io.github.uveshm003.anchor.core.designsystem.component.ListRowTrailing
 import io.github.uveshm003.anchor.core.designsystem.component.SectionHeader
+import io.github.uveshm003.anchor.core.model.Anchor
 import io.github.uveshm003.anchor.core.model.ModeColor
 import io.github.uveshm003.anchor.core.model.ModeIcon
 import io.github.uveshm003.anchor.core.ui.color
@@ -85,7 +86,7 @@ fun ModeEditorRoute(onDone: () -> Unit, viewModel: ModeEditorViewModel = hiltVie
                 onColor = viewModel::setColor,
                 onAllowList = viewModel::setAllowList,
                 onPickApps = { viewModel.showAppPicker(true) },
-                onTimer = viewModel::setTimer,
+                onExit = viewModel::setExit,
             ),
         )
     }
@@ -99,7 +100,7 @@ data class ModeEditorActions(
     val onColor: (ModeColor) -> Unit = {},
     val onAllowList: (Boolean) -> Unit = {},
     val onPickApps: () -> Unit = {},
-    val onTimer: (Int?) -> Unit = {},
+    val onExit: (ExitChoice) -> Unit = {},
 )
 
 @Composable
@@ -159,7 +160,7 @@ private fun EditorForm(state: ModeEditorUiState, actions: ModeEditorActions) {
     ) {
         LookSection(state, actions)
         AppsSection(state, actions)
-        ExitSection(state.draft.timerMinutes, actions.onTimer)
+        ExitSection(state.draft, state.anchors, actions.onExit)
     }
 }
 
@@ -242,27 +243,50 @@ private fun AppsSection(state: ModeEditorUiState, actions: ModeEditorActions) {
 
 /** Anchor tap or a timer. */
 @Composable
-private fun ExitSection(timerMinutes: Int?, onTimer: (Int?) -> Unit) {
+private fun ExitSection(draft: ModeDraft, anchors: List<Anchor>, onExit: (ExitChoice) -> Unit) {
+    val timer = draft.timerMinutes
+    val specific = draft.anchorId?.takeIf { id -> anchors.any { it.id.value == id } }
     Column {
         SectionHeader(stringResource(R.string.feature_modes_exit))
         Column(Modifier.selectableGroup()) {
             Choice(
                 stringResource(R.string.feature_modes_exit_anchor),
                 stringResource(R.string.feature_modes_exit_anchor_body),
-                timerMinutes == null,
-            ) { onTimer(null) }
+                timer == null && specific == null,
+            ) { onExit(ExitChoice.AnyAnchor) }
+            if (anchors.isNotEmpty()) {
+                Choice(
+                    stringResource(R.string.feature_modes_exit_specific),
+                    stringResource(R.string.feature_modes_exit_specific_body),
+                    timer == null && specific != null,
+                ) { onExit(ExitChoice.SpecificAnchor(specific ?: anchors.first().id.value)) }
+            }
+        }
+        if (timer == null && specific != null) {
+            ChipRow {
+                anchors.forEach { anchor ->
+                    FilterChip(
+                        selected = anchor.id.value == specific,
+                        onClick = { onExit(ExitChoice.SpecificAnchor(anchor.id.value)) },
+                        label = { Text(anchor.name) },
+                        modifier = Modifier.heightIn(min = 48.dp),
+                    )
+                }
+            }
+        }
+        Column(Modifier.selectableGroup()) {
             Choice(
                 stringResource(R.string.feature_modes_exit_timer),
                 stringResource(R.string.feature_modes_exit_timer_body),
-                timerMinutes != null,
-            ) { onTimer(timerMinutes ?: DEFAULT_TIMER) }
+                timer != null,
+            ) { onExit(ExitChoice.Timer(timer ?: DEFAULT_TIMER)) }
         }
-        if (timerMinutes != null) {
+        if (timer != null) {
             ChipRow {
                 TIMER_CHOICES.forEach { minutes ->
                     FilterChip(
-                        selected = minutes == timerMinutes,
-                        onClick = { onTimer(minutes) },
+                        selected = minutes == timer,
+                        onClick = { onExit(ExitChoice.Timer(minutes)) },
                         label = { Text(stringResource(R.string.feature_modes_minutes, minutes)) },
                         modifier = Modifier.heightIn(min = 48.dp),
                     )

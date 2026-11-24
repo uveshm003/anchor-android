@@ -6,6 +6,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import io.github.uveshm003.anchor.core.data.repository.InstalledApp
 import io.github.uveshm003.anchor.core.designsystem.theme.AnchorTheme
+import io.github.uveshm003.anchor.core.model.Anchor
+import io.github.uveshm003.anchor.core.model.AnchorId
+import io.github.uveshm003.anchor.core.model.AnchorType
 import io.github.uveshm003.anchor.core.model.AppPolicy
 import io.github.uveshm003.anchor.core.model.ExitRule
 import io.github.uveshm003.anchor.core.model.Mode
@@ -83,6 +86,18 @@ class ModesScreenshotTest(private val variant: ScreenshotVariant) {
 
     @Test
     fun appPicker() = capture("app_picker") { AppPickerScreen(editor.copy(pickingApps = true), {}, {}, {}, {}) }
+
+    @Test
+    fun modeEditorSpecificAnchor() = capture("mode_editor_specific_anchor") {
+        val anchors = listOf(
+            Anchor(AnchorId(1), "Desk", AnchorType.Nfc, "a".repeat(64)),
+            Anchor(AnchorId(2), "Bedroom", AnchorType.Nfc, "b".repeat(64)),
+        )
+        ModeEditorScreen(
+            editor.copy(draft = editor.draft.copy(timerMinutes = null, anchorId = 2), anchors = anchors),
+            ModeEditorActions(),
+        )
+    }
 
     @Test
     fun templateChooser() = capture("template_chooser") {

@@ -70,4 +70,6 @@
     <string name="feature_modes_template_driving_body">Only maps and music work. Ends with an anchor tap.</string>
     <string name="feature_modes_template_family">Family Time</string>
     <string name="feature_modes_template_family_body">Puts the phone away for 2 hours: social, games, video and news blocked.</string>
+    <string name="feature_modes_exit_specific">A specific anchor</string>
+    <string name="feature_modes_exit_specific_body">Only the anchor you choose ends it, such as the one in your bedroom.</string>
 </resources>

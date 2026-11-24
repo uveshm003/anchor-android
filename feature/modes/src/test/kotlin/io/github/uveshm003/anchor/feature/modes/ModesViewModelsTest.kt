@@ -5,6 +5,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import io.github.uveshm003.anchor.core.data.repository.InstalledApp
+import io.github.uveshm003.anchor.core.model.Anchor
+import io.github.uveshm003.anchor.core.model.AnchorId
+import io.github.uveshm003.anchor.core.model.AnchorType
 import io.github.uveshm003.anchor.core.model.AppPolicy
 import io.github.uveshm003.anchor.core.model.ExitRule
 import io.github.uveshm003.anchor.core.model.Mode
@@ -12,9 +15,11 @@ import io.github.uveshm003.anchor.core.model.ModeColor
 import io.github.uveshm003.anchor.core.model.ModeIcon
 import io.github.uveshm003.anchor.core.model.ModeId
 import io.github.uveshm003.anchor.core.testing.MainDispatcherRule
+import io.github.uveshm003.anchor.core.testing.data.FakeAnchorRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeInstalledAppsRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeModeRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeSettingsRepository
+import io.github.uveshm003.anchor.feature.modes.editor.ExitChoice
 import io.github.uveshm003.anchor.feature.modes.editor.ModeEditorEffect
 import io.github.uveshm003.anchor.feature.modes.editor.ModeEditorViewModel
 import io.github.uveshm003.anchor.feature.modes.list.ModesEffect
@@ -69,7 +74,10 @@ class ModesViewModelsTest {
         repo: FakeModeRepository = FakeModeRepository(),
         settings: FakeSettingsRepository = FakeSettingsRepository(),
         handle: SavedStateHandle = SavedStateHandle(mapOf("modeId" to modeId)),
-    ) = ModeEditorViewModel(handle, repo, settings, FakeInstalledAppsRepository(apps)) { setOf("com.android.dialer") }
+        anchorRepo: FakeAnchorRepository = FakeAnchorRepository(),
+    ) = ModeEditorViewModel(handle, repo, settings, FakeInstalledAppsRepository(apps), anchorRepo) {
+        setOf("com.android.dialer")
+    }
 
     @Test
     fun new_mode_validates_name_and_saves_a_block_list_without_essentials() = runTest {
@@ -86,7 +94,7 @@ class ModesViewModelsTest {
             vm.setColor(ModeColor.Indigo)
             vm.toggleApp("com.social")
             vm.toggleApp("com.android.dialer") // essential: ignored
-            vm.setTimer(45)
+            vm.setExit(ExitChoice.Timer(45))
             cancelAndIgnoreRemainingEvents()
         }
         assertThat(vm.uiState.value.dirty).isTrue()
@@ -119,7 +127,7 @@ class ModesViewModelsTest {
             assertThat(state.draft.packages).containsExactly("com.social", "com.video")
             vm.setAllowList(true)
             vm.setName("Only")
-            vm.setTimer(null)
+            vm.setExit(ExitChoice.AnyAnchor)
             cancelAndIgnoreRemainingEvents()
         }
         vm.effects.test {
@@ -153,5 +161,25 @@ class ModesViewModelsTest {
             assertThat(state.dirty).isTrue()
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun a_specific_anchor_can_be_required_once_one_is_paired() = runTest {
+        val desk = Anchor(AnchorId(4), "Desk", AnchorType.Nfc, "a".repeat(64))
+        val repo = FakeModeRepository()
+        val vm = editor(repo = repo, anchorRepo = FakeAnchorRepository(listOf(desk)))
+        vm.uiState.test {
+            var state = awaitItem()
+            while (state.loading || state.anchors.isEmpty()) state = awaitItem()
+            vm.setName("Sleep")
+            vm.setExit(ExitChoice.SpecificAnchor(desk.id.value))
+            assertThat(expectMostRecentItem().draft.anchorId).isEqualTo(4)
+            cancelAndIgnoreRemainingEvents()
+        }
+        vm.effects.test {
+            vm.save()
+            awaitItem()
+        }
+        assertThat(repo.getModes().single().exitRule).isEqualTo(ExitRule.RequiresAnchor(desk.id))
     }
 }

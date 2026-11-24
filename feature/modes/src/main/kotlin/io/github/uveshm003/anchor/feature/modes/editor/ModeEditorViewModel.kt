@@ -6,10 +6,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.uveshm003.anchor.core.data.platform.EssentialApps
+import io.github.uveshm003.anchor.core.data.repository.AnchorRepository
 import io.github.uveshm003.anchor.core.data.repository.InstalledApp
 import io.github.uveshm003.anchor.core.data.repository.InstalledAppsRepository
 import io.github.uveshm003.anchor.core.data.repository.ModeRepository
 import io.github.uveshm003.anchor.core.data.repository.SettingsRepository
+import io.github.uveshm003.anchor.core.model.Anchor
+import io.github.uveshm003.anchor.core.model.AnchorId
 import io.github.uveshm003.anchor.core.model.AppPolicy
 import io.github.uveshm003.anchor.core.model.ExitRule
 import io.github.uveshm003.anchor.core.model.Mode
@@ -44,7 +47,18 @@ data class ModeDraft(
     val packages: Set<String> = emptySet(),
     val timerMinutes: Int? = null,
     val quietActions: QuietActions = QuietActions(),
+    /** With no timer: the anchor that ends it, or null for any anchor. */
+    val anchorId: Long? = null,
 )
+
+/** How a session of this mode ends. */
+sealed interface ExitChoice {
+    data object AnyAnchor : ExitChoice
+
+    data class SpecificAnchor(val anchorId: Long) : ExitChoice
+
+    data class Timer(val minutes: Int) : ExitChoice
+}
 
 data class ModeEditorUiState(
     val loading: Boolean = true,
@@ -56,6 +70,7 @@ data class ModeEditorUiState(
     val query: String = "",
     val apps: List<InstalledApp> = emptyList(),
     val essentials: Set<String> = emptySet(),
+    val anchors: List<Anchor> = emptyList(),
 ) {
     val shownApps: List<InstalledApp>
         get() = if (query.isBlank()) apps else apps.filter { it.label.contains(query.trim(), ignoreCase = true) }
@@ -71,6 +86,7 @@ class ModeEditorViewModel @Inject constructor(
     private val modes: ModeRepository,
     private val settings: SettingsRepository,
     private val installedApps: InstalledAppsRepository,
+    anchors: AnchorRepository,
     essentialApps: EssentialApps,
 ) : ViewModel() {
     private val route = savedState.toRoute<ModeEditorRoute>()
@@ -79,8 +95,12 @@ class ModeEditorViewModel @Inject constructor(
     private var original = ModeDraft()
     private var existing: Mode? = null
 
-    val uiState: StateFlow<ModeEditorUiState> = combine(editor, installedApps.apps) { state, apps ->
-        state.copy(apps = apps)
+    val uiState: StateFlow<ModeEditorUiState> = combine(editor, installedApps.apps, anchors.anchors) {
+            state,
+            apps,
+            paired,
+        ->
+        state.copy(apps = apps, anchors = paired)
     }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), editor.value)
 
@@ -109,7 +129,13 @@ class ModeEditorViewModel @Inject constructor(
 
     fun setAllowList(allowList: Boolean) = edit { it.copy(allowList = allowList) }
 
-    fun setTimer(minutes: Int?) = edit { it.copy(timerMinutes = minutes) }
+    fun setExit(exit: ExitChoice) = edit {
+        when (exit) {
+            ExitChoice.AnyAnchor -> it.copy(timerMinutes = null, anchorId = null)
+            is ExitChoice.SpecificAnchor -> it.copy(timerMinutes = null, anchorId = exit.anchorId)
+            is ExitChoice.Timer -> it.copy(timerMinutes = exit.minutes, anchorId = null)
+        }
+    }
 
     fun toggleApp(packageName: String) {
         if (packageName in editor.value.essentials) return
@@ -151,7 +177,8 @@ class ModeEditorViewModel @Inject constructor(
                 icon = draft.icon,
                 color = draft.color,
                 appPolicy = if (draft.allowList) AppPolicy.AllowList(packages) else AppPolicy.BlockList(packages),
-                exitRule = draft.timerMinutes?.let { ExitRule.TimerEnds(it) } ?: ExitRule.RequiresAnchor(),
+                exitRule = draft.timerMinutes?.let { ExitRule.TimerEnds(it) }
+                    ?: ExitRule.RequiresAnchor(draft.anchorId?.let(::AnchorId)),
                 quietActions = draft.quietActions,
             )
             val id = modes.upsert(mode)
@@ -182,5 +209,6 @@ private fun Mode.toDraft() = ModeDraft(
     allowList = appPolicy is AppPolicy.AllowList,
     packages = appPolicy.packages,
     timerMinutes = (exitRule as? ExitRule.TimerEnds)?.minutes,
+    anchorId = (exitRule as? ExitRule.RequiresAnchor)?.anchorId?.value,
     quietActions = quietActions,
 )
