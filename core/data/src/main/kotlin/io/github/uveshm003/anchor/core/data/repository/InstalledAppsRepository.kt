@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ApplicationInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.uveshm003.anchor.core.common.dispatchers.AnchorDispatchers
 import io.github.uveshm003.anchor.core.common.dispatchers.Dispatcher
@@ -16,8 +17,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
 
-/** A launchable app (label + package). Icons are loaded by the UI (`core:ui` `AppIcon`). */
-data class InstalledApp(val packageName: String, val label: String)
+/** A launchable app. Icons are loaded by the UI (`core:ui` `AppIcon`). */
+data class InstalledApp(val packageName: String, val label: String, val category: AppCategory = AppCategory.Other)
+
+/** From `ApplicationInfo.category` (declared by the app; many apps leave it undefined). */
+enum class AppCategory { Social, Game, Video, Audio, News, Image, Maps, Productivity, Other }
 
 interface InstalledAppsRepository {
     /** Launchable apps except Anchor, sorted by label for the current locale; refreshes on install/uninstall. */
@@ -50,9 +54,27 @@ internal class AndroidInstalledAppsRepository @Inject constructor(
         val launcher = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
         val collator = Collator.getInstance(Locale.getDefault())
         return pm.queryIntentActivities(launcher, 0)
-            .map { InstalledApp(it.activityInfo.packageName, it.loadLabel(pm).toString()) }
+            .map {
+                InstalledApp(
+                    it.activityInfo.packageName,
+                    it.loadLabel(pm).toString(),
+                    categoryOf(it.activityInfo.applicationInfo),
+                )
+            }
             .filter { it.packageName != context.packageName }
             .distinctBy { it.packageName }
             .sortedWith { a, b -> collator.compare(a.label, b.label) }
+    }
+
+    private fun categoryOf(info: ApplicationInfo?): AppCategory = when (info?.category) {
+        ApplicationInfo.CATEGORY_SOCIAL -> AppCategory.Social
+        ApplicationInfo.CATEGORY_GAME -> AppCategory.Game
+        ApplicationInfo.CATEGORY_VIDEO -> AppCategory.Video
+        ApplicationInfo.CATEGORY_AUDIO -> AppCategory.Audio
+        ApplicationInfo.CATEGORY_NEWS -> AppCategory.News
+        ApplicationInfo.CATEGORY_IMAGE -> AppCategory.Image
+        ApplicationInfo.CATEGORY_MAPS -> AppCategory.Maps
+        ApplicationInfo.CATEGORY_PRODUCTIVITY -> AppCategory.Productivity
+        else -> AppCategory.Other
     }
 }
