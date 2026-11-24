@@ -28,6 +28,9 @@ object Engine {
         is Input.TimerElapsed -> timerElapsed(state, input, env)
         is Input.CommandFailed -> commandFailed(state, input)
         is Input.Reconcile -> reconcile(state, env)
+        Input.RecoveryRequested -> recoveryRequested(state, env)
+        Input.RecoveryCancelled -> recoveryCancelled(state, env)
+        is Input.RecoveryElapsed -> recoveryElapsed(state, input, env)
     }
 
     private fun holdToStart(state: EngineState, input: Input.HoldToStart, env: Environment): Transition {
@@ -119,17 +122,77 @@ object Engine {
     private fun reconcile(state: EngineState, env: Environment): Transition {
         val active = state.active
         val endsAt = active?.session?.endsAt
+        val recovery = state.recovery?.let { Recovery.restamp(it, env) }
         return when {
             active == null -> Transition(
-                state.copy(degraded = false),
+                state.copy(degraded = false, recovery = null),
                 listOf(ClearAppPolicy(commandId("clear", null, env))),
                 Outcome.Reconciled,
             )
 
             endsAt != null && !env.now.isBefore(endsAt) -> end(state, active, SessionEnd.Timer, env)
 
-            else -> Transition(state.copy(degraded = false), applyCommands(active, env), Outcome.Reconciled)
+            recovery != null && Recovery.isComplete(recovery, env) -> end(state, active, SessionEnd.Recovery, env)
+
+            else -> Transition(
+                state.copy(degraded = false, recovery = recovery),
+                applyCommands(active, env) + listOfNotNull(recovery?.let { scheduleRecovery(it, env) }),
+                Outcome.Reconciled,
+            )
         }
+    }
+
+    /** Works whatever the exit rule or the emergency quota; one pending recovery at a time. */
+    private fun recoveryRequested(state: EngineState, env: Environment): Transition {
+        val active = state.active
+        return when {
+            active == null -> state.rejected(RejectReason.NotActive)
+
+            state.recovery != null -> state.rejected(RejectReason.RecoveryAlreadyPending)
+
+            else -> {
+                val recovery = Recovery.start(active.session.id, env)
+                Transition(
+                    state.copy(recovery = recovery),
+                    listOf(scheduleRecovery(recovery, env)),
+                    Outcome.RecoveryScheduled(Recovery.DELAY),
+                )
+            }
+        }
+    }
+
+    private fun recoveryCancelled(state: EngineState, env: Environment): Transition {
+        val recovery = state.recovery ?: return state.ignored(IgnoreReason.NoRecovery)
+        val cancel = Command.CancelRecovery(commandId("cancel_recovery", recovery.sessionId, env), recovery.sessionId)
+        return Transition(state.copy(recovery = null), listOf(cancel), Outcome.RecoveryCancelled)
+    }
+
+    /** The alarm fired: end the session if enough monotonic time has passed, otherwise wake up again later. */
+    private fun recoveryElapsed(state: EngineState, input: Input.RecoveryElapsed, env: Environment): Transition {
+        val active = state.active
+        val recovery = state.recovery?.takeIf { it.sessionId == input.sessionId }?.let { Recovery.restamp(it, env) }
+        return when {
+            active == null || recovery == null -> state.ignored(IgnoreReason.NoRecovery)
+
+            Recovery.isComplete(recovery, env) -> end(state, active, SessionEnd.Recovery, env)
+
+            else -> Transition(
+                state.copy(recovery = recovery),
+                listOf(scheduleRecovery(recovery, env)),
+                Outcome.RecoveryScheduled(Recovery.remaining(recovery)),
+            )
+        }
+    }
+
+    /** Next check: when the monotonic delay or the wall-clock limit is due, whichever comes first. */
+    private fun scheduleRecovery(recovery: PendingRecovery, env: Environment): Command.ScheduleRecovery {
+        val untilLimit = Duration.between(env.now, recovery.requestedAt.plus(Recovery.WALL_CLOCK_LIMIT))
+        val wait = minOf(Recovery.remaining(recovery), untilLimit).coerceAtLeast(Duration.ZERO)
+        return Command.ScheduleRecovery(
+            id = commandId("recovery", recovery.sessionId, env),
+            sessionId = recovery.sessionId,
+            elapsedRealtimeAt = env.elapsedRealtimeMillis + wait.toMillis(),
+        )
     }
 
     private fun start(state: EngineState, mode: Mode, source: SessionSource, env: Environment): Transition {
@@ -155,8 +218,13 @@ object Engine {
         val commands = buildList {
             add(ClearAppPolicy(commandId("clear", ended.id, env)))
             if (ended.endsAt != null) add(CancelTimer(commandId("cancel_timer", ended.id, env), ended.id))
+            if (state.recovery !=
+                null
+            ) {
+                add(Command.CancelRecovery(commandId("cancel_recovery", ended.id, env), ended.id))
+            }
         }
-        return Transition(state.copy(active = null, degraded = false), commands, Outcome.Ended(ended))
+        return Transition(state.copy(active = null, degraded = false, recovery = null), commands, Outcome.Ended(ended))
     }
 
     private fun applyCommands(active: ActiveSession, env: Environment): List<Command> {
