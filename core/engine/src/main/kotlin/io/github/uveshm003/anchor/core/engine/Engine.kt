@@ -79,7 +79,10 @@ object Engine {
     private fun endWithAnchor(state: EngineState, active: ActiveSession, anchor: Anchor, env: Environment) =
         when (val rule = active.session.exitRule) {
             is ExitRule.RequiresAnchor ->
-                if (rule.anchorId == null || rule.anchorId == anchor.id) {
+                // A specific anchor that's no longer paired falls back to any anchor, so nobody is stuck.
+                if (rule.anchorId == null || rule.anchorId == anchor.id ||
+                    env.anchors.none { it.id == rule.anchorId }
+                ) {
                     end(state, active, SessionEnd.AnchorTap, env)
                 } else {
                     state.rejected(RejectReason.RequiresAnchor(requiredAnchorName(rule, env)))
