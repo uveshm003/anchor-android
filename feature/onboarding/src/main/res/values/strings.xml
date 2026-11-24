@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_onboarding_welcome_title">Welcome to Anchor</string>
+    <string name="feature_onboarding_welcome_body">Tap your phone on an NFC sticker to start focusing. Distracting apps stay blocked until you walk back and tap again.\n\nStarting is easy. Stopping takes a deliberate step.</string>
+    <string name="feature_onboarding_get_started">Get started</string>
+    <string name="feature_onboarding_disclosure_title">How Anchor blocks apps</string>
+    <string name="feature_onboarding_disclosure_body">Anchor uses an Accessibility service to block apps during your focus sessions.\n\n• What it sees: the name of the app on screen (including split-screen and picture-in-picture windows). It never reads what is on screen, what you type, or your messages.\n• Why: to cover apps you chose to block and to count how often you opened them.\n• Where it goes: nowhere. Anchor has no internet access; everything stays on this phone.\n\nYou can turn it off at any time in Settings › Accessibility.</string>
+    <string name="feature_onboarding_agree">I agree, continue</string>
+    <string name="feature_onboarding_not_now">Not now</string>
+    <string name="feature_onboarding_enable_title">Turn on app blocking</string>
+    <string name="feature_onboarding_enable_body">In Settings, open Installed apps (or Downloaded apps), tap Anchor app blocking and turn it on. Then come back here.\n\nIf the switch is greyed out, open Anchor in Settings › Apps, tap ⋮ and choose Allow restricted settings first.</string>
+    <string name="feature_onboarding_open_settings">Open settings</string>
+    <string name="feature_onboarding_skip">Skip for now</string>
+</resources>

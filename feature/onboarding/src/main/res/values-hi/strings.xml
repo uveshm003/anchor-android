@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_onboarding_welcome_title">Anchor में आपका स्वागत है</string>
+    <string name="feature_onboarding_welcome_body">फ़ोकस शुरू करने के लिए अपना फ़ोन किसी NFC स्टिकर पर टैप करें। ध्यान भटकाने वाले ऐप तब तक ब्लॉक रहेंगे जब तक आप वापस जाकर फिर से टैप नहीं करते।\n\nशुरू करना आसान है। रोकने के लिए सोच-समझकर कदम उठाना पड़ता है।</string>
+    <string name="feature_onboarding_get_started">शुरू करें</string>
+    <string name="feature_onboarding_disclosure_title">Anchor ऐप कैसे ब्लॉक करता है</string>
+    <string name="feature_onboarding_disclosure_body">आपके फ़ोकस सत्रों के दौरान ऐप ब्लॉक करने के लिए Anchor एक सुलभता (Accessibility) सेवा का इस्तेमाल करता है।\n\n• यह क्या देखता है: स्क्रीन पर खुले ऐप का नाम (स्प्लिट-स्क्रीन और पिक्चर-इन-पिक्चर विंडो समेत)। यह स्क्रीन की सामग्री, आपका टाइप किया हुआ या आपके संदेश कभी नहीं पढ़ता।\n• क्यों: आपके चुने हुए ऐप को ढकने और यह गिनने के लिए कि आपने उन्हें कितनी बार खोला।\n• यह कहाँ जाता है: कहीं नहीं। Anchor के पास इंटरनेट की अनुमति नहीं है; सब कुछ इसी फ़ोन पर रहता है।\n\nआप इसे कभी भी सेटिंग › सुलभता में बंद कर सकते हैं।</string>
+    <string name="feature_onboarding_agree">मैं सहमत हूँ, आगे बढ़ें</string>
+    <string name="feature_onboarding_not_now">अभी नहीं</string>
+    <string name="feature_onboarding_enable_title">ऐप ब्लॉकिंग चालू करें</string>
+    <string name="feature_onboarding_enable_body">सेटिंग में इंस्टॉल किए गए ऐप (या डाउनलोड किए गए ऐप) खोलें, Anchor ऐप ब्लॉकिंग पर टैप करें और इसे चालू करें। फिर यहाँ वापस आएँ।\n\nअगर स्विच धूसर है, तो पहले सेटिंग › ऐप में Anchor खोलें, ⋮ पर टैप करें और प्रतिबंधित सेटिंग की अनुमति दें चुनें।</string>
+    <string name="feature_onboarding_open_settings">सेटिंग खोलें</string>
+    <string name="feature_onboarding_skip">अभी के लिए छोड़ें</string>
+</resources>
