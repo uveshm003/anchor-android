@@ -242,6 +242,16 @@ class EngineTest {
     }
 
     @Test
+    fun `a specific anchor that was unpaired falls back to any anchor`() {
+        val unpaired = env.copy(anchors = listOf(bedside))
+        val transition = Engine.reduce(activeIn(specific), Input.AnchorTapped(bedside.hash), unpaired)
+
+        assertThat((transition.outcome as Outcome.Ended).session.endedBy).isEqualTo(SessionEnd.AnchorTap)
+        assertThat(Engine.reduce(activeIn(specific), Input.StopRequested, unpaired).outcome)
+            .isEqualTo(Outcome.Rejected(RejectReason.RequiresAnchor(null)))
+    }
+
+    @Test
     fun `the matching specific anchor ends the session`() {
         val transition = Engine.reduce(activeIn(specific), Input.AnchorTapped(desk.hash), env)
 
