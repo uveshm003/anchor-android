@@ -29,6 +29,17 @@ in GitHub issues (milestones M0–M6) and is completed through PRs that close th
 
 *(none yet)*
 
+### M6 – Hardening & release
+
+- [ ] **T-2** Deleted screenshot goldens come back after a build (tooling).
+  - [ ] After deleting a golden and its test, `ciCheck` no longer restores the PNG into `src/test/screenshots`
+    (Roborazzi outputs restored from the build cache)
+  - Test plan: delete a golden, run `ciCheck` twice with the cache warm, `git status` stays clean
+- [ ] **T-3** Lint occasionally crashes in K2 analysis of a test file ("Error while resolving FirRegularClassImpl").
+  - [ ] Root cause found (lint 32.5 / Kotlin 2.4, parallel lint workers) and fixed or worked around without
+    disabling lint on test sources
+  - Test plan: 10 consecutive `ciCheck` runs without the crash
+
 ## Done
 
 ### M0 – Foundation
