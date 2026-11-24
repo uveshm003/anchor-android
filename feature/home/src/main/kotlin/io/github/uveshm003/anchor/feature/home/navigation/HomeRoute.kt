@@ -16,10 +16,14 @@ data object EmergencyUnlockRoute
 
 fun NavController.navigateToEmergencyUnlock() = navigate(EmergencyUnlockRoute) { launchSingleTop = true }
 
-/** [onCreateMode] is wired by the app (features don't depend on each other). */
-fun NavGraphBuilder.homeScreen(navController: NavController, onCreateMode: () -> Unit) {
+/** [onCreateMode] and [onPairAnchor] are wired by the app (features don't depend on each other). */
+fun NavGraphBuilder.homeScreen(navController: NavController, onCreateMode: () -> Unit, onPairAnchor: () -> Unit) {
     composable<HomeRoute> {
-        HomeScreenRoute(onCreateMode = onCreateMode, onEmergencyUnlock = navController::navigateToEmergencyUnlock)
+        HomeScreenRoute(
+            onCreateMode = onCreateMode,
+            onEmergencyUnlock = navController::navigateToEmergencyUnlock,
+            onPairAnchor = onPairAnchor,
+        )
     }
     composable<EmergencyUnlockRoute> { EmergencyUnlockScreenRoute(onClose = { navController.popBackStack() }) }
 }
