@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="service_notifications_channel">चल रहा सत्र</string>
+    <string name="service_notifications_channel_description">फ़ोकस सत्र चालू रहने पर दिखता है, साथ में उसे खत्म करने का तरीका।</string>
+    <string name="service_notifications_title">%1$s चालू है</string>
+    <string name="service_notifications_ends_any_anchor">खत्म करने के लिए अपने किसी एंकर पर टैप करें</string>
+    <string name="service_notifications_ends_specific_anchor">खत्म करने के लिए अपने %1$s एंकर पर टैप करें</string>
+    <string name="service_notifications_ends_at">%1$s पर खत्म होगा</string>
+    <string name="service_notifications_ends_trigger">ट्रिगर के खत्म होने पर खत्म होगा</string>
+</resources>

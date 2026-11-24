@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="service_notifications_channel">Active session</string>
+    <string name="service_notifications_channel_description">Shows while a focus session is on, with how to end it.</string>
+    <string name="service_notifications_title">%1$s is on</string>
+    <string name="service_notifications_ends_any_anchor">Tap one of your anchors to end it</string>
+    <string name="service_notifications_ends_specific_anchor">Tap your %1$s anchor to end it</string>
+    <string name="service_notifications_ends_at">Ends at %1$s</string>
+    <string name="service_notifications_ends_trigger">Ends when its trigger ends</string>
+</resources>
