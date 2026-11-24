@@ -126,7 +126,10 @@ object Engine {
         return when {
             active == null -> Transition(
                 state.copy(degraded = false, recovery = null),
-                listOf(ClearAppPolicy(commandId("clear", null, env))),
+                listOf(
+                    ClearAppPolicy(commandId("clear", null, env)),
+                    Command.HideSessionNotification(commandId("hide_notification", null, env)),
+                ),
                 Outcome.Reconciled,
             )
 
@@ -217,6 +220,7 @@ object Engine {
         val ended = active.session.copy(endedAt = env.now, endedBy = how)
         val commands = buildList {
             add(ClearAppPolicy(commandId("clear", ended.id, env)))
+            add(Command.HideSessionNotification(commandId("hide_notification", ended.id, env)))
             if (ended.endsAt != null) add(CancelTimer(commandId("cancel_timer", ended.id, env), ended.id))
             if (state.recovery !=
                 null
@@ -237,6 +241,17 @@ object Engine {
                     sessionId = session.id,
                     modeName = session.modeName,
                     policy = EssentialsPolicy.apply(active.mode.appPolicy, env.essentials),
+                    startedAt = session.startedAt,
+                    exitRule = rule,
+                    endsAt = session.endsAt,
+                    requiredAnchorName = (rule as? ExitRule.RequiresAnchor)?.let { requiredAnchorName(it, env) },
+                ),
+            )
+            add(
+                Command.ShowSessionNotification(
+                    id = commandId("show_notification", session.id, env),
+                    sessionId = session.id,
+                    modeName = session.modeName,
                     startedAt = session.startedAt,
                     exitRule = rule,
                     endsAt = session.endsAt,

@@ -110,10 +110,13 @@ class SessionControllerTest {
         assertThat(outcome).isInstanceOf(Outcome.Started::class.java)
         assertThat(executed.map { it::class }).containsExactly(
             Command.ClearAppPolicy::class,
+            Command.HideSessionNotification::class,
             Command.ApplyAppPolicy::class,
+            Command.ShowSessionNotification::class,
             Command.ScheduleTimer::class,
         ).inOrder()
-        assertThat((executed[1] as Command.ApplyAppPolicy).policy).isEqualTo(AppPolicy.BlockList(setOf("com.social")))
+        val apply = executed.filterIsInstance<Command.ApplyAppPolicy>().single()
+        assertThat(apply.policy).isEqualTo(AppPolicy.BlockList(setOf("com.social")))
         assertThat(db.engineDao().pendingCommands()).isEmpty()
         assertThat(EngineJson.decodeState(db.engineDao().getState()!!.json).active?.session?.modeId).isEqualTo(modeId)
         assertThat(db.sessionDao().observeActive().first()?.modeName).isEqualTo("Work")
@@ -129,7 +132,8 @@ class SessionControllerTest {
 
         assertThat(outcome.session.endedBy).isEqualTo(SessionEnd.EmergencyUnlock)
         assertThat(db.sessionDao().observeUnlockCountSince(0).first()).isEqualTo(1)
-        assertThat(executed.last()).isInstanceOf(Command.ClearAppPolicy::class.java)
+        assertThat(executed.takeLast(2).map { it::class })
+            .containsExactly(Command.ClearAppPolicy::class, Command.HideSessionNotification::class).inOrder()
     }
 
     @Test

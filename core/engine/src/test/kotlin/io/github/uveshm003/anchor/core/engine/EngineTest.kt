@@ -60,44 +60,46 @@ class EngineTest {
     private val schedule = ScheduleTimer::class
     private val cancel = CancelTimer::class
     private val scheduleRecovery = Command.ScheduleRecovery::class
+    private val show = Command.ShowSessionNotification::class
+    private val hide = Command.HideSessionNotification::class
 
     /** Every (state, input) pair: the outcome type and the command types, in order. */
     private val table = listOf(
-        Case("idle", Input.HoldToStart(work.id), started, listOf(apply)),
+        Case("idle", Input.HoldToStart(work.id), started, listOf(apply, show)),
         Case("idle", Input.StopRequested, rejected, emptyList()),
-        Case("idle", Input.AnchorTapped(desk.hash), started, listOf(apply)),
+        Case("idle", Input.AnchorTapped(desk.hash), started, listOf(apply, show)),
         Case("idle", Input.EmergencyUnlock, rejected, emptyList()),
         Case("idle", Input.TimerElapsed(SessionId(1)), ignored, emptyList()),
         Case("idle", Input.CommandFailed("x", SessionId(1)), ignored, emptyList()),
-        Case("idle", Input.Reconcile(ReconcileCause.AppStart), reconciled, listOf(clear)),
+        Case("idle", Input.Reconcile(ReconcileCause.AppStart), reconciled, listOf(clear, hide)),
         Case("any anchor", Input.HoldToStart(work.id), rejected, emptyList()),
         Case("any anchor", Input.StopRequested, rejected, emptyList()),
-        Case("any anchor", Input.AnchorTapped(desk.hash), ended, listOf(clear)),
-        Case("any anchor", Input.EmergencyUnlock, ended, listOf(clear)),
-        Case("any anchor", Input.TimerElapsed(SessionId(1)), ended, listOf(clear)),
+        Case("any anchor", Input.AnchorTapped(desk.hash), ended, listOf(clear, hide)),
+        Case("any anchor", Input.EmergencyUnlock, ended, listOf(clear, hide)),
+        Case("any anchor", Input.TimerElapsed(SessionId(1)), ended, listOf(clear, hide)),
         Case("any anchor", Input.CommandFailed("x", SessionId(1)), Outcome.Degraded::class, emptyList()),
-        Case("any anchor", Input.Reconcile(ReconcileCause.Boot), reconciled, listOf(apply)),
+        Case("any anchor", Input.Reconcile(ReconcileCause.Boot), reconciled, listOf(apply, show)),
         Case("timer", Input.HoldToStart(work.id), rejected, emptyList()),
         Case("timer", Input.StopRequested, rejected, emptyList()),
         Case("timer", Input.AnchorTapped(desk.hash), rejected, emptyList()),
-        Case("timer", Input.EmergencyUnlock, ended, listOf(clear, cancel)),
-        Case("timer", Input.TimerElapsed(SessionId(1)), ended, listOf(clear, cancel)),
+        Case("timer", Input.EmergencyUnlock, ended, listOf(clear, hide, cancel)),
+        Case("timer", Input.TimerElapsed(SessionId(1)), ended, listOf(clear, hide, cancel)),
         Case("timer", Input.CommandFailed("x", SessionId(2)), ignored, emptyList()),
-        Case("timer", Input.Reconcile(ReconcileCause.TimeChanged), reconciled, listOf(apply, schedule)),
+        Case("timer", Input.Reconcile(ReconcileCause.TimeChanged), reconciled, listOf(apply, show, schedule)),
         Case("specific anchor", Input.HoldToStart(work.id), rejected, emptyList()),
         Case("specific anchor", Input.StopRequested, rejected, emptyList()),
         Case("specific anchor", Input.AnchorTapped(bedside.hash), rejected, emptyList()),
-        Case("specific anchor", Input.EmergencyUnlock, ended, listOf(clear)),
+        Case("specific anchor", Input.EmergencyUnlock, ended, listOf(clear, hide)),
         Case("specific anchor", Input.TimerElapsed(SessionId(2)), ignored, emptyList()),
         Case("specific anchor", Input.CommandFailed("x", SessionId(1)), Outcome.Degraded::class, emptyList()),
-        Case("specific anchor", Input.Reconcile(ReconcileCause.PackageReplaced), reconciled, listOf(apply)),
+        Case("specific anchor", Input.Reconcile(ReconcileCause.PackageReplaced), reconciled, listOf(apply, show)),
         Case("trigger", Input.HoldToStart(work.id), rejected, emptyList()),
         Case("trigger", Input.StopRequested, rejected, emptyList()),
         Case("trigger", Input.AnchorTapped(desk.hash), rejected, emptyList()),
-        Case("trigger", Input.EmergencyUnlock, ended, listOf(clear)),
-        Case("trigger", Input.TimerElapsed(SessionId(1)), ended, listOf(clear)),
+        Case("trigger", Input.EmergencyUnlock, ended, listOf(clear, hide)),
+        Case("trigger", Input.TimerElapsed(SessionId(1)), ended, listOf(clear, hide)),
         Case("trigger", Input.CommandFailed("x", null), ignored, emptyList()),
-        Case("trigger", Input.Reconcile(ReconcileCause.TimeZoneChanged), reconciled, listOf(apply)),
+        Case("trigger", Input.Reconcile(ReconcileCause.TimeZoneChanged), reconciled, listOf(apply, show)),
         Case("idle", Input.RecoveryRequested, rejected, emptyList()),
         Case("idle", Input.RecoveryCancelled, ignored, emptyList()),
         Case("idle", Input.RecoveryElapsed(SessionId(1)), ignored, emptyList()),
@@ -160,7 +162,7 @@ class EngineTest {
         assertThat(session.startedAt).isEqualTo(now)
         assertThat(transition.state.active?.session).isEqualTo(session)
         assertThat(transition.state.nextSessionId).isEqualTo(2)
-        val apply = transition.commands.single() as ApplyAppPolicy
+        val apply = transition.commands.filterIsInstance<ApplyAppPolicy>().single()
         assertThat(apply.policy).isEqualTo(AppPolicy.BlockList(setOf(SOCIAL)))
         assertThat(apply.modeName).isEqualTo("Work")
         assertThat(apply.requiredAnchorName).isNull()
@@ -186,7 +188,11 @@ class EngineTest {
 
     @Test
     fun `allow list always includes essentials`() {
-        val apply = Engine.reduce(idle, Input.HoldToStart(allow.id), env).commands.single() as ApplyAppPolicy
+        val apply = Engine.reduce(
+            idle,
+            Input.HoldToStart(allow.id),
+            env,
+        ).commands.filterIsInstance<ApplyAppPolicy>().single()
 
         assertThat(apply.policy).isEqualTo(AppPolicy.AllowList(setOf("com.maps", DIALER, LAUNCHER)))
         assertThat(apply.policy.blocks(DIALER)).isFalse()
@@ -229,7 +235,7 @@ class EngineTest {
                     idle,
                     Input.HoldToStart(specific.id),
                     env,
-                ).commands.single() as ApplyAppPolicy
+                ).commands.filterIsInstance<ApplyAppPolicy>().single()
                 ).requiredAnchorName,
         )
             .isEqualTo("Desk")
@@ -320,7 +326,7 @@ class EngineTest {
         val transition = Engine.reduce(activeIn(timer), Input.Reconcile(ReconcileCause.Boot), later)
 
         assertThat((transition.outcome as Outcome.Ended).session.endedBy).isEqualTo(SessionEnd.Timer)
-        assertThat(transition.commands.map { it::class }).containsExactly(clear, cancel).inOrder()
+        assertThat(transition.commands.map { it::class }).containsExactly(clear, hide, cancel).inOrder()
     }
 
     @Test
@@ -340,7 +346,7 @@ class EngineTest {
             env.copy(now = now.plusSeconds(1)),
         )
 
-        assertThat(first.commands.single().id).isNotEqualTo(again.commands.single().id)
+        assertThat(first.commands.first().id).isNotEqualTo(again.commands.first().id)
         assertThat(Json.decodeFromString<EngineState>(Json.encodeToString(first.state))).isEqualTo(first.state)
         val commands: List<Command> = first.commands + again.commands
         assertThat(Json.decodeFromString<List<Command>>(Json.encodeToString(commands))).isEqualTo(commands)
