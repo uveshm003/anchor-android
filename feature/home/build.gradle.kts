@@ -4,4 +4,6 @@ plugins {
 
 dependencies {
     implementation(projects.core.data)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.ktx)
 }
