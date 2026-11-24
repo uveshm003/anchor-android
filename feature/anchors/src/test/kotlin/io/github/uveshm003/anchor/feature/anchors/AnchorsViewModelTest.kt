@@ -8,11 +8,15 @@ import io.github.uveshm003.anchor.core.engine.Input
 import io.github.uveshm003.anchor.core.model.Anchor
 import io.github.uveshm003.anchor.core.model.AnchorId
 import io.github.uveshm003.anchor.core.model.AnchorType
+import io.github.uveshm003.anchor.core.model.ExitRule
+import io.github.uveshm003.anchor.core.model.Mode
+import io.github.uveshm003.anchor.core.model.ModeId
 import io.github.uveshm003.anchor.core.nfc.AnchorTags
 import io.github.uveshm003.anchor.core.nfc.NfcAvailability
 import io.github.uveshm003.anchor.core.nfc.WriteResult
 import io.github.uveshm003.anchor.core.testing.MainDispatcherRule
 import io.github.uveshm003.anchor.core.testing.data.FakeAnchorRepository
+import io.github.uveshm003.anchor.core.testing.data.FakeModeRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeSessionInputs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
@@ -29,12 +33,15 @@ class AnchorsViewModelTest {
     private val inputs = FakeSessionInputs()
     private val desk = Anchor(AnchorId(1), "Desk", AnchorType.Nfc, "01".padEnd(64, '0'))
     private var nfc = NfcAvailability.Enabled
+    private val modes = FakeModeRepository(
+        listOf(Mode(ModeId(1), "Sleep", exitRule = ExitRule.RequiresAnchor(AnchorId(1))), Mode(ModeId(2), "Work")),
+    )
 
     private fun CoroutineScope.setup(
         repo: FakeAnchorRepository = FakeAnchorRepository(listOf(desk)),
     ): Pair<AnchorsViewModel, AnchorTags> {
         val tags = AnchorTags(hasher, inputs, this)
-        return AnchorsViewModel(repo, tags) { nfc } to tags
+        return AnchorsViewModel(repo, modes, tags) { nfc } to tags
     }
 
     @Test
@@ -88,6 +95,12 @@ class AnchorsViewModelTest {
             assertThat(awaitItem().anchors.single().name).isEqualTo("Office")
             vm.unpair(desk)
             assertThat(awaitItem().anchors).isEmpty()
+            // Modes that needed it now accept any anchor.
+            assertThat(
+                modes.getModes().map {
+                    it.exitRule
+                },
+            ).containsExactly(ExitRule.RequiresAnchor(), ExitRule.RequiresAnchor())
 
             nfc = NfcAvailability.Disabled
             vm.refreshNfc()

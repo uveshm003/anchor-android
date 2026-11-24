@@ -22,4 +22,7 @@
     <string name="feature_anchors_name">नाम</string>
     <string name="feature_anchors_name_hint">डेस्क</string>
     <string name="feature_anchors_save">सेव करें</string>
+    <string name="feature_anchors_unpair_title">%1$s हटाएँ?</string>
+    <string name="feature_anchors_unpair_body">इस स्टिकर पर टैप करने से अब सत्र शुरू या खत्म नहीं होंगे। जिन मोड को इस एंकर की ज़रूरत है, वे आपके किसी भी एंकर को मान लेंगे।</string>
+    <string name="feature_anchors_unpair_confirm">हटाएँ</string>
 </resources>

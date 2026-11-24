@@ -77,6 +77,7 @@ data class AnchorsActions(
 @Composable
 fun AnchorsScreen(state: AnchorsUiState, actions: AnchorsActions, modifier: Modifier = Modifier) {
     var renaming by rememberSaveable { mutableStateOf<Long?>(null) }
+    var unpairing by rememberSaveable { mutableStateOf<Long?>(null) }
     val canPair = state.nfc == NfcAvailability.Enabled
     Scaffold(
         modifier = modifier,
@@ -114,22 +115,59 @@ fun AnchorsScreen(state: AnchorsUiState, actions: AnchorsActions, modifier: Modi
                     items(state.anchors, key = { it.id.value }) { anchor ->
                         AnchorRow(anchor, onRename = {
                             renaming = anchor.id.value
-                        }, onUnpair = { actions.onUnpair(anchor) })
+                        }, onUnpair = { unpairing = anchor.id.value })
                     }
                 }
             }
         }
     }
     PairingDialog(state.pairing, actions)
-    state.anchors.find { it.id.value == renaming }?.let { anchor ->
+    AnchorDialogs(
+        anchors = state.anchors,
+        renaming = renaming,
+        unpairing = unpairing,
+        actions = actions,
+        onClose = {
+            renaming = null
+            unpairing = null
+        },
+    )
+}
+
+/** Rename and unpair confirmations for the anchor with that id, if any. */
+@Composable
+private fun AnchorDialogs(
+    anchors: List<Anchor>,
+    renaming: Long?,
+    unpairing: Long?,
+    actions: AnchorsActions,
+    onClose: () -> Unit,
+) {
+    anchors.find { it.id.value == unpairing }?.let { anchor ->
+        AlertDialog(
+            onDismissRequest = { onClose() },
+            title = { Text(stringResource(R.string.feature_anchors_unpair_title, anchor.name)) },
+            text = { Text(stringResource(R.string.feature_anchors_unpair_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    onClose()
+                    actions.onUnpair(anchor)
+                }) { Text(stringResource(R.string.feature_anchors_unpair_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { onClose() }) { Text(stringResource(R.string.feature_anchors_cancel)) }
+            },
+        )
+    }
+    anchors.find { it.id.value == renaming }?.let { anchor ->
         NameDialog(
             title = stringResource(R.string.feature_anchors_rename),
             initial = anchor.name,
             onSave = {
-                renaming = null
+                onClose()
                 actions.onRename(anchor, it)
             },
-            onDismiss = { renaming = null },
+            onDismiss = { onClose() },
         )
     }
 }
