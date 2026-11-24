@@ -5,16 +5,21 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import io.github.uveshm003.anchor.core.common.time.TestClock
+import io.github.uveshm003.anchor.core.data.platform.DeviceUptime
+import io.github.uveshm003.anchor.core.data.platform.RecoveryCountdown
 import io.github.uveshm003.anchor.core.data.repository.UserSettings
 import io.github.uveshm003.anchor.core.engine.ActiveSession
 import io.github.uveshm003.anchor.core.engine.EngineState
 import io.github.uveshm003.anchor.core.engine.Input
 import io.github.uveshm003.anchor.core.engine.Outcome
+import io.github.uveshm003.anchor.core.engine.PendingRecovery
+import io.github.uveshm003.anchor.core.engine.Recovery
 import io.github.uveshm003.anchor.core.engine.RejectReason
 import io.github.uveshm003.anchor.core.model.ExitRule
 import io.github.uveshm003.anchor.core.model.Mode
 import io.github.uveshm003.anchor.core.model.ModeId
 import io.github.uveshm003.anchor.core.model.Session
+import io.github.uveshm003.anchor.core.model.SessionEnd
 import io.github.uveshm003.anchor.core.model.SessionId
 import io.github.uveshm003.anchor.core.model.SessionSource
 import io.github.uveshm003.anchor.core.testing.MainDispatcherRule
@@ -26,6 +31,7 @@ import io.github.uveshm003.anchor.core.testing.data.FakeSettingsRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeUnlockHistoryRepository
 import io.github.uveshm003.anchor.feature.home.emergency.EmergencyStep
 import io.github.uveshm003.anchor.feature.home.emergency.EmergencyUnlockViewModel
+import java.time.Duration
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -46,12 +52,18 @@ class HomeViewModelsTest {
     private val requests = FakeSessionRequests()
     private val blocker = FakeBlockerStatus(enabled = true)
     private val sessions = FakeSessionRepository()
+    private var elapsed = 0L
+    private val uptime = object : DeviceUptime {
+        override fun elapsedRealtimeMillis() = elapsed
+
+        override fun bootCount() = 1
+    }
 
     private fun home() = HomeViewModel(
         FakeModeRepository(listOf(work, study)),
         settings,
         blocker,
-        SessionSources(sessions, FakeUnlockHistoryRepository(2), requests),
+        SessionSources(sessions, FakeUnlockHistoryRepository(2), requests, RecoveryCountdown(uptime, clock)),
         clock,
     )
 
@@ -179,5 +191,43 @@ class HomeViewModelsTest {
             assertThat(expectMostRecentItem().step).isEqualTo(EmergencyStep.Exhausted)
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun recovery_shows_a_countdown_can_be_cancelled_and_offers_repair_afterwards() = runTest {
+        val recovery =
+            PendingRecovery(SessionId(1), clock.instant(), countedMillis = 0, stampBoot = 1, stampElapsed = 0)
+        sessions.state.value = activeState.copy(recovery = recovery)
+        elapsed = Duration.ofHours(2).toMillis()
+        val vm = home()
+        vm.uiState.test {
+            var state = awaitItem()
+            while (state.loading) state = awaitItem()
+            assertThat(state.recoveryRemaining).isEqualTo(Duration.ofHours(22))
+            vm.cancelRecovery()
+            assertThat(requests.requested).contains(Input.RecoveryCancelled)
+
+            sessions.state.value = EngineState()
+            sessions.historyState.value = listOf(session.copy(endedAt = clock.instant(), endedBy = SessionEnd.Recovery))
+            assertThat(expectMostRecentItem().offerRepair).isTrue()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun recovery_can_be_started_when_the_quota_is_used_up() = runTest {
+        sessions.state.value = activeState
+        requests.outcome = { Outcome.RecoveryScheduled(Recovery.DELAY) }
+        val vm = emergency(left = 0)
+        vm.uiState.test {
+            var state = awaitItem()
+            while (state.quota == 0) state = awaitItem()
+            assertThat(state.step).isEqualTo(EmergencyStep.Exhausted)
+            assertThat(state.recoveryPending).isFalse()
+            vm.startRecovery()
+            assertThat(expectMostRecentItem().step).isEqualTo(EmergencyStep.RecoveryStarted)
+            cancelAndIgnoreRemainingEvents()
+        }
+        assertThat(requests.requested).containsExactly(Input.RecoveryRequested)
     }
 }
