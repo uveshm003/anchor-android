@@ -121,6 +121,7 @@ graph TD
     end
     app --> core_data
     app --> core_designsystem
+    app --> core_nfc
     app --> core_triggers
     app --> core_ui
     app --> feature_anchors
@@ -155,6 +156,7 @@ graph TD
     core_ui --> core_model
     feature_anchors --> core_data
     feature_anchors --> core_designsystem
+    feature_anchors --> core_nfc
     feature_anchors --> core_ui
     feature_home --> core_data
     feature_home --> core_designsystem
