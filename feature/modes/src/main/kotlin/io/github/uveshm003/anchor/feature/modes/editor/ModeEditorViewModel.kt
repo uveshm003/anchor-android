@@ -16,7 +16,9 @@ import io.github.uveshm003.anchor.core.model.Mode
 import io.github.uveshm003.anchor.core.model.ModeColor
 import io.github.uveshm003.anchor.core.model.ModeIcon
 import io.github.uveshm003.anchor.core.model.ModeId
+import io.github.uveshm003.anchor.core.model.QuietActions
 import io.github.uveshm003.anchor.feature.modes.navigation.ModeEditorRoute
+import io.github.uveshm003.anchor.feature.modes.templates.ModeTemplate
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -41,6 +43,7 @@ data class ModeDraft(
     val allowList: Boolean = false,
     val packages: Set<String> = emptySet(),
     val timerMinutes: Int? = null,
+    val quietActions: QuietActions = QuietActions(),
 )
 
 data class ModeEditorUiState(
@@ -67,10 +70,11 @@ class ModeEditorViewModel @Inject constructor(
     private val savedState: SavedStateHandle,
     private val modes: ModeRepository,
     private val settings: SettingsRepository,
-    installedApps: InstalledAppsRepository,
+    private val installedApps: InstalledAppsRepository,
     essentialApps: EssentialApps,
 ) : ViewModel() {
-    private val modeId = ModeId(savedState.toRoute<ModeEditorRoute>().modeId)
+    private val route = savedState.toRoute<ModeEditorRoute>()
+    private val modeId = ModeId(route.modeId)
     private val editor = MutableStateFlow(ModeEditorUiState(isNew = modeId.value == 0L))
     private var original = ModeDraft()
     private var existing: Mode? = null
@@ -89,8 +93,10 @@ class ModeEditorViewModel @Inject constructor(
             original = existing?.toDraft() ?: ModeDraft()
             val restored = savedState.get<String>(DRAFT_KEY)?.let { json.decodeFromString<ModeDraft>(it) }
             val essentials = essentialApps.packages(includeDefaultSms = settings.settings.first().allowDefaultSmsApp)
+            val template = route.template?.let { name -> ModeTemplate.entries.find { it.name == name } }
+                ?.draft(route.name.orEmpty(), installedApps.apps.first(), essentials)
             // The draft first: the form (and its name field) is seeded when loading turns false.
-            edit { restored ?: original }
+            edit { restored ?: template ?: original }
             editor.update { it.copy(loading = false, essentials = essentials) }
         }
     }
@@ -146,6 +152,7 @@ class ModeEditorViewModel @Inject constructor(
                 color = draft.color,
                 appPolicy = if (draft.allowList) AppPolicy.AllowList(packages) else AppPolicy.BlockList(packages),
                 exitRule = draft.timerMinutes?.let { ExitRule.TimerEnds(it) } ?: ExitRule.RequiresAnchor(),
+                quietActions = draft.quietActions,
             )
             val id = modes.upsert(mode)
             // The first mode becomes the default an anchor tap starts.
@@ -175,4 +182,5 @@ private fun Mode.toDraft() = ModeDraft(
     allowList = appPolicy is AppPolicy.AllowList,
     packages = appPolicy.packages,
     timerMinutes = (exitRule as? ExitRule.TimerEnds)?.minutes,
+    quietActions = quietActions,
 )

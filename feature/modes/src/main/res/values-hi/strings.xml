@@ -57,4 +57,17 @@
     <string name="feature_modes_select_all_shown">दिखाए गए सभी चुनें</string>
     <string name="feature_modes_search_apps">ऐप खोजें</string>
     <string name="feature_modes_always_allowed">हमेशा अनुमति</string>
+    <string name="feature_modes_template_title">नया मोड शुरू करें</string>
+    <string name="feature_modes_template_blank">शुरू से बनाएँ</string>
+    <string name="feature_modes_template_blank_body">सब कुछ खुद चुनें।</string>
+    <string name="feature_modes_template_deep_work">गहरा काम</string>
+    <string name="feature_modes_template_deep_work_body">सोशल, गेम, वीडियो और खबरें ब्लॉक करता है। एंकर पर टैप करने से खत्म।</string>
+    <string name="feature_modes_template_study">पढ़ाई</string>
+    <string name="feature_modes_template_study_body">45 मिनट के लिए सोशल, गेम और वीडियो ब्लॉक करता है।</string>
+    <string name="feature_modes_template_sleep">नींद</string>
+    <string name="feature_modes_template_sleep_body">सुबह बेडसाइड एंकर पर टैप करने तक ध्यान भटकाने वाले ऐप ब्लॉक रखता है।</string>
+    <string name="feature_modes_template_driving">ड्राइविंग</string>
+    <string name="feature_modes_template_driving_body">सिर्फ़ मैप और संगीत चलते हैं। एंकर पर टैप करने से खत्म।</string>
+    <string name="feature_modes_template_family">परिवार का समय</string>
+    <string name="feature_modes_template_family_body">2 घंटे के लिए फ़ोन अलग: सोशल, गेम, वीडियो और खबरें ब्लॉक।</string>
 </resources>

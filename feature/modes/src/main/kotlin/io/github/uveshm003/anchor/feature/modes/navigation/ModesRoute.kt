@@ -11,11 +11,16 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object ModesRoute
 
-/** Create (`modeId = 0`) or edit a mode. */
+/** Create (`modeId = 0`, optionally from a [template] with its localised [name]) or edit a mode. */
 @Serializable
-data class ModeEditorRoute(val modeId: Long = 0)
+data class ModeEditorRoute(val modeId: Long = 0, val template: String? = null, val name: String? = null)
 
 fun NavGraphBuilder.modesScreen(navController: NavController) {
-    composable<ModesRoute> { ModesScreenRoute(onEditMode = { navController.navigate(ModeEditorRoute(it)) }) }
+    composable<ModesRoute> {
+        ModesScreenRoute(
+            onEditMode = { navController.navigate(ModeEditorRoute(it)) },
+            onCreateMode = { template, name -> navController.navigate(ModeEditorRoute(0, template?.name, name)) },
+        )
+    }
     composable<ModeEditorRoute> { ModeEditorScreenRoute(onDone = { navController.popBackStack() }) }
 }
