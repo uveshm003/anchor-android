@@ -8,6 +8,7 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.core.engine)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.ktx)
 
     testImplementation(projects.core.testing)
     testImplementation(libs.truth)
