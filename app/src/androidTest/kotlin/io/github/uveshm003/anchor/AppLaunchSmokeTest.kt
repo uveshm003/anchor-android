@@ -4,7 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import io.github.uveshm003.anchor.feature.modes.R as ModesR
+import io.github.uveshm003.anchor.feature.onboarding.R as OnboardingR
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,7 +17,8 @@ class AppLaunchSmokeTest {
 
     @Test
     fun appLaunches_andRendersShell() {
-        val modes = composeRule.activity.getString(ModesR.string.feature_modes_title)
-        composeRule.onNodeWithText(modes).assertIsDisplayed()
+        // A fresh install starts with onboarding.
+        val welcome = composeRule.activity.getString(OnboardingR.string.feature_onboarding_welcome_title)
+        composeRule.onNodeWithText(welcome).assertIsDisplayed()
     }
 }
