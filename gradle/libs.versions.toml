@@ -20,6 +20,7 @@ roborazzi = "1.79.0"
 
 # AndroidX / Google
 androidxActivity = "1.13.0"
+androidxCamera = "1.7.0"
 androidxBenchmark = "1.5.0"
 androidxCore = "1.19.1"
 androidxCoreSplashscreen = "1.2.0"
@@ -39,6 +40,9 @@ androidxWork = "2.12.0"
 composeBom = "2026.09.00"
 hilt = "2.60.1"
 
+# Offline QR encode/decode (ML Kit adds INTERNET; ADR 0009)
+zxing = "3.5.4"
+
 # Kotlin libraries
 kotlinxCoroutines = "1.11.0"
 kotlinxSerialization = "1.13.0"
@@ -53,6 +57,9 @@ turbine = "1.2.1"
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxActivity" }
 androidx-benchmark-macro = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "androidxBenchmark" }
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "androidxCamera" }
+androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "androidxCamera" }
+androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "androidxCamera" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
@@ -87,6 +94,7 @@ hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", vers
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-core = { module = "com.google.dagger:hilt-core", version.ref = "hilt" }
 junit4 = { module = "junit:junit", version.ref = "junit4" }
+zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
