@@ -21,6 +21,7 @@ class AnchorsScreenshotTest(variant: ScreenshotVariant) {
     private val anchors = listOf(
         Anchor(AnchorId(1), "Desk", AnchorType.Nfc, "a".repeat(64)),
         Anchor(AnchorId(2), "Bedroom", AnchorType.Nfc, "b".repeat(64)),
+        Anchor(AnchorId(3), "Kitchen", AnchorType.Qr, "c".repeat(64)),
     )
 
     private fun capture(name: String, state: AnchorsUiState) = screenshot.capture(name) { dark ->

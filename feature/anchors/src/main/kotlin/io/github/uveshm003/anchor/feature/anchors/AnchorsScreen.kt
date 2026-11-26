@@ -44,6 +44,7 @@ import io.github.uveshm003.anchor.core.designsystem.component.AnchorTopAppBar
 import io.github.uveshm003.anchor.core.designsystem.component.EmptyState
 import io.github.uveshm003.anchor.core.designsystem.component.EmptyStateAction
 import io.github.uveshm003.anchor.core.model.Anchor
+import io.github.uveshm003.anchor.core.model.AnchorType
 import io.github.uveshm003.anchor.core.nfc.NfcAvailability
 import io.github.uveshm003.anchor.core.nfc.WriteResult
 
@@ -60,6 +61,8 @@ fun AnchorsRoute(viewModel: AnchorsViewModel = hiltViewModel()) {
             onPair = viewModel::startPairing,
             onDismissPairing = viewModel::dismissPairing,
             onSave = viewModel::save,
+            onChoose = viewModel::choose,
+            onCreateQr = viewModel::createQr,
             onRename = viewModel::rename,
             onUnpair = viewModel::unpair,
         ),
@@ -70,6 +73,8 @@ data class AnchorsActions(
     val onPair: () -> Unit = {},
     val onDismissPairing: () -> Unit = {},
     val onSave: (String) -> Unit = {},
+    val onChoose: (AnchorType) -> Unit = {},
+    val onCreateQr: (String) -> Unit = {},
     val onRename: (Anchor, String) -> Unit = { _, _ -> },
     val onUnpair: (Anchor) -> Unit = {},
 )
@@ -78,7 +83,8 @@ data class AnchorsActions(
 fun AnchorsScreen(state: AnchorsUiState, actions: AnchorsActions, modifier: Modifier = Modifier) {
     var renaming by rememberSaveable { mutableStateOf<Long?>(null) }
     var unpairing by rememberSaveable { mutableStateOf<Long?>(null) }
-    val canPair = state.nfc == NfcAvailability.Enabled
+    // QR anchors work on every phone, so pairing is always possible.
+    val canPair = true
     Scaffold(
         modifier = modifier,
         topBar = { AnchorTopAppBar(title = stringResource(R.string.feature_anchors_title)) },
@@ -121,7 +127,7 @@ fun AnchorsScreen(state: AnchorsUiState, actions: AnchorsActions, modifier: Modi
             }
         }
     }
-    PairingDialog(state.pairing, actions)
+    PairingDialog(state.pairing, state.nfc, actions)
     AnchorDialogs(
         anchors = state.anchors,
         renaming = renaming,
@@ -204,11 +210,30 @@ private fun AnchorRow(anchor: Anchor, onRename: () -> Unit, onUnpair: () -> Unit
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Icon(painterResource(AnchorIcons.Nfc), contentDescription = null)
+        Icon(
+            painterResource(
+                if (anchor.type ==
+                    AnchorType.Qr
+                ) {
+                    AnchorIcons.QrCode
+                } else {
+                    AnchorIcons.Nfc
+                },
+            ),
+            contentDescription = null,
+        )
         Column(Modifier.weight(1f)) {
             Text(anchor.name, style = MaterialTheme.typography.bodyLarge)
             Text(
-                stringResource(R.string.feature_anchors_nfc_sticker),
+                stringResource(
+                    if (anchor.type ==
+                        AnchorType.Qr
+                    ) {
+                        R.string.feature_anchors_qr_code
+                    } else {
+                        R.string.feature_anchors_nfc_sticker
+                    },
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -218,9 +243,21 @@ private fun AnchorRow(anchor: Anchor, onRename: () -> Unit, onUnpair: () -> Unit
 }
 
 @Composable
-private fun PairingDialog(pairing: Pairing, actions: AnchorsActions) {
+private fun PairingDialog(pairing: Pairing, nfc: NfcAvailability, actions: AnchorsActions) {
     when (pairing) {
         Pairing.Idle -> Unit
+
+        Pairing.ChooseKind -> ChooseKindDialog(nfc, actions.onChoose, actions.onDismissPairing)
+
+        Pairing.NameQr -> NameDialog(
+            title = stringResource(R.string.feature_anchors_name_title),
+            initial = "",
+            note = stringResource(R.string.feature_anchors_qr_note),
+            onSave = actions.onCreateQr,
+            onDismiss = actions.onDismissPairing,
+        )
+
+        is Pairing.QrCreated -> QrCreatedDialog(pairing, actions.onDismissPairing)
 
         Pairing.Waiting -> AlertDialog(
             onDismissRequest = actions.onDismissPairing,

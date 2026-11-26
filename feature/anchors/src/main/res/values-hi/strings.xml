@@ -5,7 +5,7 @@
     <string name="feature_anchors_empty_title">अभी कोई एंकर नहीं</string>
     <string name="feature_anchors_empty_body">जहाँ आप फ़ोन छोड़ना चाहते हैं (डेस्क, बेडरूम, कार) वहाँ एक NFC स्टिकर लगाएँ और उसे जोड़ें। उस पर टैप करने से आपके मोड शुरू और खत्म होते हैं।</string>
     <string name="feature_anchors_pair">एंकर जोड़ें</string>
-    <string name="feature_anchors_no_nfc">इस फ़ोन में NFC नहीं है। QR कोड एंकर अगले अपडेट में आ रहे हैं।</string>
+    <string name="feature_anchors_no_nfc">इस फ़ोन में NFC नहीं है। इसके बजाय QR कोड एंकर जोड़ें।</string>
     <string name="feature_anchors_nfc_off">NFC बंद है। एंकर जोड़ने और टैप करने के लिए इसे चालू करें।</string>
     <string name="feature_anchors_turn_on_nfc">NFC चालू करें</string>
     <string name="feature_anchors_nfc_sticker">NFC स्टिकर</string>
@@ -25,4 +25,15 @@
     <string name="feature_anchors_unpair_title">%1$s हटाएँ?</string>
     <string name="feature_anchors_unpair_body">इस स्टिकर पर टैप करने से अब सत्र शुरू या खत्म नहीं होंगे। जिन मोड को इस एंकर की ज़रूरत है, वे आपके किसी भी एंकर को मान लेंगे।</string>
     <string name="feature_anchors_unpair_confirm">हटाएँ</string>
+    <string name="feature_anchors_choose_title">एंकर जोड़ें</string>
+    <string name="feature_anchors_choose_body">NFC स्टिकर इस्तेमाल करें, या QR कोड प्रिंट करके वहाँ चिपकाएँ जहाँ आप फ़ोन छोड़ना चाहते हैं।</string>
+    <string name="feature_anchors_choose_nfc">NFC स्टिकर</string>
+    <string name="feature_anchors_choose_qr">QR कोड</string>
+    <string name="feature_anchors_qr_note">Anchor एक QR कोड बनाएगा जिसे आप प्रिंट करके कहीं भी चिपका सकते हैं। सत्र शुरू या खत्म करने के लिए इसे Anchor में स्कैन करें।</string>
+    <string name="feature_anchors_qr_once">इसे अभी प्रिंट या सेव करें। Anchor इस कोड की सिर्फ़ एक पहचान रखता है और इसे दोबारा नहीं दिखा सकता।</string>
+    <string name="feature_anchors_qr_share">प्रिंट या शेयर करें</string>
+    <string name="feature_anchors_done">हो गया</string>
+    <string name="feature_anchors_qr_image">%1$s का QR कोड</string>
+    <string name="feature_anchors_qr_print_instructions">इसे वहाँ चिपकाएँ जहाँ आप फ़ोन छोड़ना चाहते हैं। सत्र शुरू या खत्म करने के लिए इसे Anchor में स्कैन करें।</string>
+    <string name="feature_anchors_qr_code">QR कोड</string>
 </resources>

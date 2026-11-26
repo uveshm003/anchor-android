@@ -14,6 +14,7 @@ import io.github.uveshm003.anchor.core.model.ModeId
 import io.github.uveshm003.anchor.core.nfc.AnchorTags
 import io.github.uveshm003.anchor.core.nfc.NfcAvailability
 import io.github.uveshm003.anchor.core.nfc.WriteResult
+import io.github.uveshm003.anchor.core.qr.QrAnchorCode
 import io.github.uveshm003.anchor.core.testing.MainDispatcherRule
 import io.github.uveshm003.anchor.core.testing.data.FakeAnchorRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeModeRepository
@@ -41,7 +42,7 @@ class AnchorsViewModelTest {
         repo: FakeAnchorRepository = FakeAnchorRepository(listOf(desk)),
     ): Pair<AnchorsViewModel, AnchorTags> {
         val tags = AnchorTags(hasher, inputs, this)
-        return AnchorsViewModel(repo, modes, tags) { nfc } to tags
+        return AnchorsViewModel(repo, modes, tags, { nfc }, hasher) to tags
     }
 
     @Test
@@ -51,6 +52,8 @@ class AnchorsViewModelTest {
         vm.uiState.test {
             while (awaitItem().loading) Unit
             vm.startPairing()
+            assertThat(awaitItem().pairing).isEqualTo(Pairing.ChooseKind)
+            vm.choose(AnchorType.Nfc)
             assertThat(awaitItem().pairing).isEqualTo(Pairing.Waiting)
             assertThat(tags.pairing.value).isTrue()
 
@@ -75,7 +78,7 @@ class AnchorsViewModelTest {
         val (vm, tags) = backgroundScope.setup()
         vm.uiState.test {
             while (awaitItem().loading) Unit
-            vm.startPairing()
+            vm.choose(AnchorType.Nfc)
             tags.onTag(byteArrayOf(0x01))
             testScheduler.runCurrent()
             assertThat(expectMostRecentItem().pairing).isEqualTo(Pairing.AlreadyPaired("Desk"))
@@ -110,5 +113,25 @@ class AnchorsViewModelTest {
         tags.onTag(byteArrayOf(0x01))
         testScheduler.runCurrent()
         assertThat(inputs.submitted).containsExactly(Input.AnchorTapped("01".padEnd(64, '0')))
+    }
+
+    @Test
+    fun a_qr_anchor_stores_only_the_hash_and_shows_the_code_once() = runTest {
+        val repo = FakeAnchorRepository()
+        val (vm, _) = backgroundScope.setup(repo)
+        vm.uiState.test {
+            while (awaitItem().loading) Unit
+            vm.choose(AnchorType.Qr)
+            assertThat(awaitItem().pairing).isEqualTo(Pairing.NameQr)
+            vm.createQr(" ")
+            vm.createQr("Kitchen")
+            val created = expectMostRecentItem().pairing as Pairing.QrCreated
+            val secret = checkNotNull(QrAnchorCode.decode(created.payload))
+            val saved = repo.getAnchors().single()
+            assertThat(saved.type).isEqualTo(AnchorType.Qr)
+            assertThat(saved.hash).isEqualTo(hasher.hash(secret))
+            assertThat(saved.hash).doesNotContain(created.payload.substringAfterLast(':'))
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }

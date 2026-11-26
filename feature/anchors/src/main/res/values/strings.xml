@@ -5,7 +5,7 @@
     <string name="feature_anchors_empty_title">No anchors yet</string>
     <string name="feature_anchors_empty_body">Stick an NFC sticker where you want to leave your phone (desk, bedroom, car) and pair it. Tapping it starts and ends your modes.</string>
     <string name="feature_anchors_pair">Pair an anchor</string>
-    <string name="feature_anchors_no_nfc">This phone has no NFC. QR code anchors are coming in the next update.</string>
+    <string name="feature_anchors_no_nfc">This phone has no NFC. Pair a QR code anchor instead.</string>
     <string name="feature_anchors_nfc_off">NFC is off. Turn it on to pair and tap anchors.</string>
     <string name="feature_anchors_turn_on_nfc">Turn on NFC</string>
     <string name="feature_anchors_nfc_sticker">NFC sticker</string>
@@ -25,4 +25,15 @@
     <string name="feature_anchors_unpair_title">Unpair %1$s?</string>
     <string name="feature_anchors_unpair_body">Tapping this sticker will no longer start or end sessions. Modes that need this anchor will accept any of your anchors instead.</string>
     <string name="feature_anchors_unpair_confirm">Unpair</string>
+    <string name="feature_anchors_choose_title">Pair an anchor</string>
+    <string name="feature_anchors_choose_body">Use an NFC sticker, or print a QR code and stick it where you want to leave your phone.</string>
+    <string name="feature_anchors_choose_nfc">NFC sticker</string>
+    <string name="feature_anchors_choose_qr">QR code</string>
+    <string name="feature_anchors_qr_note">Anchor makes a QR code to print and stick anywhere. You scan it in Anchor to start or end a session.</string>
+    <string name="feature_anchors_qr_once">Print or save it now. Anchor keeps only a fingerprint of this code and can’t show it again.</string>
+    <string name="feature_anchors_qr_share">Print or share</string>
+    <string name="feature_anchors_done">Done</string>
+    <string name="feature_anchors_qr_image">QR code for %1$s</string>
+    <string name="feature_anchors_qr_print_instructions">Stick this where you want to leave your phone. Scan it in Anchor to start or end a session.</string>
+    <string name="feature_anchors_qr_code">QR code</string>
 </resources>
