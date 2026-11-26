@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.uveshm003.anchor.core.data.repository.AnchorRepository
 import io.github.uveshm003.anchor.core.data.repository.ModeRepository
+import io.github.uveshm003.anchor.core.engine.AnchorHasher
 import io.github.uveshm003.anchor.core.model.Anchor
 import io.github.uveshm003.anchor.core.model.AnchorId
 import io.github.uveshm003.anchor.core.model.AnchorType
@@ -13,6 +14,7 @@ import io.github.uveshm003.anchor.core.nfc.AnchorTags
 import io.github.uveshm003.anchor.core.nfc.NfcAvailability
 import io.github.uveshm003.anchor.core.nfc.NfcStatus
 import io.github.uveshm003.anchor.core.nfc.WriteResult
+import io.github.uveshm003.anchor.core.qr.QrAnchorCode
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,6 +25,15 @@ import kotlinx.coroutines.launch
 
 sealed interface Pairing {
     data object Idle : Pairing
+
+    /** Pick NFC sticker or QR code. */
+    data object ChooseKind : Pairing
+
+    /** Name a new QR anchor before it's created. */
+    data object NameQr : Pairing
+
+    /** The QR anchor exists; this is the only time its code can be shown, printed or shared. */
+    data class QrCreated(val name: String, val payload: String) : Pairing
 
     /** Waiting for the user to hold the phone to a sticker. */
     data object Waiting : Pairing
@@ -46,6 +57,7 @@ class AnchorsViewModel @Inject constructor(
     private val modes: ModeRepository,
     private val tags: AnchorTags,
     private val nfcStatus: NfcStatus,
+    private val hasher: AnchorHasher,
 ) : ViewModel() {
     private val nfc = MutableStateFlow(nfcStatus.current())
     private val pairing = MutableStateFlow<Pairing>(Pairing.Idle)
@@ -71,8 +83,29 @@ class AnchorsViewModel @Inject constructor(
     }
 
     fun startPairing() {
-        tags.setPairing(true)
-        pairing.value = Pairing.Waiting
+        pairing.value = Pairing.ChooseKind
+    }
+
+    /** NFC: wait for a tap. QR: ask for a name, then [createQr]. */
+    fun choose(kind: AnchorType) {
+        when (kind) {
+            AnchorType.Nfc -> {
+                tags.setPairing(true)
+                pairing.value = Pairing.Waiting
+            }
+
+            AnchorType.Qr -> pairing.value = Pairing.NameQr
+        }
+    }
+
+    /** A random secret on the printed code; only its salted hash is stored (ADR 0008). */
+    fun createQr(name: String) {
+        if (name.isBlank()) return
+        viewModelScope.launch {
+            val secret = QrAnchorCode.newSecret()
+            repository.upsert(Anchor(AnchorId(0), name.trim(), AnchorType.Qr, hasher.hash(secret)))
+            pairing.value = Pairing.QrCreated(name.trim(), QrAnchorCode.encode(secret))
+        }
     }
 
     fun dismissPairing() {
