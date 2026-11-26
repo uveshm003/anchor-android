@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.uveshm003.anchor.core.data.platform.BlockerStatus
 import io.github.uveshm003.anchor.core.data.platform.RecoveryCountdown
+import io.github.uveshm003.anchor.core.data.repository.AnchorRepository
 import io.github.uveshm003.anchor.core.data.repository.ModeRepository
 import io.github.uveshm003.anchor.core.data.repository.SessionRepository
 import io.github.uveshm003.anchor.core.data.repository.SettingsRepository
@@ -14,6 +15,7 @@ import io.github.uveshm003.anchor.core.engine.Input
 import io.github.uveshm003.anchor.core.engine.Outcome
 import io.github.uveshm003.anchor.core.engine.ReconcileCause
 import io.github.uveshm003.anchor.core.engine.RejectReason
+import io.github.uveshm003.anchor.core.model.AnchorType
 import io.github.uveshm003.anchor.core.model.Mode
 import io.github.uveshm003.anchor.core.model.ModeId
 import io.github.uveshm003.anchor.core.model.Session
@@ -48,6 +50,8 @@ data class HomeUiState(
     val recoveryRemaining: Duration? = null,
     /** The last session ended through recovery: offer to pair a new anchor. */
     val offerRepair: Boolean = false,
+    /** A QR anchor is paired, so scanning is offered. */
+    val hasQrAnchors: Boolean = false,
 )
 
 sealed interface HomeEffect {
@@ -70,6 +74,7 @@ class HomeViewModel @Inject constructor(
     modes: ModeRepository,
     settings: SettingsRepository,
     blocker: BlockerStatus,
+    anchors: AnchorRepository,
     private val session: SessionSources,
     private val clock: Clock,
 ) : ViewModel() {
@@ -86,9 +91,9 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = combine(
         combine(modes.modes, settings.settings, selected, ::Triple),
         combine(session.sessions.engineState, session.sessions.history, now, ::Triple),
-        blocker.enabled,
+        combine(blocker.enabled, anchors.anchors, ::Pair),
         session.unlocks.remainingEmergencyUnlocks,
-    ) { (all, user, pick), (engine, history, _), enabled, left ->
+    ) { (all, user, pick), (engine, history, _), (enabled, paired), left ->
         val ordered = all.sortedByDescending { it.id == user.defaultModeId }
         HomeUiState(
             loading = false,
@@ -100,6 +105,7 @@ class HomeViewModel @Inject constructor(
             emergencyQuota = user.emergencyQuotaPerWeek,
             recoveryRemaining = engine.recovery?.let { session.countdown.remaining(it) },
             offerRepair = engine.active == null && history.firstOrNull()?.endedBy == SessionEnd.Recovery,
+            hasQrAnchors = paired.any { it.type == AnchorType.Qr },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState())
 

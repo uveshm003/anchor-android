@@ -138,9 +138,11 @@ graph TD
     feature_anchors --> core_data
     feature_anchors --> core_designsystem
     feature_anchors --> core_nfc
+    feature_anchors --> core_qr
     feature_anchors --> core_ui
     feature_home --> core_data
     feature_home --> core_designsystem
+    feature_home --> core_qr
     feature_home --> core_ui
     feature_insights --> core_data
     feature_insights --> core_designsystem

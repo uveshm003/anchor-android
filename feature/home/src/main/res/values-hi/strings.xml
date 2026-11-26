@@ -53,6 +53,19 @@
     <string name="feature_home_repair_title">आपका पिछला सत्र रिकवरी से खत्म हुआ</string>
     <string name="feature_home_repair_body">नया एंकर जोड़ें, या पुराना स्टिकर मिल गया हो तो उसे फिर से जोड़ें।</string>
     <string name="feature_home_repair_action">एंकर जोड़ें</string>
+    <string name="feature_home_scan_qr">QR एंकर स्कैन करें</string>
+    <string name="feature_home_scan_title">QR एंकर स्कैन करें</string>
+    <string name="feature_home_scan_hint">कैमरे को अपने किसी Anchor QR कोड पर रखें।</string>
+    <string name="feature_home_scan_not_anchor">यह Anchor QR कोड नहीं है। कैमरे को अपने किसी QR कोड पर रखें।</string>
+    <string name="feature_home_scan_permission">QR एंकर स्कैन करने के लिए Anchor को कैमरा चाहिए। यह सिर्फ़ कोड ढूँढता है; कोई फ़ोटो नहीं ली या सेव की जाती।</string>
+    <string name="feature_home_scan_allow">कैमरा की अनुमति दें</string>
+    <string name="feature_home_scan_again">फिर से स्कैन करें</string>
+    <string name="feature_home_scan_started">%1$s शुरू हुआ।</string>
+    <string name="feature_home_scan_ended">सत्र खत्म हुआ। आपके ऐप अनब्लॉक हो गए हैं।</string>
+    <string name="feature_home_scan_wrong">यह सत्र किसी दूसरे एंकर से खत्म होता है।</string>
+    <string name="feature_home_scan_wrong_named">यह सत्र आपके %1$s एंकर से खत्म होता है।</string>
+    <string name="feature_home_scan_unknown">यह QR एंकर इस फ़ोन पर Anchor से जुड़ा नहीं है।</string>
+    <string name="feature_home_scan_rejected">स्कैन करने से यह सत्र खत्म नहीं होता। होम पर देखें कि यह कैसे खत्म होता है।</string>
     <string-array name="feature_home_emergency_sentences">
         <item>मैं अपना फ़ोकस सत्र जल्दी खत्म करना चुन रहा हूँ</item>
         <item>इसके बाद मैं ज़रूरी काम पर लौटूँगा</item>
