@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Anchor" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Window background = Compose surface: no flash on launch, rotation or dark-mode toggle. -->
+    <style name="Theme.Anchor" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/anchor_window_background</item>
+    </style>
+
+    <style name="Theme.Anchor.Starting" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenBackground">@color/anchor_window_background</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/anchor_icon_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.Anchor</item>
+    </style>
 </resources>

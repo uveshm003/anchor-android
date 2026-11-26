@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand teal (designsystem primary) and the Compose surface, so launch shows no colour flash. -->
+    <color name="anchor_icon_background">#00506E</color>
+    <color name="anchor_window_background">#F7F9FD</color>
+</resources>
