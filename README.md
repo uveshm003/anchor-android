@@ -172,6 +172,7 @@ graph TD
     feature_onboarding --> core_ui
     feature_settings --> core_data
     feature_settings --> core_designsystem
+    feature_settings --> core_nfc
     feature_settings --> core_ui
     feature_triggers --> core_data
     feature_triggers --> core_designsystem
