@@ -6,9 +6,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.Multibinds
 import io.github.uveshm003.anchor.core.data.platform.AndroidBlockerStatus
+import io.github.uveshm003.anchor.core.data.platform.AndroidDeviceSetup
 import io.github.uveshm003.anchor.core.data.platform.AndroidDeviceUptime
 import io.github.uveshm003.anchor.core.data.platform.AndroidEssentialApps
 import io.github.uveshm003.anchor.core.data.platform.BlockerStatus
+import io.github.uveshm003.anchor.core.data.platform.DeviceSetup
 import io.github.uveshm003.anchor.core.data.platform.DeviceUptime
 import io.github.uveshm003.anchor.core.data.platform.EssentialApps
 import io.github.uveshm003.anchor.core.data.platform.SaltedAnchorHasher
@@ -66,6 +68,8 @@ internal abstract class SessionModule {
     @Binds abstract fun blockerStatus(impl: AndroidBlockerStatus): BlockerStatus
 
     @Binds abstract fun uptime(impl: AndroidDeviceUptime): DeviceUptime
+
+    @Binds abstract fun deviceSetup(impl: AndroidDeviceSetup): DeviceSetup
 
     /** Adapters contribute executors with `@IntoSet`; declared so the set may be empty in tests. */
     @Multibinds abstract fun executors(): Set<CommandExecutor>
