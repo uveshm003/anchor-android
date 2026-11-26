@@ -39,6 +39,9 @@ in GitHub issues (milestones M0–M6) and is completed through PRs that close th
   - [ ] Root cause found (lint 32.5 / Kotlin 2.4, parallel lint workers) and fixed or worked around without
     disabling lint on test sources
   - Test plan: 10 consecutive `ciCheck` runs without the crash
+- [ ] **T-4** Compose BOM 2026.11.01 (Dependabot #117) needs `compileSdk` 37.1.
+  - [ ] `compileSdk` set to API 37.1 through the convention plugin (AGP 9 minor-API DSL); platform installed in CI
+  - [ ] BOM bumped; screenshot goldens re-recorded if rendering changed; `ciCheck` green
 
 ## Done
 
