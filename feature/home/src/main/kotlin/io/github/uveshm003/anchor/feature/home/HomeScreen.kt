@@ -77,6 +77,7 @@ fun HomeRoute(
     onCreateMode: () -> Unit,
     onEmergencyUnlock: () -> Unit,
     onPairAnchor: () -> Unit,
+    onScanAnchor: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -119,6 +120,7 @@ fun HomeRoute(
             onTurnOnBlocking = { explainBlocker = true },
             onCancelRecovery = viewModel::cancelRecovery,
             onPairAnchor = onPairAnchor,
+            onScanAnchor = onScanAnchor,
         ),
     )
     if (explainBlocker) BlockerDisclosureDialog(onDismiss = { explainBlocker = false })
@@ -132,6 +134,7 @@ data class HomeActions(
     val onTurnOnBlocking: () -> Unit = {},
     val onCancelRecovery: () -> Unit = {},
     val onPairAnchor: () -> Unit = {},
+    val onScanAnchor: () -> Unit = {},
 )
 
 @Composable
@@ -198,6 +201,9 @@ private fun Idle(state: HomeUiState, actions: HomeActions) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        if (state.hasQrAnchors) {
+            TextButton(onClick = actions.onScanAnchor) { Text(stringResource(R.string.feature_home_scan_qr)) }
+        }
     }
 }
 
@@ -274,6 +280,9 @@ private fun ActiveSession(session: Session, state: HomeUiState, now: Instant, zo
             TextButton(onClick = actions.onCancelRecovery) {
                 Text(stringResource(R.string.feature_home_recovery_cancel))
             }
+        }
+        if (state.hasQrAnchors && session.exitRule is ExitRule.RequiresAnchor) {
+            AnchorButton(text = stringResource(R.string.feature_home_scan_qr), onClick = actions.onScanAnchor)
         }
         AnchorOutlinedButton(
             text = stringResource(R.string.feature_home_emergency_unlock),

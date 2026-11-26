@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.github.uveshm003.anchor.feature.home.HomeRoute as HomeScreenRoute
 import io.github.uveshm003.anchor.feature.home.emergency.EmergencyUnlockRoute as EmergencyUnlockScreenRoute
+import io.github.uveshm003.anchor.feature.home.scan.ScanRoute
 import kotlinx.serialization.Serializable
 
 /** Top-level Home destination. */
@@ -13,6 +14,10 @@ data object HomeRoute
 
 @Serializable
 data object EmergencyUnlockRoute
+
+/** Scan a QR anchor (acts like an NFC tap). */
+@Serializable
+data object ScanAnchorRoute
 
 fun NavController.navigateToEmergencyUnlock() = navigate(EmergencyUnlockRoute) { launchSingleTop = true }
 
@@ -23,7 +28,9 @@ fun NavGraphBuilder.homeScreen(navController: NavController, onCreateMode: () ->
             onCreateMode = onCreateMode,
             onEmergencyUnlock = navController::navigateToEmergencyUnlock,
             onPairAnchor = onPairAnchor,
+            onScanAnchor = { navController.navigate(ScanAnchorRoute) { launchSingleTop = true } },
         )
     }
+    composable<ScanAnchorRoute> { ScanRoute(onClose = { navController.popBackStack() }) }
     composable<EmergencyUnlockRoute> { EmergencyUnlockScreenRoute(onClose = { navController.popBackStack() }) }
 }

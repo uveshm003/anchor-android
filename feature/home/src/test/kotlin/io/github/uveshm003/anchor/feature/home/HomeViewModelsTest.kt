@@ -23,6 +23,7 @@ import io.github.uveshm003.anchor.core.model.SessionEnd
 import io.github.uveshm003.anchor.core.model.SessionId
 import io.github.uveshm003.anchor.core.model.SessionSource
 import io.github.uveshm003.anchor.core.testing.MainDispatcherRule
+import io.github.uveshm003.anchor.core.testing.data.FakeAnchorRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeBlockerStatus
 import io.github.uveshm003.anchor.core.testing.data.FakeModeRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeSessionRepository
@@ -63,6 +64,7 @@ class HomeViewModelsTest {
         FakeModeRepository(listOf(work, study)),
         settings,
         blocker,
+        FakeAnchorRepository(),
         SessionSources(sessions, FakeUnlockHistoryRepository(2), requests, RecoveryCountdown(uptime, clock)),
         clock,
     )

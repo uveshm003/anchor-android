@@ -53,6 +53,19 @@
     <string name="feature_home_repair_title">Your last session ended through recovery</string>
     <string name="feature_home_repair_body">Pair a new anchor, or pair your old sticker again if you found it.</string>
     <string name="feature_home_repair_action">Pair an anchor</string>
+    <string name="feature_home_scan_qr">Scan a QR anchor</string>
+    <string name="feature_home_scan_title">Scan a QR anchor</string>
+    <string name="feature_home_scan_hint">Point the camera at one of your Anchor QR codes.</string>
+    <string name="feature_home_scan_not_anchor">That isn’t an Anchor QR code. Point the camera at one of yours.</string>
+    <string name="feature_home_scan_permission">Anchor needs the camera to scan your QR anchor. It only looks for the code; no photos are taken or saved.</string>
+    <string name="feature_home_scan_allow">Allow camera</string>
+    <string name="feature_home_scan_again">Scan again</string>
+    <string name="feature_home_scan_started">%1$s started.</string>
+    <string name="feature_home_scan_ended">Session ended. Your apps are unblocked.</string>
+    <string name="feature_home_scan_wrong">This session ends with a different anchor.</string>
+    <string name="feature_home_scan_wrong_named">This session ends with your %1$s anchor.</string>
+    <string name="feature_home_scan_unknown">This QR anchor isn’t paired with Anchor on this phone.</string>
+    <string name="feature_home_scan_rejected">Scanning doesn’t end this session. Check how it ends on Home.</string>
     <string-array name="feature_home_emergency_sentences">
         <item>I am choosing to end my focus session early</item>
         <item>I will come back to what matters after this</item>
