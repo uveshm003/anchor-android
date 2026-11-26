@@ -6,7 +6,7 @@ minSdk = "31"
 jvmTarget = "17"
 
 # Build tooling
-androidGradlePlugin = "9.5.1"
+androidGradlePlugin = "9.5.3"
 # Lint libraries are versioned AGP + 23 (AGP 9.5.1 -> lint 32.5.1).
 androidLint = "32.5.1"
 kotlin = "2.4.21"
