@@ -2,4 +2,22 @@
 <resources>
     <string name="feature_settings_title">Settings</string>
     <string name="feature_settings_placeholder">Permissions, emergency unlocks and app settings.</string>
+    <string name="feature_settings_setup">Phone setup</string>
+    <string name="feature_settings_blocking">App blocking</string>
+    <string name="feature_settings_blocking_on">On. Modes can block apps.</string>
+    <string name="feature_settings_blocking_off">Off. Turn on “Anchor app blocking” in Accessibility settings so modes can block apps.</string>
+    <string name="feature_settings_restricted">This copy of Anchor was installed from a file, so Android hides the switch at first. Open App info, tap ⋮ and choose “Allow restricted settings”, then come back and turn on app blocking.</string>
+    <string name="feature_settings_open_app_info">Open App info</string>
+    <string name="feature_settings_open_accessibility">Open Accessibility settings</string>
+    <string name="feature_settings_battery">Battery</string>
+    <string name="feature_settings_battery_ok">Anchor can run in the background.</string>
+    <string name="feature_settings_battery_optimized">Battery optimisation can stop Anchor in the background, so timers and anchor taps may be late. Set Anchor to “Unrestricted” or “Not optimised”.</string>
+    <string name="feature_settings_open_battery">Open battery settings</string>
+    <string name="feature_settings_oem">%1$s phones also stop background apps in their own ways. See the steps for your phone.</string>
+    <string name="feature_settings_open_dontkillmyapp">Open dontkillmyapp.com</string>
+    <string name="feature_settings_nfc">NFC</string>
+    <string name="feature_settings_nfc_on">On. Tap your phone on an anchor to start or end a session.</string>
+    <string name="feature_settings_nfc_off">Off. Turn on NFC to use NFC anchors.</string>
+    <string name="feature_settings_open_nfc">Open NFC settings</string>
+    <string name="feature_settings_nfc_none">This phone has no NFC. QR code anchors are coming in the next update.</string>
 </resources>
