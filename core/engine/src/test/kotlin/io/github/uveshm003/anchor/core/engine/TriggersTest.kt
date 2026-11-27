@@ -159,4 +159,27 @@ class TriggersTest {
         val state = EngineState().reduce(Input.TriggerStarted(TriggerKey.Driving)).state
         assertThat(Json.decodeFromString<EngineState>(Json.encodeToString(state))).isEqualTo(state)
     }
+
+    @Test
+    fun a_trigger_already_on_starts_a_mode_that_just_gained_it() {
+        // USB plugged in while no mode used it: noted, nothing starts.
+        val plugged = EngineState().reduce(Input.TriggerStarted(TriggerKey.Usb))
+        assertThat(plugged.outcome).isEqualTo(Outcome.TriggersChanged)
+        assertThat(plugged.state.active).isNull()
+
+        // The user adds "Connected to a computer" to a mode; the next reconcile starts it.
+        val pc = Mode(
+            ModeId(13),
+            "At the PC",
+            priority = 3,
+            startTriggers = setOf(StartTrigger.UsbConnected),
+            exitRule = ExitRule.TriggerEnds,
+        )
+        val withPc = triggered.copy(modes = triggered.modes + pc)
+        val saved = Engine.reduce(plugged.state, Input.Reconcile(ReconcileCause.AppStart), withPc)
+
+        assertThat(saved.outcome).isInstanceOf(Outcome.Started::class.java)
+        assertThat(saved.state.active?.mode?.id).isEqualTo(pc.id)
+        assertThat(saved.state.active?.trigger).isEqualTo(TriggerKey.Usb)
+    }
 }
