@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import io.github.uveshm003.anchor.core.common.time.TestClock
 import io.github.uveshm003.anchor.core.data.repository.InstalledApp
 import io.github.uveshm003.anchor.core.model.Anchor
 import io.github.uveshm003.anchor.core.model.AnchorId
@@ -14,14 +15,18 @@ import io.github.uveshm003.anchor.core.model.Mode
 import io.github.uveshm003.anchor.core.model.ModeColor
 import io.github.uveshm003.anchor.core.model.ModeIcon
 import io.github.uveshm003.anchor.core.model.ModeId
+import io.github.uveshm003.anchor.core.model.StartTrigger
 import io.github.uveshm003.anchor.core.testing.MainDispatcherRule
 import io.github.uveshm003.anchor.core.testing.data.FakeAnchorRepository
+import io.github.uveshm003.anchor.core.testing.data.FakeDeviceSetup
 import io.github.uveshm003.anchor.core.testing.data.FakeInstalledAppsRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeModeRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeSettingsRepository
+import io.github.uveshm003.anchor.feature.modes.editor.EditorSources
 import io.github.uveshm003.anchor.feature.modes.editor.ExitChoice
 import io.github.uveshm003.anchor.feature.modes.editor.ModeEditorEffect
 import io.github.uveshm003.anchor.feature.modes.editor.ModeEditorViewModel
+import io.github.uveshm003.anchor.feature.modes.editor.ScheduleDraft
 import io.github.uveshm003.anchor.feature.modes.list.ModesEffect
 import io.github.uveshm003.anchor.feature.modes.list.ModesViewModel
 import kotlinx.coroutines.flow.first
@@ -35,6 +40,8 @@ class ModesViewModelsTest {
     @get:Rule
     val main = MainDispatcherRule()
 
+    // Monday 2026-11-23, 12:00 UTC.
+    private val clock = TestClock(java.time.Instant.parse("2026-11-23T12:00:00Z"))
     private val work = Mode(ModeId(1), "Work", priority = 0)
     private val study = Mode(ModeId(2), "Study", priority = 1)
     private val apps = listOf(
@@ -75,9 +82,13 @@ class ModesViewModelsTest {
         settings: FakeSettingsRepository = FakeSettingsRepository(),
         handle: SavedStateHandle = SavedStateHandle(mapOf("modeId" to modeId)),
         anchorRepo: FakeAnchorRepository = FakeAnchorRepository(),
-    ) = ModeEditorViewModel(handle, repo, settings, FakeInstalledAppsRepository(apps), anchorRepo) {
-        setOf("com.android.dialer")
-    }
+        device: FakeDeviceSetup = FakeDeviceSetup(),
+    ) = ModeEditorViewModel(
+        handle,
+        repo,
+        settings,
+        EditorSources(FakeInstalledAppsRepository(apps), anchorRepo, { setOf("com.android.dialer") }, clock, device),
+    )
 
     @Test
     fun new_mode_validates_name_and_saves_a_block_list_without_essentials() = runTest {
@@ -90,8 +101,8 @@ class ModesViewModelsTest {
             assertThat(awaitItem().nameError).isTrue()
 
             vm.setName("  Deep Work ")
-            vm.setIcon(ModeIcon.Study)
-            vm.setColor(ModeColor.Indigo)
+            vm.setLook(icon = ModeIcon.Study)
+            vm.setLook(color = ModeColor.Indigo)
             vm.toggleApp("com.social")
             vm.toggleApp("com.android.dialer") // essential: ignored
             vm.setExit(ExitChoice.Timer(45))
@@ -181,5 +192,58 @@ class ModesViewModelsTest {
             awaitItem()
         }
         assertThat(repo.getModes().single().exitRule).isEqualTo(ExitRule.RequiresAnchor(desk.id))
+    }
+
+    @Test
+    fun a_schedule_shows_its_next_start_validates_and_can_end_the_mode() = runTest {
+        val repo = FakeModeRepository()
+        val device = FakeDeviceSetup(exactAlarms = false)
+        val vm = editor(repo = repo, device = device)
+        vm.uiState.test {
+            while (awaitItem().loading) Unit
+            vm.setName("Nights")
+            vm.setSchedule(ScheduleDraft(days = setOf(1), startMinute = 22 * 60, endMinute = 7 * 60))
+            var state = expectMostRecentItem()
+            assertThat(state.nextScheduleStart).isEqualTo(java.time.LocalDateTime.parse("2026-11-23T22:00"))
+            assertThat(state.exactAlarms).isFalse()
+
+            vm.setExit(ExitChoice.TriggerEnds)
+            assertThat(expectMostRecentItem().draft.endsWithTrigger).isTrue()
+
+            vm.setSchedule(ScheduleDraft(days = emptySet()))
+            vm.save()
+            state = expectMostRecentItem()
+            assertThat(state.scheduleError).isTrue()
+            assertThat(state.nextScheduleStart).isNull()
+
+            vm.setSchedule(ScheduleDraft(days = setOf(1, 2), startMinute = 22 * 60, endMinute = 7 * 60))
+            cancelAndIgnoreRemainingEvents()
+        }
+        vm.effects.test {
+            vm.save()
+            awaitItem()
+        }
+        val saved = repo.getModes().single()
+        assertThat(saved.startTriggers).containsExactly(
+            StartTrigger.Hold,
+            StartTrigger.AnchorTap,
+            StartTrigger.Schedule(setOf(1, 2), 22 * 60, 7 * 60),
+        )
+        assertThat(saved.exitRule).isEqualTo(ExitRule.TriggerEnds)
+    }
+
+    @Test
+    fun turning_the_schedule_off_drops_the_trigger_exit() = runTest {
+        val vm = editor()
+        vm.uiState.test {
+            while (awaitItem().loading) Unit
+            vm.setSchedule(ScheduleDraft())
+            vm.setExit(ExitChoice.TriggerEnds)
+            vm.setSchedule(null)
+            val draft = expectMostRecentItem().draft
+            assertThat(draft.schedule).isNull()
+            assertThat(draft.endsWithTrigger).isFalse()
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }

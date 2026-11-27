@@ -147,3 +147,19 @@ class FakeSessionRequests(
         return outcome(input)
     }
 }
+
+/** Device checks with fixed answers. */
+class FakeDeviceSetup(
+    var batteryOptimized: Boolean = false,
+    var sideloaded: Boolean = false,
+    var manufacturer: String = "google",
+    var exactAlarms: Boolean = true,
+) : io.github.uveshm003.anchor.core.data.platform.DeviceSetup {
+    override fun batteryOptimized() = batteryOptimized
+
+    override fun sideloaded() = sideloaded
+
+    override fun manufacturer() = manufacturer
+
+    override fun exactAlarmsAllowed() = exactAlarms
+}

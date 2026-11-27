@@ -23,6 +23,7 @@ import io.github.uveshm003.anchor.feature.modes.editor.ModeDraft
 import io.github.uveshm003.anchor.feature.modes.editor.ModeEditorActions
 import io.github.uveshm003.anchor.feature.modes.editor.ModeEditorScreen
 import io.github.uveshm003.anchor.feature.modes.editor.ModeEditorUiState
+import io.github.uveshm003.anchor.feature.modes.editor.ScheduleDraft
 import io.github.uveshm003.anchor.feature.modes.list.ModesScreen
 import io.github.uveshm003.anchor.feature.modes.list.ModesUiState
 import io.github.uveshm003.anchor.feature.modes.templates.TemplateChooser
@@ -98,6 +99,29 @@ class ModesScreenshotTest(private val variant: ScreenshotVariant) {
             ModeEditorActions(),
         )
     }
+
+    @Test
+    fun modeEditorSchedule() = capture("mode_editor_schedule") { ModeEditorScreen(scheduled, ModeEditorActions()) }
+
+    @Test
+    fun modeEditorSchedule_fontScale2() {
+        assumeTrue(variant.device == ScreenshotDevice.Phone)
+        capture("mode_editor_schedule_fontscale2") {
+            CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale = 2f)) {
+                ModeEditorScreen(scheduled, ModeEditorActions())
+            }
+        }
+    }
+
+    private val scheduled get() = editor.copy(
+        draft = editor.draft.copy(
+            timerMinutes = null,
+            schedule = ScheduleDraft(setOf(1, 2, 3, 4, 5), 22 * 60, 7 * 60),
+            endsWithTrigger = true,
+        ),
+        nextScheduleStart = java.time.LocalDateTime.parse("2026-11-23T22:00"),
+        exactAlarms = false,
+    )
 
     @Test
     fun templateChooser() = capture("template_chooser") {

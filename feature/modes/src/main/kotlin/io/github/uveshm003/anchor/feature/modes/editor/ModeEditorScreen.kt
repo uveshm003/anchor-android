@@ -82,11 +82,12 @@ fun ModeEditorRoute(onDone: () -> Unit, viewModel: ModeEditorViewModel = hiltVie
                 onClose = onDone,
                 onSave = viewModel::save,
                 onName = viewModel::setName,
-                onIcon = viewModel::setIcon,
-                onColor = viewModel::setColor,
+                onIcon = { viewModel.setLook(icon = it) },
+                onColor = { viewModel.setLook(color = it) },
                 onAllowList = viewModel::setAllowList,
                 onPickApps = { viewModel.showAppPicker(true) },
                 onExit = viewModel::setExit,
+                onSchedule = viewModel::setSchedule,
             ),
         )
     }
@@ -101,6 +102,7 @@ data class ModeEditorActions(
     val onAllowList: (Boolean) -> Unit = {},
     val onPickApps: () -> Unit = {},
     val onExit: (ExitChoice) -> Unit = {},
+    val onSchedule: (ScheduleDraft?) -> Unit = {},
 )
 
 @Composable
@@ -160,6 +162,7 @@ private fun EditorForm(state: ModeEditorUiState, actions: ModeEditorActions) {
     ) {
         LookSection(state, actions)
         AppsSection(state, actions)
+        ScheduleSection(state, actions.onSchedule)
         ExitSection(state.draft, state.anchors, actions.onExit)
     }
 }
@@ -252,7 +255,7 @@ private fun ExitSection(draft: ModeDraft, anchors: List<Anchor>, onExit: (ExitCh
             Choice(
                 stringResource(R.string.feature_modes_exit_anchor),
                 stringResource(R.string.feature_modes_exit_anchor_body),
-                timer == null && specific == null,
+                timer == null && specific == null && !draft.endsWithTrigger,
             ) { onExit(ExitChoice.AnyAnchor) }
             if (anchors.isNotEmpty()) {
                 Choice(
@@ -260,6 +263,13 @@ private fun ExitSection(draft: ModeDraft, anchors: List<Anchor>, onExit: (ExitCh
                     stringResource(R.string.feature_modes_exit_specific_body),
                     timer == null && specific != null,
                 ) { onExit(ExitChoice.SpecificAnchor(specific ?: anchors.first().id.value)) }
+            }
+            if (draft.schedule != null) {
+                Choice(
+                    stringResource(R.string.feature_modes_exit_trigger),
+                    stringResource(R.string.feature_modes_exit_trigger_body),
+                    draft.endsWithTrigger,
+                ) { onExit(ExitChoice.TriggerEnds) }
             }
         }
         if (timer == null && specific != null) {

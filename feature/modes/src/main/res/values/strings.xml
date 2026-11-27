@@ -72,4 +72,15 @@
     <string name="feature_modes_template_family_body">Puts the phone away for 2 hours: social, games, video and news blocked.</string>
     <string name="feature_modes_exit_specific">A specific anchor</string>
     <string name="feature_modes_exit_specific_body">Only the anchor you choose ends it, such as the one in your bedroom.</string>
+    <string name="feature_modes_start_automatically">Start automatically</string>
+    <string name="feature_modes_schedule">Schedule</string>
+    <string name="feature_modes_schedule_body">Starts by itself on the days and times you choose.</string>
+    <string name="feature_modes_schedule_from">From %1$s</string>
+    <string name="feature_modes_schedule_until">Until %1$s</string>
+    <string name="feature_modes_schedule_next">Next: %1$s at %2$s</string>
+    <string name="feature_modes_schedule_invalid">Pick at least one day and different start and end times.</string>
+    <string name="feature_modes_schedule_inexact">Exact alarms are off, so this schedule may start or end up to 10 minutes late.</string>
+    <string name="feature_modes_schedule_allow_exact">Allow exact alarms</string>
+    <string name="feature_modes_exit_trigger">When the schedule ends</string>
+    <string name="feature_modes_exit_trigger_body">Ends by itself when the scheduled time is over.</string>
 </resources>
