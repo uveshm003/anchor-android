@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import io.github.uveshm003.anchor.core.engine.CommandExecutor
 import io.github.uveshm003.anchor.core.triggers.recovery.RecoveryExecutor
+import io.github.uveshm003.anchor.core.triggers.schedule.ScheduleWakeExecutor
 import io.github.uveshm003.anchor.core.triggers.timer.TimerExecutor
 
 @Module
@@ -17,4 +18,7 @@ internal abstract class TriggersModule {
 
     @Binds @IntoSet
     abstract fun recovery(executor: RecoveryExecutor): CommandExecutor
+
+    @Binds @IntoSet
+    abstract fun schedule(executor: ScheduleWakeExecutor): CommandExecutor
 }

@@ -30,6 +30,7 @@ class EnvironmentSampler @Inject constructor(
             emergencyQuotaPerWeek = user.emergencyQuotaPerWeek,
             elapsedRealtimeMillis = uptime.elapsedRealtimeMillis(),
             bootCount = uptime.bootCount(),
+            zone = clock.zone,
         )
     }
 }

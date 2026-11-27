@@ -1,5 +1,6 @@
 package io.github.uveshm003.anchor.core.triggers.system
 
+import android.app.AlarmManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -26,9 +27,16 @@ class SystemEventsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val cause = when (intent.action) {
             Intent.ACTION_BOOT_COMPLETED -> ReconcileCause.Boot
+
             Intent.ACTION_MY_PACKAGE_REPLACED -> ReconcileCause.PackageReplaced
+
             Intent.ACTION_TIME_CHANGED -> ReconcileCause.TimeChanged
+
             Intent.ACTION_TIMEZONE_CHANGED -> ReconcileCause.TimeZoneChanged
+
+            // Exact alarms were allowed or revoked: re-arm the schedule and timer alarms the right way.
+            AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED -> ReconcileCause.PermissionGranted
+
             else -> return
         }
         val pending = goAsync()

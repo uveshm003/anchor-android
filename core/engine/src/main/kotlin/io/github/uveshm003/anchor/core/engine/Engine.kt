@@ -27,12 +27,54 @@ object Engine {
         Input.EmergencyUnlock -> emergencyUnlock(state, env)
         is Input.TimerElapsed -> timerElapsed(state, input, env)
         is Input.CommandFailed -> commandFailed(state, input)
-        is Input.Reconcile -> reconcile(state, env)
+        is Input.Reconcile -> reconcile(state, env).let { syncSchedules(it, env) }
+        Input.RecoveryRequested, Input.RecoveryCancelled, is Input.RecoveryElapsed -> recovery(state, input, env)
+        is Input.TriggerStarted, is Input.TriggerEnded, Input.ScheduleTick -> automatic(state, input, env)
+    }
+
+    private fun recovery(state: EngineState, input: Input, env: Environment): Transition = when (input) {
         Input.RecoveryRequested -> recoveryRequested(state, env)
         Input.RecoveryCancelled -> recoveryCancelled(state, env)
         is Input.RecoveryElapsed -> recoveryElapsed(state, input, env)
+        else -> error("Not a recovery input: $input")
+    }
+
+    private fun automatic(state: EngineState, input: Input, env: Environment): Transition = when (input) {
         is Input.TriggerStarted -> triggerStarted(state, input.key, env)
         is Input.TriggerEnded -> triggerEnded(state, input.key, env)
+        Input.ScheduleTick -> syncSchedules(Transition(state, emptyList(), Outcome.TriggersChanged), env)
+        else -> error("Not an automatic-trigger input: $input")
+    }
+
+    /**
+     * Brings schedule triggers in line with the clock: closed windows end their trigger (and un-spend it), newly open
+     * ones start, spent ones stay quiet. Always re-arms the wake-up for the next opening or closing.
+     */
+    private fun syncSchedules(after: Transition, env: Environment): Transition {
+        val open = Schedules.openKeys(env.modes, env.now, env.zone)
+        val tracked = (after.state.activeTriggers + after.state.spentTriggers)
+            .filterIsInstance<TriggerKey.Schedule>()
+            .toSet()
+        var result = after
+        (tracked - open).forEach { result = result.then(triggerEnded(result.state, it, env)) }
+        (open - tracked).forEach { result = result.then(triggerStarted(result.state, it, env)) }
+        val wake = Command.ScheduleWake(
+            id = commandId("schedule_wake", null, env),
+            at = Schedules.nextWake(env.modes, env.now, env.zone),
+        )
+        return result.copy(commands = result.commands + wake)
+    }
+
+    /** Chains two transitions; an end followed by a start is recorded as a switch so both sessions are kept. */
+    private fun Transition.then(next: Transition): Transition {
+        val first = outcome
+        val second = next.outcome
+        val combined = when {
+            first is Outcome.Ended && second is Outcome.Started -> Outcome.Switched(first.session, second.session)
+            second == Outcome.TriggersChanged -> first
+            else -> second
+        }
+        return Transition(next.state, commands + next.commands, combined)
     }
 
     /**
@@ -41,6 +83,8 @@ object Engine {
      * trigger (otherwise ending it would break "strict to stop").
      */
     private fun triggerStarted(state: EngineState, key: TriggerKey, env: Environment): Transition {
+        // Used up while still true: wait until it turns false before it can start anything again.
+        if (key in state.spentTriggers) return Transition(state, emptyList(), Outcome.TriggersChanged)
         val noted = state.copy(activeTriggers = state.activeTriggers + key)
         val active = state.active
         val best = Triggers.best(noted.activeTriggers, env.modes)
@@ -56,7 +100,7 @@ object Engine {
 
     /** Ends only the session this trigger started, and only if its exit rule is "ends with its trigger". */
     private fun triggerEnded(state: EngineState, key: TriggerKey, env: Environment): Transition {
-        val noted = state.copy(activeTriggers = state.activeTriggers - key)
+        val noted = state.copy(activeTriggers = state.activeTriggers - key, spentTriggers = state.spentTriggers - key)
         val active = state.active
         return if (active != null && active.trigger == key && active.session.exitRule == ExitRule.TriggerEnds) {
             end(noted, active, SessionEnd.TriggerEnded, env)
@@ -274,6 +318,7 @@ object Engine {
             degraded = false,
             recovery = null,
             activeTriggers = remainingTriggers(state, active, how),
+            spentTriggers = state.spentTriggers + (state.activeTriggers - remainingTriggers(state, active, how)),
         )
         // A trigger that is still active may start its mode now
         // (e.g. a schedule still open when a manual session ends).

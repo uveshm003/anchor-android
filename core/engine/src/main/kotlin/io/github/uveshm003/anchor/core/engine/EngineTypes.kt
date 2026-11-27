@@ -11,6 +11,8 @@ import io.github.uveshm003.anchor.core.model.SessionId
 import io.github.uveshm003.anchor.core.model.UnlockRecord
 import java.time.Duration
 import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -27,6 +29,11 @@ data class EngineState(
     val recovery: PendingRecovery? = null,
     /** Automatic triggers that are currently true and haven't been used up (see [Engine]). */
     val activeTriggers: Set<TriggerKey> = emptySet(),
+    /**
+     * Triggers that are still true but were used up (their session ended another way, e.g. an emergency unlock).
+     * They can't start a session again until they turn false.
+     */
+    val spentTriggers: Set<TriggerKey> = emptySet(),
 )
 
 /**
@@ -62,6 +69,8 @@ data class Environment(
     val elapsedRealtimeMillis: Long = 0,
     /** `Settings.Global.BOOT_COUNT`, to tell boots apart. */
     val bootCount: Int = 0,
+    /** The user's current time zone, for schedule windows. */
+    val zone: ZoneId = ZoneOffset.UTC,
 )
 
 const val DEFAULT_EMERGENCY_QUOTA = 3
@@ -119,6 +128,11 @@ sealed interface Input {
     @Serializable
     @SerialName("trigger_ended")
     data class TriggerEnded(val key: TriggerKey) : Input
+
+    /** The schedule alarm fired: re-check which schedule windows are open. */
+    @Serializable
+    @SerialName("schedule_tick")
+    data object ScheduleTick : Input
 }
 
 @Serializable
@@ -182,6 +196,14 @@ sealed interface Command {
     @SerialName("schedule_recovery")
     data class ScheduleRecovery(override val id: String, val sessionId: SessionId, val elapsedRealtimeAt: Long) :
         Command
+
+    /** Wake up at [at] (wall clock) to re-check schedules; null cancels the wake-up. */
+    @Serializable
+    @SerialName("schedule_wake")
+    data class ScheduleWake(
+        override val id: String,
+        @Serializable(with = InstantAsEpochMillis::class) val at: Instant?,
+    ) : Command
 
     @Serializable
     @SerialName("cancel_recovery")

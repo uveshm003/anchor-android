@@ -113,6 +113,7 @@ class SessionControllerTest {
         assertThat(executed.map { it::class }).containsExactly(
             Command.ClearAppPolicy::class,
             Command.HideSessionNotification::class,
+            Command.ScheduleWake::class,
             Command.ApplyAppPolicy::class,
             Command.ShowSessionNotification::class,
             Command.ScheduleTimer::class,
@@ -191,7 +192,7 @@ class SessionControllerTest {
 
     @Test
     fun a_switch_records_both_sessions() = runTest {
-        val modeId = addMode()
+        val modeId = addMode(ExitRule.TimerEnds(25))
         OfflineModeRepository(db.modeDao()).upsert(
             Mode(
                 ModeId(0),
@@ -203,14 +204,14 @@ class SessionControllerTest {
         )
         val controller = controller()
         controller.request(Input.HoldToStart(modeId))
-        controller.request(Input.TriggerStarted(TriggerKey.Driving))
+        // A trigger can't override the manual session…
+        assertThat(controller.request(Input.TriggerStarted(TriggerKey.Driving))).isEqualTo(Outcome.TriggersChanged)
 
-        val outcome = controller.request(Input.EmergencyUnlock)
-        assertThat(outcome).isInstanceOf(Outcome.Ended::class.java)
+        // …but starts its mode as soon as the manual session ends.
+        val outcome = controller.request(Input.TimerElapsed(io.github.uveshm003.anchor.core.model.SessionId(1)))
 
-        controller.request(Input.TriggerStarted(TriggerKey.Driving))
-        val history = db.sessionDao().observeHistory().first()
-        assertThat(history.map { it.modeName }).containsExactly("Work")
+        assertThat(outcome).isInstanceOf(Outcome.Switched::class.java)
+        assertThat(db.sessionDao().observeHistory().first().map { it.modeName }).containsExactly("Work")
         assertThat(db.sessionDao().observeActive().first()?.modeName).isEqualTo("Commute")
     }
 }
