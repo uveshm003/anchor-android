@@ -31,6 +31,38 @@ object Engine {
         Input.RecoveryRequested -> recoveryRequested(state, env)
         Input.RecoveryCancelled -> recoveryCancelled(state, env)
         is Input.RecoveryElapsed -> recoveryElapsed(state, input, env)
+        is Input.TriggerStarted -> triggerStarted(state, input.key, env)
+        is Input.TriggerEnded -> triggerEnded(state, input.key, env)
+    }
+
+    /**
+     * Automatic triggers never override a manual or anchor session. Idle: the highest-priority matching mode
+     * starts. A higher-priority trigger replaces a running automatic session only if that session ends with its
+     * trigger (otherwise ending it would break "strict to stop").
+     */
+    private fun triggerStarted(state: EngineState, key: TriggerKey, env: Environment): Transition {
+        val noted = state.copy(activeTriggers = state.activeTriggers + key)
+        val active = state.active
+        val best = Triggers.best(noted.activeTriggers, env.modes)
+        val preempts = active?.trigger != null && active.session.exitRule == ExitRule.TriggerEnds &&
+            best != null && best.mode.id != active.mode.id && best.mode.priority < active.mode.priority
+        return when {
+            best == null -> Transition(noted, emptyList(), Outcome.TriggersChanged)
+            active == null -> start(noted, best.mode, Triggers.source(best.key), env, best.key)
+            preempts -> end(noted, active, SessionEnd.Preempted, env)
+            else -> Transition(noted, emptyList(), Outcome.TriggersChanged)
+        }
+    }
+
+    /** Ends only the session this trigger started, and only if its exit rule is "ends with its trigger". */
+    private fun triggerEnded(state: EngineState, key: TriggerKey, env: Environment): Transition {
+        val noted = state.copy(activeTriggers = state.activeTriggers - key)
+        val active = state.active
+        return if (active != null && active.trigger == key && active.session.exitRule == ExitRule.TriggerEnds) {
+            end(noted, active, SessionEnd.TriggerEnded, env)
+        } else {
+            Transition(noted, emptyList(), Outcome.TriggersChanged)
+        }
     }
 
     private fun holdToStart(state: EngineState, input: Input.HoldToStart, env: Environment): Transition {
@@ -201,7 +233,13 @@ object Engine {
         )
     }
 
-    private fun start(state: EngineState, mode: Mode, source: SessionSource, env: Environment): Transition {
+    private fun start(
+        state: EngineState,
+        mode: Mode,
+        source: SessionSource,
+        env: Environment,
+        trigger: TriggerKey? = null,
+    ): Transition {
         val endsAt = (mode.exitRule as? ExitRule.TimerEnds)?.let {
             env.now.plus(Duration.ofMinutes(it.minutes.toLong()))
         }
@@ -214,7 +252,7 @@ object Engine {
             exitRule = mode.exitRule,
             endsAt = endsAt,
         )
-        val active = ActiveSession(session, mode)
+        val active = ActiveSession(session, mode, trigger)
         val next = state.copy(active = active, nextSessionId = state.nextSessionId + 1, degraded = false)
         return Transition(next, applyCommands(active, env), Outcome.Started(session))
     }
@@ -231,8 +269,32 @@ object Engine {
                 add(Command.CancelRecovery(commandId("cancel_recovery", ended.id, env), ended.id))
             }
         }
-        return Transition(state.copy(active = null, degraded = false, recovery = null), commands, Outcome.Ended(ended))
+        val idle = state.copy(
+            active = null,
+            degraded = false,
+            recovery = null,
+            activeTriggers = remainingTriggers(state, active, how),
+        )
+        // A trigger that is still active may start its mode now
+        // (e.g. a schedule still open when a manual session ends).
+        val next = Triggers.best(idle.activeTriggers, env.modes)
+            ?: return Transition(idle, commands, Outcome.Ended(ended))
+        val started = start(idle, next.mode, Triggers.source(next.key), env, next.key)
+        return Transition(started.state, commands + started.commands, Outcome.Switched(ended, started.activeSession()))
     }
+
+    /**
+     * Triggers still eligible after a session ends. The trigger that started it is used up unless it was only
+     * preempted; after an emergency unlock or recovery all are, so the session doesn't restart under the user.
+     */
+    private fun remainingTriggers(state: EngineState, active: ActiveSession, how: SessionEnd): Set<TriggerKey> =
+        when (how) {
+            SessionEnd.EmergencyUnlock, SessionEnd.Recovery -> emptySet()
+            SessionEnd.Preempted -> state.activeTriggers
+            else -> state.activeTriggers - setOfNotNull(active.trigger)
+        }
+
+    private fun Transition.activeSession() = checkNotNull(state.active).session
 
     private fun applyCommands(active: ActiveSession, env: Environment): List<Command> {
         val session = active.session

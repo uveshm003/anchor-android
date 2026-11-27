@@ -32,7 +32,7 @@ data class Session(
 enum class SessionSource { Hold, AnchorTap, Schedule, Place, Driving, BluetoothDevice, Space, Wifi, Usb }
 
 @Serializable
-enum class SessionEnd { AnchorTap, Timer, TriggerEnded, EmergencyUnlock, Recovery }
+enum class SessionEnd { AnchorTap, Timer, TriggerEnded, EmergencyUnlock, Recovery, Preempted }
 
 /** An emergency unlock, counted against the rolling weekly quota. */
 @Serializable

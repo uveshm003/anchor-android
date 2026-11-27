@@ -25,6 +25,8 @@ data class EngineState(
     val degraded: Boolean = false,
     /** Lost-anchor recovery counting down for the active session (see [Recovery]). */
     val recovery: PendingRecovery? = null,
+    /** Automatic triggers that are currently true and haven't been used up (see [Engine]). */
+    val activeTriggers: Set<TriggerKey> = emptySet(),
 )
 
 /**
@@ -43,7 +45,7 @@ data class PendingRecovery(
 
 /** The running session plus the mode as it was when it started (later edits don't change a running session). */
 @Serializable
-data class ActiveSession(val session: Session, val mode: Mode)
+data class ActiveSession(val session: Session, val mode: Mode, val trigger: TriggerKey? = null)
 
 /**
  * Facts sampled by the controller once per input, when it is dequeued: the time and the user's configuration.
@@ -108,6 +110,15 @@ sealed interface Input {
     @Serializable
     @SerialName("recovery_elapsed")
     data class RecoveryElapsed(val sessionId: SessionId) : Input
+
+    /** An automatic trigger became true (schedule window opened, car connected, …). */
+    @Serializable
+    @SerialName("trigger_started")
+    data class TriggerStarted(val key: TriggerKey) : Input
+
+    @Serializable
+    @SerialName("trigger_ended")
+    data class TriggerEnded(val key: TriggerKey) : Input
 }
 
 @Serializable
@@ -195,6 +206,12 @@ sealed interface Outcome {
     data class RecoveryScheduled(val remaining: Duration) : Outcome
 
     data object RecoveryCancelled : Outcome
+
+    /** One session ended and the next (from an active trigger) started in the same transition. */
+    data class Switched(val ended: Session, val started: Session) : Outcome
+
+    /** The set of active triggers changed but no session started or ended. */
+    data object TriggersChanged : Outcome
 }
 
 sealed interface RejectReason {

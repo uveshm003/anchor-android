@@ -115,6 +115,16 @@ class EngineTest {
         Case("trigger", Input.RecoveryRequested, Outcome.RecoveryScheduled::class, listOf(scheduleRecovery)),
         Case("trigger", Input.RecoveryCancelled, ignored, emptyList()),
         Case("trigger", Input.RecoveryElapsed(SessionId(1)), ignored, emptyList()),
+        Case("idle", Input.TriggerStarted(TriggerKey.Driving), Outcome.TriggersChanged::class, emptyList()),
+        Case("idle", Input.TriggerEnded(TriggerKey.Driving), Outcome.TriggersChanged::class, emptyList()),
+        Case("any anchor", Input.TriggerStarted(TriggerKey.Driving), Outcome.TriggersChanged::class, emptyList()),
+        Case("any anchor", Input.TriggerEnded(TriggerKey.Driving), Outcome.TriggersChanged::class, emptyList()),
+        Case("timer", Input.TriggerStarted(TriggerKey.Driving), Outcome.TriggersChanged::class, emptyList()),
+        Case("timer", Input.TriggerEnded(TriggerKey.Driving), Outcome.TriggersChanged::class, emptyList()),
+        Case("specific anchor", Input.TriggerStarted(TriggerKey.Driving), Outcome.TriggersChanged::class, emptyList()),
+        Case("specific anchor", Input.TriggerEnded(TriggerKey.Driving), Outcome.TriggersChanged::class, emptyList()),
+        Case("trigger", Input.TriggerStarted(TriggerKey.Driving), Outcome.TriggersChanged::class, emptyList()),
+        Case("trigger", Input.TriggerEnded(TriggerKey.Driving), Outcome.TriggersChanged::class, emptyList()),
     )
 
     @Test
@@ -150,6 +160,8 @@ class EngineTest {
         Input.RecoveryRequested -> "recovery_requested"
         Input.RecoveryCancelled -> "recovery_cancelled"
         is Input.RecoveryElapsed -> "recovery_elapsed"
+        is Input.TriggerStarted -> "trigger_started"
+        is Input.TriggerEnded -> "trigger_ended"
     }
 
     @Test
@@ -374,6 +386,8 @@ class EngineTest {
             "recovery_requested",
             "recovery_cancelled",
             "recovery_elapsed",
+            "trigger_started",
+            "trigger_ended",
         )
     }
 }
