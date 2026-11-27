@@ -114,6 +114,12 @@ class ModesScreenshotTest(private val variant: ScreenshotVariant) {
     fun modeEditorSchedule() = capture("mode_editor_schedule") { ModeEditorScreen(scheduled, ModeEditorActions()) }
 
     @Test
+    fun modeEditorUsb() = capture("mode_editor_usb") {
+        val usb = editor.copy(draft = editor.draft.copy(timerMinutes = null, usb = true, endsWithTrigger = true))
+        ModeEditorScreen(usb, ModeEditorActions())
+    }
+
+    @Test
     fun modeEditorSchedule_fontScale2() {
         assumeTrue(variant.device == ScreenshotDevice.Phone)
         capture("mode_editor_schedule_fontscale2") {

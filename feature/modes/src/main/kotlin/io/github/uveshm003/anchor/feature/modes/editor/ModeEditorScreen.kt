@@ -87,7 +87,7 @@ fun ModeEditorRoute(onDone: () -> Unit, viewModel: ModeEditorViewModel = hiltVie
                 onAllowList = viewModel::setAllowList,
                 onPickApps = { viewModel.showAppPicker(true) },
                 onExit = viewModel::setExit,
-                onSchedule = viewModel::setSchedule,
+                onTrigger = viewModel::setTrigger,
             ),
         )
     }
@@ -102,7 +102,7 @@ data class ModeEditorActions(
     val onAllowList: (Boolean) -> Unit = {},
     val onPickApps: () -> Unit = {},
     val onExit: (ExitChoice) -> Unit = {},
-    val onSchedule: (ScheduleDraft?) -> Unit = {},
+    val onTrigger: (TriggerChange) -> Unit = {},
 )
 
 @Composable
@@ -162,7 +162,7 @@ private fun EditorForm(state: ModeEditorUiState, actions: ModeEditorActions) {
     ) {
         LookSection(state, actions)
         AppsSection(state, actions)
-        ScheduleSection(state, actions.onSchedule)
+        AutomaticSection(state, actions.onTrigger)
         ExitSection(state.draft, state.anchors, actions.onExit)
     }
 }
@@ -264,13 +264,7 @@ private fun ExitSection(draft: ModeDraft, anchors: List<Anchor>, onExit: (ExitCh
                     timer == null && specific != null,
                 ) { onExit(ExitChoice.SpecificAnchor(specific ?: anchors.first().id.value)) }
             }
-            if (draft.schedule != null) {
-                Choice(
-                    stringResource(R.string.feature_modes_exit_trigger),
-                    stringResource(R.string.feature_modes_exit_trigger_body),
-                    draft.endsWithTrigger,
-                ) { onExit(ExitChoice.TriggerEnds) }
-            }
+            if (draft.automatic) TriggerExitChoice(draft) { onExit(ExitChoice.TriggerEnds) }
         }
         if (timer == null && specific != null) {
             ChipRow {
@@ -313,6 +307,17 @@ private fun ChipRow(content: @Composable () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) { content() }
+}
+
+/** "Ends when its trigger ends", worded for the mode's automatic triggers. */
+@Composable
+private fun TriggerExitChoice(draft: ModeDraft, onSelect: () -> Unit) {
+    val (title, body) = when {
+        draft.schedule == null -> R.string.feature_modes_exit_any_trigger to R.string.feature_modes_exit_usb_body
+        !draft.usb -> R.string.feature_modes_exit_trigger to R.string.feature_modes_exit_trigger_body
+        else -> R.string.feature_modes_exit_any_trigger to R.string.feature_modes_exit_any_trigger_body
+    }
+    Choice(stringResource(title), stringResource(body), draft.endsWithTrigger, onSelect)
 }
 
 @Composable

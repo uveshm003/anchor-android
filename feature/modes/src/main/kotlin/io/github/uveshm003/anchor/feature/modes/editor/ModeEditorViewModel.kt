@@ -57,9 +57,23 @@ data class ModeDraft(
     val anchorId: Long? = null,
     /** Starts automatically on this weekly schedule. */
     val schedule: ScheduleDraft? = null,
-    /** Ends when its automatic trigger (the schedule) ends. */
+    /** Starts automatically while connected to a computer by USB. */
+    val usb: Boolean = false,
+    /** Ends when the automatic trigger that started it ends. */
     val endsWithTrigger: Boolean = false,
-)
+) {
+    /** It has at least one automatic start trigger. */
+    val automatic: Boolean get() = schedule != null || usb
+}
+
+/** A change to the "Start automatically" section. */
+sealed interface TriggerChange {
+    /** Turns the schedule on, edits it, or (null) turns it off. */
+    data class Schedule(val schedule: ScheduleDraft?) : TriggerChange
+
+    /** "Connected to a computer" on or off. */
+    data class Usb(val on: Boolean) : TriggerChange
+}
 
 /** Days are ISO (1 = Monday); times are minutes after midnight. */
 @Serializable
@@ -179,9 +193,13 @@ class ModeEditorViewModel @Inject constructor(
     fun setLook(icon: ModeIcon? = null, color: ModeColor? = null) =
         edit { it.copy(icon = icon ?: it.icon, color = color ?: it.color) }
 
-    /** Turns the schedule on, edits it, or (null) turns it off, which also drops "ends with its trigger". */
-    fun setSchedule(schedule: ScheduleDraft?) = edit {
-        it.copy(schedule = schedule, endsWithTrigger = it.endsWithTrigger && schedule != null)
+    /** Edits the automatic triggers; turning the last one off also drops "ends with its trigger". */
+    fun setTrigger(change: TriggerChange) = edit {
+        val next = when (change) {
+            is TriggerChange.Schedule -> it.copy(schedule = change.schedule)
+            is TriggerChange.Usb -> it.copy(usb = change.on)
+        }
+        next.copy(endsWithTrigger = next.endsWithTrigger && next.automatic)
     }
 
     fun setAllowList(allowList: Boolean) = edit { it.copy(allowList = allowList) }
@@ -244,9 +262,10 @@ class ModeEditorViewModel @Inject constructor(
                 color = draft.color,
                 appPolicy = if (draft.allowList) AppPolicy.AllowList(packages) else AppPolicy.BlockList(packages),
                 startTriggers = (existing?.startTriggers ?: DEFAULT_TRIGGERS)
-                    .filterNot { it is StartTrigger.Schedule }.toSet() + setOfNotNull(draft.schedule?.toTrigger()),
+                    .filterNot { it is StartTrigger.Schedule || it == StartTrigger.UsbConnected }.toSet() +
+                    setOfNotNull(draft.schedule?.toTrigger(), StartTrigger.UsbConnected.takeIf { draft.usb }),
                 exitRule = when {
-                    draft.endsWithTrigger && draft.schedule != null -> ExitRule.TriggerEnds
+                    draft.endsWithTrigger && draft.automatic -> ExitRule.TriggerEnds
                     draft.timerMinutes != null -> ExitRule.TimerEnds(draft.timerMinutes)
                     else -> ExitRule.RequiresAnchor(draft.anchorId?.let(::AnchorId))
                 },
@@ -293,5 +312,6 @@ private fun Mode.toDraft() = ModeDraft(
     quietActions = quietActions,
     schedule = startTriggers.filterIsInstance<StartTrigger.Schedule>().firstOrNull()
         ?.let { ScheduleDraft(it.days, it.startMinute, it.endMinute) },
+    usb = StartTrigger.UsbConnected in startTriggers,
     endsWithTrigger = exitRule == ExitRule.TriggerEnds,
 )
