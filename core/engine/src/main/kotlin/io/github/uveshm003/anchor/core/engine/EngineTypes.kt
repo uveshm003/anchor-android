@@ -136,7 +136,17 @@ sealed interface Input {
 }
 
 @Serializable
-enum class ReconcileCause { AppStart, Boot, PackageReplaced, TimeChanged, TimeZoneChanged, PermissionGranted }
+enum class ReconcileCause {
+    AppStart,
+    Boot,
+    PackageReplaced,
+    TimeChanged,
+    TimeZoneChanged,
+    PermissionGranted,
+
+    /** A mode was saved, deleted or reordered (schedules and trigger registrations follow). */
+    ModesChanged,
+}
 
 /** Side effects for the Android executors. Every command has a stable [id]; executors dedupe by it. */
 @Serializable
