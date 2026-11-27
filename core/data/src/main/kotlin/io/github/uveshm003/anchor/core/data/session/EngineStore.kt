@@ -36,6 +36,11 @@ class EngineStore @Inject constructor(
         when (val outcome = transition.outcome) {
             is Outcome.Started -> sessionDao.upsert(outcome.session.asEntity())
 
+            is Outcome.Switched -> {
+                sessionDao.upsert(outcome.ended.asEntity())
+                sessionDao.upsert(outcome.started.asEntity())
+            }
+
             is Outcome.Ended -> {
                 val session = outcome.session
                 sessionDao.upsert(session.asEntity())

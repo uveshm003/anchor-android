@@ -47,6 +47,9 @@ class ScanTest {
         assertThat(scan(Outcome.Ended(session))).isEqualTo(ScanState.Ended)
         assertThat(requests.requested.last()).isEqualTo(Input.AnchorTapped(hasher.hash(secret)))
         assertThat(scan(Outcome.Started(session))).isEqualTo(ScanState.Started("Deep Work"))
+        assertThat(
+            scan(Outcome.Switched(session, session.copy(modeName = "Commute"))),
+        ).isEqualTo(ScanState.Started("Commute"))
         assertThat(scan(Outcome.Rejected(RejectReason.RequiresAnchor("Desk")))).isEqualTo(ScanState.WrongAnchor("Desk"))
         assertThat(scan(Outcome.Ignored(IgnoreReason.UnknownAnchor))).isEqualTo(ScanState.Unknown)
         assertThat(scan(Outcome.Rejected(RejectReason.EndsWithTrigger))).isEqualTo(ScanState.Rejected)

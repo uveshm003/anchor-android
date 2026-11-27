@@ -55,6 +55,9 @@ class ScanViewModel @Inject constructor(private val hasher: AnchorHasher, privat
             _state.value = when (val outcome = requests.request(Input.AnchorTapped(hasher.hash(secret)))) {
                 is Outcome.Started -> ScanState.Started(outcome.session.modeName)
 
+                // The tapped session ended and an active automatic trigger started its mode.
+                is Outcome.Switched -> ScanState.Started(outcome.started.modeName)
+
                 is Outcome.Ended -> ScanState.Ended
 
                 is Outcome.Ignored -> if (outcome.reason ==

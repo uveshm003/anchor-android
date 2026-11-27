@@ -21,11 +21,13 @@ import io.github.uveshm003.anchor.core.engine.CommandExecutor
 import io.github.uveshm003.anchor.core.engine.ExecutionResult
 import io.github.uveshm003.anchor.core.engine.Input
 import io.github.uveshm003.anchor.core.engine.Outcome
+import io.github.uveshm003.anchor.core.engine.TriggerKey
 import io.github.uveshm003.anchor.core.model.AppPolicy
 import io.github.uveshm003.anchor.core.model.ExitRule
 import io.github.uveshm003.anchor.core.model.Mode
 import io.github.uveshm003.anchor.core.model.ModeId
 import io.github.uveshm003.anchor.core.model.SessionEnd
+import io.github.uveshm003.anchor.core.model.StartTrigger
 import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -185,5 +187,30 @@ class SessionControllerTest {
         assertThrows(IllegalStateException::class.java) { SessionController.buildRegistry(setOf(partial)) }
         assertThrows(IllegalStateException::class.java) { SessionController.buildRegistry(setOf(executor, partial)) }
         assertThat(SessionController.buildRegistry(setOf(executor))).hasSize(SessionController.COMMAND_TYPES.size)
+    }
+
+    @Test
+    fun a_switch_records_both_sessions() = runTest {
+        val modeId = addMode()
+        OfflineModeRepository(db.modeDao()).upsert(
+            Mode(
+                ModeId(0),
+                "Commute",
+                priority = 1,
+                startTriggers = setOf(StartTrigger.Driving),
+                exitRule = ExitRule.TriggerEnds,
+            ),
+        )
+        val controller = controller()
+        controller.request(Input.HoldToStart(modeId))
+        controller.request(Input.TriggerStarted(TriggerKey.Driving))
+
+        val outcome = controller.request(Input.EmergencyUnlock)
+        assertThat(outcome).isInstanceOf(Outcome.Ended::class.java)
+
+        controller.request(Input.TriggerStarted(TriggerKey.Driving))
+        val history = db.sessionDao().observeHistory().first()
+        assertThat(history.map { it.modeName }).containsExactly("Work")
+        assertThat(db.sessionDao().observeActive().first()?.modeName).isEqualTo("Commute")
     }
 }
