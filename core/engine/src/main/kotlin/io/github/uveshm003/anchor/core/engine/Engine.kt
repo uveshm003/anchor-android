@@ -27,7 +27,7 @@ object Engine {
         Input.EmergencyUnlock -> emergencyUnlock(state, env)
         is Input.TimerElapsed -> timerElapsed(state, input, env)
         is Input.CommandFailed -> commandFailed(state, input)
-        is Input.Reconcile -> reconcile(state, env).let { syncSchedules(it, env) }
+        is Input.Reconcile -> reconcile(state, env).let { syncSchedules(it, env) }.let { resumeTriggers(it, env) }
         Input.RecoveryRequested, Input.RecoveryCancelled, is Input.RecoveryElapsed -> recovery(state, input, env)
         is Input.TriggerStarted, is Input.TriggerEnded, Input.ScheduleTick -> automatic(state, input, env)
     }
@@ -63,6 +63,19 @@ object Engine {
             at = Schedules.nextWake(env.modes, env.now, env.zone),
         )
         return result.copy(commands = result.commands + wake)
+    }
+
+    /**
+     * Idle after a reconcile while a trigger is already on (e.g. a mode just gained the USB trigger while the
+     * phone is plugged in): the best matching mode starts, as if the trigger had just turned on.
+     */
+    private fun resumeTriggers(after: Transition, env: Environment): Transition {
+        val best = Triggers.best(after.state.activeTriggers, env.modes)
+        return if (after.state.active != null || best == null) {
+            after
+        } else {
+            after.then(start(after.state, best.mode, Triggers.source(best.key), env, best.key))
+        }
     }
 
     /** Chains two transitions; an end followed by a start is recorded as a switch so both sessions are kept. */

@@ -9,6 +9,16 @@ interface SessionInputs {
 }
 
 /**
+ * Listens for platform events that only reach a running process (context-registered receivers and callbacks),
+ * and only submits inputs. The blocker service starts every watcher while it runs (ADR 0010). Idempotent.
+ */
+interface ProcessWatcher {
+    fun start()
+
+    fun stop()
+}
+
+/**
  * Carries out one kind of [Command]. Exactly one executor handles each command type; executors are idempotent
  * and dedupe by command id. Adapters provide them with Hilt `@IntoSet`.
  */
