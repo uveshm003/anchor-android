@@ -27,6 +27,8 @@ class SettingsTest {
         override fun sideloaded() = sideloaded
 
         override fun manufacturer() = brand.lowercase()
+
+        override fun exactAlarmsAllowed() = true
     }
     private val blocker = FakeBlockerStatus(enabled = false)
 

@@ -1,5 +1,6 @@
 package io.github.uveshm003.anchor.core.data.platform
 
+import android.app.AlarmManager
 import android.content.Context
 import android.os.Build
 import android.os.PowerManager
@@ -19,6 +20,9 @@ interface DeviceSetup {
 
     /** Lower-case manufacturer, for OEM-specific battery hints. */
     fun manufacturer(): String
+
+    /** Exact alarms are allowed (otherwise schedules may run up to 10 minutes late). */
+    fun exactAlarmsAllowed(): Boolean
 }
 
 internal class AndroidDeviceSetup @Inject constructor(@ApplicationContext private val context: Context) : DeviceSetup {
@@ -32,6 +36,9 @@ internal class AndroidDeviceSetup @Inject constructor(@ApplicationContext privat
     }
 
     override fun manufacturer(): String = Build.MANUFACTURER.orEmpty().lowercase()
+
+    override fun exactAlarmsAllowed(): Boolean =
+        context.getSystemService(AlarmManager::class.java)?.canScheduleExactAlarms() == true
 
     private companion object {
         /** The system's own installer: an APK opened from a file or browser. */

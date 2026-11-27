@@ -4,15 +4,18 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import io.github.uveshm003.anchor.core.common.time.TestClock
 import io.github.uveshm003.anchor.core.data.repository.AppCategory
 import io.github.uveshm003.anchor.core.data.repository.InstalledApp
 import io.github.uveshm003.anchor.core.model.AppPolicy
 import io.github.uveshm003.anchor.core.model.ExitRule
 import io.github.uveshm003.anchor.core.testing.MainDispatcherRule
 import io.github.uveshm003.anchor.core.testing.data.FakeAnchorRepository
+import io.github.uveshm003.anchor.core.testing.data.FakeDeviceSetup
 import io.github.uveshm003.anchor.core.testing.data.FakeInstalledAppsRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeModeRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeSettingsRepository
+import io.github.uveshm003.anchor.feature.modes.editor.EditorSources
 import io.github.uveshm003.anchor.feature.modes.editor.ModeEditorEffect
 import io.github.uveshm003.anchor.feature.modes.editor.ModeEditorViewModel
 import io.github.uveshm003.anchor.feature.modes.templates.ModeTemplate
@@ -55,9 +58,10 @@ class ModeTemplatesTest {
                 SavedStateHandle(mapOf("modeId" to 0L, "template" to template.name, "name" to template.name)),
                 repo,
                 FakeSettingsRepository(),
-                FakeInstalledAppsRepository(apps),
-                FakeAnchorRepository(),
-            ) { essentials }
+                EditorSources(FakeInstalledAppsRepository(apps), FakeAnchorRepository(), {
+                    essentials
+                }, TestClock(), FakeDeviceSetup()),
+            )
             val state = vm.uiState.first { !it.loading }
             assertThat(state.dirty).isTrue() // nothing saved until the user saves
             assertThat(repo.getModes()).isEmpty()
