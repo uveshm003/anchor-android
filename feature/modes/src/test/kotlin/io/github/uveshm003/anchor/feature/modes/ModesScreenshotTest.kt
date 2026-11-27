@@ -6,6 +6,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import io.github.uveshm003.anchor.core.data.repository.InstalledApp
 import io.github.uveshm003.anchor.core.designsystem.theme.AnchorTheme
+import io.github.uveshm003.anchor.core.engine.ModeStatus
+import io.github.uveshm003.anchor.core.engine.TriggerPermission
+import io.github.uveshm003.anchor.core.engine.WaitReason
 import io.github.uveshm003.anchor.core.model.Anchor
 import io.github.uveshm003.anchor.core.model.AnchorId
 import io.github.uveshm003.anchor.core.model.AnchorType
@@ -79,7 +82,14 @@ class ModesScreenshotTest(private val variant: ScreenshotVariant) {
 
     @Test
     fun modesList() = capture("modes_list") {
-        ModesScreen(ModesUiState(loading = false, modes = modes), {}, {}, {}, {}, {})
+        val statuses = mapOf(
+            ModeId(1) to ModeStatus.Running,
+            ModeId(2) to ModeStatus.Waiting(WaitReason.OtherMode("Deep Work")),
+            ModeId(3) to ModeStatus.StartsAt(java.time.Instant.parse("2026-11-23T22:00:00Z")),
+        )
+        val missing = mapOf(ModeId(3) to setOf(TriggerPermission.ExactAlarm))
+        val state = ModesUiState(loading = false, modes = modes, statuses = statuses, missing = missing)
+        ModesScreen(state, {}, {}, {}, {}, {})
     }
 
     @Test

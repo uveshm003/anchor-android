@@ -31,6 +31,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -46,6 +47,9 @@ import io.github.uveshm003.anchor.core.designsystem.component.AnchorTopAppBar
 import io.github.uveshm003.anchor.core.designsystem.component.EmptyState
 import io.github.uveshm003.anchor.core.designsystem.component.EmptyStateAction
 import io.github.uveshm003.anchor.core.designsystem.component.ModeBadge
+import io.github.uveshm003.anchor.core.engine.ModeStatus
+import io.github.uveshm003.anchor.core.engine.TriggerPermission
+import io.github.uveshm003.anchor.core.engine.WaitReason
 import io.github.uveshm003.anchor.core.model.AppPolicy
 import io.github.uveshm003.anchor.core.model.ExitRule
 import io.github.uveshm003.anchor.core.model.Mode
@@ -54,6 +58,10 @@ import io.github.uveshm003.anchor.core.ui.drawable
 import io.github.uveshm003.anchor.feature.modes.R
 import io.github.uveshm003.anchor.feature.modes.templates.ModeTemplate
 import io.github.uveshm003.anchor.feature.modes.templates.TemplateChooserSheet
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.time.format.TextStyle
 
 @Composable
 fun ModesRoute(
@@ -143,11 +151,10 @@ fun ModesScreen(
                 itemsIndexed(state.modes, key = { _, mode -> mode.id.value }) { index, mode ->
                     ModeRow(
                         mode = mode,
-                        canMoveUp = index > 0,
-                        canMoveDown = index < state.modes.lastIndex,
+                        notes = rowNotes(state, mode),
                         onEdit = { onEdit(mode) },
-                        onMoveUp = { onMoveUp(mode) },
-                        onMoveDown = { onMoveDown(mode) },
+                        onMoveUp = if (index > 0) ({ onMoveUp(mode) }) else null,
+                        onMoveDown = if (index < state.modes.lastIndex) ({ onMoveDown(mode) }) else null,
                         onDelete = { pendingDelete = mode.id.value },
                     )
                 }
@@ -176,11 +183,12 @@ private fun DeleteDialog(mode: Mode, onDismiss: () -> Unit, onConfirm: () -> Uni
 @Composable
 private fun ModeRow(
     mode: Mode,
-    canMoveUp: Boolean,
-    canMoveDown: Boolean,
+    notes: List<RowNote>,
     onEdit: () -> Unit,
-    onMoveUp: () -> Unit,
-    onMoveDown: () -> Unit,
+    /** Null for the first mode (it can't move up). */
+    onMoveUp: (() -> Unit)?,
+    /** Null for the last mode (it can't move down). */
+    onMoveDown: (() -> Unit)?,
     onDelete: () -> Unit,
 ) {
     val moveUp = stringResource(R.string.feature_modes_move_up, mode.name)
@@ -193,18 +201,18 @@ private fun ModeRow(
             .clickable(onClick = onEdit)
             .semantics {
                 customActions = buildList {
-                    if (canMoveUp) {
+                    onMoveUp?.let { move ->
                         add(
                             CustomAccessibilityAction(moveUp) {
-                                onMoveUp()
+                                move()
                                 true
                             },
                         )
                     }
-                    if (canMoveDown) {
+                    onMoveDown?.let { move ->
                         add(
                             CustomAccessibilityAction(moveDown) {
-                                onMoveDown()
+                                move()
                                 true
                             },
                         )
@@ -223,10 +231,62 @@ private fun ModeRow(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            notes.forEach { note ->
+                Text(
+                    text = note.text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (note.warning) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                )
+            }
         }
-        if (canMoveUp) AnchorIconButton(AnchorIcons.ArrowUpward, moveUp, onMoveUp)
-        if (canMoveDown) AnchorIconButton(AnchorIcons.ArrowDownward, moveDown, onMoveDown)
+        onMoveUp?.let { AnchorIconButton(AnchorIcons.ArrowUpward, moveUp, it) }
+        onMoveDown?.let { AnchorIconButton(AnchorIcons.ArrowDownward, moveDown, it) }
         AnchorIconButton(AnchorIcons.Delete, stringResource(R.string.feature_modes_delete_named, mode.name), onDelete)
+    }
+}
+
+/** A line under a mode's summary: its status, or a missing permission ([warning]). */
+internal data class RowNote(val text: String, val warning: Boolean = false)
+
+@Composable
+private fun rowNotes(state: ModesUiState, mode: Mode): List<RowNote> {
+    val status = state.statuses[mode.id]?.let { statusLine(it, state.zone) }?.let(::RowNote)
+    val missing = state.missing[mode.id].orEmpty().sorted().map { RowNote(permissionLine(it), warning = true) }
+    return listOfNotNull(status) + missing
+}
+
+@Composable
+private fun permissionLine(permission: TriggerPermission): String = stringResource(
+    when (permission) {
+        TriggerPermission.ExactAlarm -> R.string.feature_modes_missing_exact_alarm
+        TriggerPermission.Location -> R.string.feature_modes_missing_location
+        TriggerPermission.NearbyDevices -> R.string.feature_modes_missing_nearby
+        TriggerPermission.ActivityRecognition -> R.string.feature_modes_missing_activity
+    },
+)
+
+/** "Running now", "Starts Monday at 22:00", "Waiting: …"; null for manual-only modes. */
+@Composable
+internal fun statusLine(status: ModeStatus, zone: ZoneId): String? {
+    val locale = LocalConfiguration.current.locales[0]
+    return when (status) {
+        ModeStatus.Running -> stringResource(R.string.feature_modes_status_running)
+
+        is ModeStatus.StartsAt -> status.at.atZone(zone).let { at ->
+            stringResource(
+                R.string.feature_modes_status_starts,
+                at.dayOfWeek.getDisplayName(TextStyle.FULL, locale),
+                DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale).format(at),
+            )
+        }
+
+        is ModeStatus.Waiting -> when (val reason = status.reason) {
+            is WaitReason.ManualSession -> stringResource(R.string.feature_modes_status_waiting_manual, reason.modeName)
+            is WaitReason.OtherMode -> stringResource(R.string.feature_modes_status_waiting_other, reason.modeName)
+            WaitReason.UsedUp -> stringResource(R.string.feature_modes_status_used_up)
+        }
+
+        ModeStatus.Manual -> null
     }
 }
 

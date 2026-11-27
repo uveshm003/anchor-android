@@ -29,6 +29,8 @@ class SettingsTest {
         override fun manufacturer() = brand.lowercase()
 
         override fun exactAlarmsAllowed() = true
+
+        override fun granted(permission: io.github.uveshm003.anchor.core.engine.TriggerPermission) = true
     }
     private val blocker = FakeBlockerStatus(enabled = false)
 

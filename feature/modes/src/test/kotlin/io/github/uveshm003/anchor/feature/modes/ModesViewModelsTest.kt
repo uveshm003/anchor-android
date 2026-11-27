@@ -6,6 +6,11 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import io.github.uveshm003.anchor.core.common.time.TestClock
 import io.github.uveshm003.anchor.core.data.repository.InstalledApp
+import io.github.uveshm003.anchor.core.engine.EngineState
+import io.github.uveshm003.anchor.core.engine.ModeStatus
+import io.github.uveshm003.anchor.core.engine.TriggerKey
+import io.github.uveshm003.anchor.core.engine.TriggerPermission
+import io.github.uveshm003.anchor.core.engine.WaitReason
 import io.github.uveshm003.anchor.core.model.Anchor
 import io.github.uveshm003.anchor.core.model.AnchorId
 import io.github.uveshm003.anchor.core.model.AnchorType
@@ -21,6 +26,7 @@ import io.github.uveshm003.anchor.core.testing.data.FakeAnchorRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeDeviceSetup
 import io.github.uveshm003.anchor.core.testing.data.FakeInstalledAppsRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeModeRepository
+import io.github.uveshm003.anchor.core.testing.data.FakeSessionRepository
 import io.github.uveshm003.anchor.core.testing.data.FakeSettingsRepository
 import io.github.uveshm003.anchor.feature.modes.editor.EditorSources
 import io.github.uveshm003.anchor.feature.modes.editor.ExitChoice
@@ -54,7 +60,7 @@ class ModesViewModelsTest {
     @Test
     fun list_loads_reorders_deletes_and_undoes() = runTest {
         val repo = FakeModeRepository(listOf(work, study))
-        val vm = ModesViewModel(repo)
+        val vm = ModesViewModel(repo, FakeSessionRepository(), clock, FakeDeviceSetup())
         vm.uiState.test {
             var loaded = awaitItem()
             while (loaded.loading) loaded = awaitItem()
@@ -73,6 +79,37 @@ class ModesViewModelsTest {
             assertThat(awaitItem().modes.map { it.name }).containsExactly("Work")
             vm.undoDelete(study)
             assertThat(awaitItem().modes.map { it.name }).containsExactly("Work", "Study").inOrder()
+        }
+    }
+
+    @Test
+    fun list_explains_each_mode_and_its_missing_permissions() = runTest {
+        val night = Mode(
+            ModeId(3),
+            "Night",
+            priority = 2,
+            startTriggers = setOf(StartTrigger.Schedule(setOf(1), 22 * 60, 7 * 60)),
+            exitRule = ExitRule.TriggerEnds,
+        )
+        val sessions = FakeSessionRepository()
+        val vm =
+            ModesViewModel(
+                FakeModeRepository(listOf(work, night)),
+                sessions,
+                clock,
+                FakeDeviceSetup(exactAlarms = false),
+            )
+        vm.uiState.test {
+            var state = awaitItem()
+            while (state.loading) state = awaitItem()
+            assertThat(state.statuses[work.id]).isEqualTo(ModeStatus.Manual)
+            assertThat(
+                state.statuses[night.id],
+            ).isEqualTo(ModeStatus.StartsAt(java.time.Instant.parse("2026-11-23T22:00:00Z")))
+            assertThat(state.missing).containsExactly(night.id, setOf(TriggerPermission.ExactAlarm))
+
+            sessions.state.value = EngineState(spentTriggers = setOf(TriggerKey.Schedule(night.id)))
+            assertThat(awaitItem().statuses[night.id]).isEqualTo(ModeStatus.Waiting(WaitReason.UsedUp))
         }
     }
 
