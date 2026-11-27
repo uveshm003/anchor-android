@@ -6,6 +6,7 @@ plugins {
 dependencies {
     implementation(projects.core.common)
     implementation(projects.core.engine)
+    implementation(libs.androidx.core.ktx)
 
     testImplementation(projects.core.testing)
     testImplementation(libs.androidx.test.core)
