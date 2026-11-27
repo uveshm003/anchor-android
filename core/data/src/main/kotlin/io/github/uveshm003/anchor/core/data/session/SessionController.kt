@@ -96,7 +96,7 @@ class SessionController @Inject constructor(
         is Command.ScheduleRecovery -> sessionId
         is Command.CancelRecovery -> sessionId
         is Command.ShowSessionNotification -> sessionId
-        is Command.ClearAppPolicy, is Command.HideSessionNotification -> null
+        is Command.ClearAppPolicy, is Command.HideSessionNotification, is Command.ScheduleWake -> null
     }
 
     companion object {
@@ -112,6 +112,7 @@ class SessionController @Inject constructor(
             Command.CancelRecovery::class,
             Command.ShowSessionNotification::class,
             Command.HideSessionNotification::class,
+            Command.ScheduleWake::class,
         )
 
         /** Fails fast on a missing or duplicate handler, so "not mine" and "failed" are never confused. */

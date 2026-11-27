@@ -62,6 +62,7 @@ class EngineTest {
     private val scheduleRecovery = Command.ScheduleRecovery::class
     private val show = Command.ShowSessionNotification::class
     private val hide = Command.HideSessionNotification::class
+    private val wake = Command.ScheduleWake::class
 
     /** Every (state, input) pair: the outcome type and the command types, in order. */
     private val table = listOf(
@@ -71,35 +72,35 @@ class EngineTest {
         Case("idle", Input.EmergencyUnlock, rejected, emptyList()),
         Case("idle", Input.TimerElapsed(SessionId(1)), ignored, emptyList()),
         Case("idle", Input.CommandFailed("x", SessionId(1)), ignored, emptyList()),
-        Case("idle", Input.Reconcile(ReconcileCause.AppStart), reconciled, listOf(clear, hide)),
+        Case("idle", Input.Reconcile(ReconcileCause.AppStart), reconciled, listOf(clear, hide, wake)),
         Case("any anchor", Input.HoldToStart(work.id), rejected, emptyList()),
         Case("any anchor", Input.StopRequested, rejected, emptyList()),
         Case("any anchor", Input.AnchorTapped(desk.hash), ended, listOf(clear, hide)),
         Case("any anchor", Input.EmergencyUnlock, ended, listOf(clear, hide)),
         Case("any anchor", Input.TimerElapsed(SessionId(1)), ended, listOf(clear, hide)),
         Case("any anchor", Input.CommandFailed("x", SessionId(1)), Outcome.Degraded::class, emptyList()),
-        Case("any anchor", Input.Reconcile(ReconcileCause.Boot), reconciled, listOf(apply, show)),
+        Case("any anchor", Input.Reconcile(ReconcileCause.Boot), reconciled, listOf(apply, show, wake)),
         Case("timer", Input.HoldToStart(work.id), rejected, emptyList()),
         Case("timer", Input.StopRequested, rejected, emptyList()),
         Case("timer", Input.AnchorTapped(desk.hash), rejected, emptyList()),
         Case("timer", Input.EmergencyUnlock, ended, listOf(clear, hide, cancel)),
         Case("timer", Input.TimerElapsed(SessionId(1)), ended, listOf(clear, hide, cancel)),
         Case("timer", Input.CommandFailed("x", SessionId(2)), ignored, emptyList()),
-        Case("timer", Input.Reconcile(ReconcileCause.TimeChanged), reconciled, listOf(apply, show, schedule)),
+        Case("timer", Input.Reconcile(ReconcileCause.TimeChanged), reconciled, listOf(apply, show, schedule, wake)),
         Case("specific anchor", Input.HoldToStart(work.id), rejected, emptyList()),
         Case("specific anchor", Input.StopRequested, rejected, emptyList()),
         Case("specific anchor", Input.AnchorTapped(bedside.hash), rejected, emptyList()),
         Case("specific anchor", Input.EmergencyUnlock, ended, listOf(clear, hide)),
         Case("specific anchor", Input.TimerElapsed(SessionId(2)), ignored, emptyList()),
         Case("specific anchor", Input.CommandFailed("x", SessionId(1)), Outcome.Degraded::class, emptyList()),
-        Case("specific anchor", Input.Reconcile(ReconcileCause.PackageReplaced), reconciled, listOf(apply, show)),
+        Case("specific anchor", Input.Reconcile(ReconcileCause.PackageReplaced), reconciled, listOf(apply, show, wake)),
         Case("trigger", Input.HoldToStart(work.id), rejected, emptyList()),
         Case("trigger", Input.StopRequested, rejected, emptyList()),
         Case("trigger", Input.AnchorTapped(desk.hash), rejected, emptyList()),
         Case("trigger", Input.EmergencyUnlock, ended, listOf(clear, hide)),
         Case("trigger", Input.TimerElapsed(SessionId(1)), ended, listOf(clear, hide)),
         Case("trigger", Input.CommandFailed("x", null), ignored, emptyList()),
-        Case("trigger", Input.Reconcile(ReconcileCause.TimeZoneChanged), reconciled, listOf(apply, show)),
+        Case("trigger", Input.Reconcile(ReconcileCause.TimeZoneChanged), reconciled, listOf(apply, show, wake)),
         Case("idle", Input.RecoveryRequested, rejected, emptyList()),
         Case("idle", Input.RecoveryCancelled, ignored, emptyList()),
         Case("idle", Input.RecoveryElapsed(SessionId(1)), ignored, emptyList()),
@@ -125,6 +126,11 @@ class EngineTest {
         Case("specific anchor", Input.TriggerEnded(TriggerKey.Driving), Outcome.TriggersChanged::class, emptyList()),
         Case("trigger", Input.TriggerStarted(TriggerKey.Driving), Outcome.TriggersChanged::class, emptyList()),
         Case("trigger", Input.TriggerEnded(TriggerKey.Driving), Outcome.TriggersChanged::class, emptyList()),
+        Case("idle", Input.ScheduleTick, Outcome.TriggersChanged::class, listOf(wake)),
+        Case("any anchor", Input.ScheduleTick, Outcome.TriggersChanged::class, listOf(wake)),
+        Case("timer", Input.ScheduleTick, Outcome.TriggersChanged::class, listOf(wake)),
+        Case("specific anchor", Input.ScheduleTick, Outcome.TriggersChanged::class, listOf(wake)),
+        Case("trigger", Input.ScheduleTick, Outcome.TriggersChanged::class, listOf(wake)),
     )
 
     @Test
@@ -162,6 +168,7 @@ class EngineTest {
         is Input.RecoveryElapsed -> "recovery_elapsed"
         is Input.TriggerStarted -> "trigger_started"
         is Input.TriggerEnded -> "trigger_ended"
+        Input.ScheduleTick -> "schedule_tick"
     }
 
     @Test
@@ -348,7 +355,7 @@ class EngineTest {
         val transition = Engine.reduce(activeIn(timer), Input.Reconcile(ReconcileCause.Boot), later)
 
         assertThat((transition.outcome as Outcome.Ended).session.endedBy).isEqualTo(SessionEnd.Timer)
-        assertThat(transition.commands.map { it::class }).containsExactly(clear, hide, cancel).inOrder()
+        assertThat(transition.commands.map { it::class }).containsExactly(clear, hide, cancel, wake).inOrder()
     }
 
     @Test
@@ -388,6 +395,7 @@ class EngineTest {
             "recovery_elapsed",
             "trigger_started",
             "trigger_ended",
+            "schedule_tick",
         )
     }
 }
