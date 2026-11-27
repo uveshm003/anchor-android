@@ -92,4 +92,9 @@
     <string name="feature_modes_missing_location">जगह (लोकेशन) की अनुमति चाहिए</string>
     <string name="feature_modes_missing_nearby">आस-पास के डिवाइस की अनुमति चाहिए</string>
     <string name="feature_modes_missing_activity">शारीरिक गतिविधि की अनुमति चाहिए</string>
+    <string name="feature_modes_usb">कंप्यूटर से जुड़ा होने पर</string>
+    <string name="feature_modes_usb_body">फ़ोन USB से कंप्यूटर में लगा होने पर शुरू होता है, और सिर्फ़ तब जब ब्लॉक करना चालू हो। कुछ USB वॉल चार्जर भी कंप्यूटर गिने जाते हैं।</string>
+    <string name="feature_modes_exit_any_trigger">ट्रिगर खत्म होने पर</string>
+    <string name="feature_modes_exit_any_trigger_body">जिससे शुरू हुआ वह रुकते ही अपने-आप खत्म होता है: शेड्यूल पूरा होने या फ़ोन निकालने पर।</string>
+    <string name="feature_modes_exit_usb_body">फ़ोन निकालते ही अपने-आप खत्म होता है।</string>
 </resources>

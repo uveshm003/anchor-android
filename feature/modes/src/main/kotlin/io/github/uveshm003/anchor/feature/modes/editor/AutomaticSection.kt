@@ -39,10 +39,11 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.format.TextStyle
 
-/** "Start automatically": a weekly schedule (other triggers join as their adapters land). */
+/** "Start automatically": schedule and USB (other triggers join as their adapters land). */
 @Composable
-internal fun ScheduleSection(state: ModeEditorUiState, onSchedule: (ScheduleDraft?) -> Unit) {
+internal fun AutomaticSection(state: ModeEditorUiState, onTrigger: (TriggerChange) -> Unit) {
     val schedule = state.draft.schedule
+    val onSchedule: (ScheduleDraft?) -> Unit = { onTrigger(TriggerChange.Schedule(it)) }
     Column {
         SectionHeader(stringResource(R.string.feature_modes_start_automatically))
         AnchorListRow(
@@ -52,6 +53,12 @@ internal fun ScheduleSection(state: ModeEditorUiState, onSchedule: (ScheduleDraf
             trailing = ListRowTrailing.Switch(schedule != null) { on -> onSchedule(if (on) ScheduleDraft() else null) },
         )
         if (schedule != null) ScheduleEditor(state, schedule, onSchedule)
+        AnchorListRow(
+            title = stringResource(R.string.feature_modes_usb),
+            supportingText = stringResource(R.string.feature_modes_usb_body),
+            leadingIcon = AnchorIcons.Usb,
+            trailing = ListRowTrailing.Switch(state.draft.usb) { on -> onTrigger(TriggerChange.Usb(on)) },
+        )
     }
 }
 

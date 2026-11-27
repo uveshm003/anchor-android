@@ -33,6 +33,7 @@ import io.github.uveshm003.anchor.feature.modes.editor.ExitChoice
 import io.github.uveshm003.anchor.feature.modes.editor.ModeEditorEffect
 import io.github.uveshm003.anchor.feature.modes.editor.ModeEditorViewModel
 import io.github.uveshm003.anchor.feature.modes.editor.ScheduleDraft
+import io.github.uveshm003.anchor.feature.modes.editor.TriggerChange
 import io.github.uveshm003.anchor.feature.modes.list.ModesEffect
 import io.github.uveshm003.anchor.feature.modes.list.ModesViewModel
 import kotlinx.coroutines.flow.first
@@ -239,7 +240,16 @@ class ModesViewModelsTest {
         vm.uiState.test {
             while (awaitItem().loading) Unit
             vm.setName("Nights")
-            vm.setSchedule(ScheduleDraft(days = setOf(1), startMinute = 22 * 60, endMinute = 7 * 60))
+            vm.setTrigger(
+                TriggerChange.Schedule(
+                    ScheduleDraft(
+                        days = setOf(1),
+                        startMinute = 22 * 60,
+                        endMinute =
+                            7 * 60,
+                    ),
+                ),
+            )
             var state = expectMostRecentItem()
             assertThat(state.nextScheduleStart).isEqualTo(java.time.LocalDateTime.parse("2026-11-23T22:00"))
             assertThat(state.exactAlarms).isFalse()
@@ -247,13 +257,22 @@ class ModesViewModelsTest {
             vm.setExit(ExitChoice.TriggerEnds)
             assertThat(expectMostRecentItem().draft.endsWithTrigger).isTrue()
 
-            vm.setSchedule(ScheduleDraft(days = emptySet()))
+            vm.setTrigger(TriggerChange.Schedule(ScheduleDraft(days = emptySet())))
             vm.save()
             state = expectMostRecentItem()
             assertThat(state.scheduleError).isTrue()
             assertThat(state.nextScheduleStart).isNull()
 
-            vm.setSchedule(ScheduleDraft(days = setOf(1, 2), startMinute = 22 * 60, endMinute = 7 * 60))
+            vm.setTrigger(
+                TriggerChange.Schedule(
+                    ScheduleDraft(
+                        days = setOf(1, 2),
+                        startMinute = 22 * 60,
+                        endMinute =
+                            7 * 60,
+                    ),
+                ),
+            )
             cancelAndIgnoreRemainingEvents()
         }
         vm.effects.test {
@@ -270,13 +289,49 @@ class ModesViewModelsTest {
     }
 
     @Test
+    fun usb_trigger_saves_and_keeps_the_trigger_exit_until_the_last_trigger_is_off() = runTest {
+        val repo = FakeModeRepository()
+        val vm = editor(repo = repo)
+        vm.uiState.test {
+            while (awaitItem().loading) Unit
+            vm.setName("At the PC")
+            vm.setTrigger(TriggerChange.Usb(on = true))
+            vm.setTrigger(TriggerChange.Schedule(ScheduleDraft()))
+            vm.setExit(ExitChoice.TriggerEnds)
+            vm.setTrigger(TriggerChange.Schedule(null)) // USB is still on: the trigger exit stays
+            assertThat(expectMostRecentItem().draft.endsWithTrigger).isTrue()
+            cancelAndIgnoreRemainingEvents()
+        }
+        vm.effects.test {
+            vm.save()
+            awaitItem()
+        }
+        val saved = repo.getModes().single()
+        assertThat(
+            saved.startTriggers,
+        ).containsExactly(StartTrigger.Hold, StartTrigger.AnchorTap, StartTrigger.UsbConnected)
+        assertThat(saved.exitRule).isEqualTo(ExitRule.TriggerEnds)
+
+        // Editing it again shows USB on; turning it off drops the trigger exit.
+        val again = editor(modeId = saved.id.value, repo = repo)
+        again.uiState.test {
+            var state = awaitItem()
+            while (state.loading) state = awaitItem()
+            assertThat(state.draft.usb).isTrue()
+            again.setTrigger(TriggerChange.Usb(on = false))
+            assertThat(expectMostRecentItem().draft.endsWithTrigger).isFalse()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun turning_the_schedule_off_drops_the_trigger_exit() = runTest {
         val vm = editor()
         vm.uiState.test {
             while (awaitItem().loading) Unit
-            vm.setSchedule(ScheduleDraft())
+            vm.setTrigger(TriggerChange.Schedule(ScheduleDraft()))
             vm.setExit(ExitChoice.TriggerEnds)
-            vm.setSchedule(null)
+            vm.setTrigger(TriggerChange.Schedule(null))
             val draft = expectMostRecentItem().draft
             assertThat(draft.schedule).isNull()
             assertThat(draft.endsWithTrigger).isFalse()

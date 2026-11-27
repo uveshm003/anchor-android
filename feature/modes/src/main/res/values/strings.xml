@@ -92,4 +92,9 @@
     <string name="feature_modes_missing_location">Needs the location permission</string>
     <string name="feature_modes_missing_nearby">Needs the nearby devices permission</string>
     <string name="feature_modes_missing_activity">Needs the physical activity permission</string>
+    <string name="feature_modes_usb">Connected to a computer</string>
+    <string name="feature_modes_usb_body">Starts while the phone is plugged into a computer by USB, and only while blocking is on. Some USB wall chargers count as a computer.</string>
+    <string name="feature_modes_exit_any_trigger">When its trigger ends</string>
+    <string name="feature_modes_exit_any_trigger_body">Ends by itself when whatever started it stops: the schedule is over or the phone is unplugged.</string>
+    <string name="feature_modes_exit_usb_body">Ends by itself when the phone is unplugged.</string>
 </resources>

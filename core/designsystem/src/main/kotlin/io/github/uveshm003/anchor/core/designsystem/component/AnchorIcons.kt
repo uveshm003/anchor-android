@@ -79,4 +79,6 @@ object AnchorIcons {
     @DrawableRes val Warning = R.drawable.core_designsystem_ic_warning
 
     @DrawableRes val Work = R.drawable.core_designsystem_ic_work
+
+    @DrawableRes val Usb = R.drawable.core_designsystem_ic_usb
 }
