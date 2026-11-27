@@ -83,4 +83,13 @@
     <string name="feature_modes_schedule_allow_exact">सटीक अलार्म की अनुमति दें</string>
     <string name="feature_modes_exit_trigger">शेड्यूल खत्म होने पर</string>
     <string name="feature_modes_exit_trigger_body">तय समय पूरा होते ही अपने-आप खत्म होता है।</string>
+    <string name="feature_modes_status_running">अभी चल रहा है</string>
+    <string name="feature_modes_status_starts">%1$s को %2$s बजे शुरू होगा</string>
+    <string name="feature_modes_status_waiting_manual">इंतज़ार: %1$s चल रहा है और अपने-आप वाले मोड उसे नहीं रोकते</string>
+    <string name="feature_modes_status_waiting_other">इंतज़ार: %1$s चल रहा है</string>
+    <string name="feature_modes_status_used_up">जल्दी खत्म हुआ; अगली बार ट्रिगर चालू होने पर फिर शुरू होगा</string>
+    <string name="feature_modes_missing_exact_alarm">सटीक अलार्म बंद हैं: 10 मिनट तक देर से शुरू हो सकता है</string>
+    <string name="feature_modes_missing_location">जगह (लोकेशन) की अनुमति चाहिए</string>
+    <string name="feature_modes_missing_nearby">आस-पास के डिवाइस की अनुमति चाहिए</string>
+    <string name="feature_modes_missing_activity">शारीरिक गतिविधि की अनुमति चाहिए</string>
 </resources>

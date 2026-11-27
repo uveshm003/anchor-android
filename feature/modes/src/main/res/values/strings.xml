@@ -83,4 +83,13 @@
     <string name="feature_modes_schedule_allow_exact">Allow exact alarms</string>
     <string name="feature_modes_exit_trigger">When the schedule ends</string>
     <string name="feature_modes_exit_trigger_body">Ends by itself when the scheduled time is over.</string>
+    <string name="feature_modes_status_running">Running now</string>
+    <string name="feature_modes_status_starts">Starts %1$s at %2$s</string>
+    <string name="feature_modes_status_waiting_manual">Waiting: %1$s is running and automatic modes never interrupt it</string>
+    <string name="feature_modes_status_waiting_other">Waiting: %1$s is running</string>
+    <string name="feature_modes_status_used_up">Ended early; starts again next time its trigger turns on</string>
+    <string name="feature_modes_missing_exact_alarm">Exact alarms are off: may start up to 10 minutes late</string>
+    <string name="feature_modes_missing_location">Needs the location permission</string>
+    <string name="feature_modes_missing_nearby">Needs the nearby devices permission</string>
+    <string name="feature_modes_missing_activity">Needs the physical activity permission</string>
 </resources>

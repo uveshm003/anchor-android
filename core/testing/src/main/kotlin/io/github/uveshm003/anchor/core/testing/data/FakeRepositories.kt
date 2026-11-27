@@ -154,6 +154,7 @@ class FakeDeviceSetup(
     var sideloaded: Boolean = false,
     var manufacturer: String = "google",
     var exactAlarms: Boolean = true,
+    var denied: Set<io.github.uveshm003.anchor.core.engine.TriggerPermission> = emptySet(),
 ) : io.github.uveshm003.anchor.core.data.platform.DeviceSetup {
     override fun batteryOptimized() = batteryOptimized
 
@@ -162,4 +163,8 @@ class FakeDeviceSetup(
     override fun manufacturer() = manufacturer
 
     override fun exactAlarmsAllowed() = exactAlarms
+
+    override fun granted(permission: io.github.uveshm003.anchor.core.engine.TriggerPermission) =
+        permission !in denied &&
+            (permission != io.github.uveshm003.anchor.core.engine.TriggerPermission.ExactAlarm || exactAlarms)
 }
