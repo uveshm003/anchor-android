@@ -7,6 +7,7 @@ import android.view.accessibility.AccessibilityWindowInfo
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.uveshm003.anchor.core.common.dispatchers.ApplicationScope
 import io.github.uveshm003.anchor.core.engine.BlockAttemptRecorder
+import io.github.uveshm003.anchor.core.engine.ProcessWatcher
 import io.github.uveshm003.anchor.service.blocker.detect.BlockAttemptDebouncer
 import io.github.uveshm003.anchor.service.blocker.detect.BlockDecider
 import io.github.uveshm003.anchor.service.blocker.detect.VisibleWindow
@@ -32,6 +33,9 @@ class BlockerService : AccessibilityService() {
     @Inject @ApplicationScope
     lateinit var scope: CoroutineScope
 
+    /** Trigger listeners that need a running process (ADR 0010); they live as long as this service. */
+    @Inject lateinit var watchers: Set<@JvmSuppressWildcards ProcessWatcher>
+
     private val debouncer = BlockAttemptDebouncer()
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -47,6 +51,16 @@ class BlockerService : AccessibilityService() {
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
             )
         }
+    }
+
+    override fun onServiceConnected() {
+        super.onServiceConnected()
+        watchers.forEach { it.start() }
+    }
+
+    override fun onDestroy() {
+        watchers.forEach { it.stop() }
+        super.onDestroy()
     }
 
     override fun onInterrupt() = Unit
