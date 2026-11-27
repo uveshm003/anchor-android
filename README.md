@@ -51,8 +51,8 @@ package + count + time unless you opt in to keeping titles.
 |---|---|---|---|
 | **MVP** | Create a mode, hold to start, block apps, tap an NFC anchor to stop, emergency unlock ([plan](docs/mvp.md)) | `v0.1.0` | Done |
 | M0 Foundation | Design system, app shell, test infrastructure, architecture docs | – | Mostly done |
-| M1 Modes & blocking core | What the MVP leaves out: templates, reorder, ongoing notification, battery/OEM guides | `v0.2.0` | Planned |
-| M2 Anchors | What the MVP leaves out: QR anchors, lost-anchor recovery, specific-anchor exit rule | `v0.2.0` | Planned |
+| M1 Modes & blocking core | Templates, ongoing notification, phone setup checks | `v0.2.0` | Done |
+| M2 Anchors | QR anchors, lost-anchor recovery, specific-anchor exit rule, threat model | `v0.2.0` | Done |
 | M3 Automatic modes | Schedule, driving, Bluetooth, Spaces, places, Wi-Fi, USB, conflict resolution | `v0.3.0` | Planned |
 | M4 Quiet actions | DND, ringer, notification holding, driving auto-reply | `v0.4.0` | Planned |
 | M5 Strict mode, insights & surfaces | Strict guards, Weekly Activity, widget, tile, shortcuts, Hindi | `v0.5.0` | Planned |
