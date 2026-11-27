@@ -51,3 +51,10 @@ in GitHub issues (milestones M0–M6) and is completed through PRs that close th
   - [x] `org.gradle.tooling.parallel=true` (`gradle.properties`) and `gradle/gradle-daemon-jvm.properties`
     (pins the Gradle daemon to Java 25) are either committed in a chore PR or discarded
   - [x] If committed: CI still green, and `CONTRIBUTING.md` names the JDK the daemon uses
+
+### M3 – Automatic modes
+
+- [x] **T-5** A new or edited schedule isn't armed until the app restarts (bug found 2026-11-28).
+  - [x] Saving, deleting or reordering a mode reconciles the engine, so the schedule wake-up is armed right away
+  - [x] The first mode list at start doesn't cause an extra reconcile (app start already reconciles)
+  - Test plan: controller test saves a scheduled mode and expects a `ScheduleWake` at its next opening
