@@ -8,7 +8,11 @@ import io.github.uveshm003.anchor.core.data.repository.SettingsRepository
 import io.github.uveshm003.anchor.core.engine.Environment
 import java.time.Clock
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 /** Samples the [Environment] once per input, at dequeue (ADR 0003 §3). */
 class EnvironmentSampler @Inject constructor(
@@ -19,6 +23,12 @@ class EnvironmentSampler @Inject constructor(
     private val essentialApps: EssentialApps,
     private val uptime: DeviceUptime,
 ) {
+    /**
+     * Emits after each change to the saved modes (not for the list at subscription), so schedules and trigger
+     * registrations follow edits, deletions and reordering without waiting for the next app start.
+     */
+    val modeChanges: Flow<Unit> = modes.modes.distinctUntilChanged().drop(1).map { }
+
     suspend fun sample(): Environment {
         val user = settings.settings.first()
         return Environment(

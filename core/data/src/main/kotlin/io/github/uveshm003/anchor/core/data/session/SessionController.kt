@@ -43,7 +43,10 @@ class SessionController @Inject constructor(
 
     private class Queued(val input: Input, val result: CompletableDeferred<Outcome>?)
 
-    /** Starts the consumer: re-runs pending commands, then reconciles (app start). Call once. */
+    /**
+     * Starts the consumer: re-runs pending commands, then reconciles (app start), and reconciles again whenever
+     * the saved modes change (a new schedule must be armed right away). Call once.
+     */
     fun start() {
         // Queued synchronously, so it runs before anything submitted after start().
         queue.trySend(Queued(Input.Reconcile(ReconcileCause.AppStart), null))
@@ -53,6 +56,9 @@ class SessionController @Inject constructor(
                 val outcome = process(queued.input)
                 queued.result?.complete(outcome)
             }
+        }
+        scope.launch {
+            environment.modeChanges.collect { queue.send(Queued(Input.Reconcile(ReconcileCause.ModesChanged), null)) }
         }
     }
 

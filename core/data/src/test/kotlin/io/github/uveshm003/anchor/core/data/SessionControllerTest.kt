@@ -29,9 +29,11 @@ import io.github.uveshm003.anchor.core.model.ModeId
 import io.github.uveshm003.anchor.core.model.SessionEnd
 import io.github.uveshm003.anchor.core.model.StartTrigger
 import kotlin.reflect.KClass
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertThrows
@@ -101,6 +103,32 @@ class SessionControllerTest {
                     exitRule = exitRule,
                 ),
             )
+
+    @Test
+    fun saving_a_scheduled_mode_arms_its_wake_up_right_away() = runTest {
+        val controller = controller()
+        runCurrent()
+        executed.clear()
+        val reconciled = async { controller.outcomes.first() }
+        runCurrent()
+
+        // Monday 2026-11-23 12:00 UTC; the schedule opens at 22:00.
+        clock.setInstant(java.time.Instant.parse("2026-11-23T12:00:00Z"))
+        OfflineModeRepository(db.modeDao()).upsert(
+            Mode(
+                ModeId(0),
+                "Night",
+                startTriggers = setOf(StartTrigger.Schedule(setOf(1), 22 * 60, 7 * 60)),
+                exitRule = ExitRule.TriggerEnds,
+            ),
+        )
+        // Room notifies on its own thread; then a no-op input queued behind the reconcile waits for its commands.
+        assertThat(reconciled.await()).isEqualTo(Outcome.Reconciled)
+        controller.request(Input.TriggerEnded(TriggerKey.Usb))
+
+        val wake = executed.filterIsInstance<Command.ScheduleWake>().single()
+        assertThat(wake.at).isEqualTo(java.time.Instant.parse("2026-11-23T22:00:00Z"))
+    }
 
     @Test
     fun start_reconciles_idle_then_hold_persists_and_executes_in_order() = runTest {
